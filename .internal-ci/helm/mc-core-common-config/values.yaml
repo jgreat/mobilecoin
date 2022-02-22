@@ -1,0 +1,18 @@
+clientAuth:
+  token: ''
+
+ias:
+  key: ''
+  spid: ''
+
+mobileCoinNetwork:
+  network: ''
+  partner: ''
+
+sentry:
+  consensus-sentry-dsn: ''
+  ledger-distribution-sentry-dsn: ''
+  fog-report-sentry-dsn: ''
+  fog-view-sentry-dsn: ''
+  fog-ledger-sentry-dsn: ''
+  fog-ingest-sentry-dsn: ''

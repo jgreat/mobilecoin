@@ -1,0 +1,28 @@
+#
+# This builds a slim runtime container for bootstrapping ledger and account data
+#
+ARG REPO_ORG=mobilecoin
+FROM ${REPO_ORG}/runtime-base:latest
+
+SHELL ["/bin/bash", "-c"]
+
+# Install any updates
+#
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y \
+        ca-certificates \
+        gettext \
+        libpq-dev \
+        libssl1.1 \
+        jq \
+        wget && \
+    rm -rf /var/cache/apt && \
+    rm -rf /var/lib/apt/lists/*
+
+ARG BIN_PATH=target/release
+COPY ${BIN_PATH}/fog-sql-recovery-db-migrations /usr/local/bin/
+COPY ${BIN_PATH}/generate-sample-ledger /usr/local/bin/
+COPY ${BIN_PATH}/sample-keys /usr/local/bin/
+COPY ${BIN_PATH}/fog-distribution /usr/local/bin/
+COPY ${BIN_PATH}/fog_ingest_client /usr/local/bin/

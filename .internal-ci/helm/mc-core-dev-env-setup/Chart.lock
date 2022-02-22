@@ -1,0 +1,21 @@
+dependencies:
+- name: mc-core-common-config
+  repository: file://../mc-core-common-config
+  version: 0.0.0
+- name: consensus-node-config
+  repository: file://../consensus-node-config
+  version: 0.0.0
+- name: consensus-node-config
+  repository: file://../consensus-node-config
+  version: 0.0.0
+- name: consensus-node-config
+  repository: file://../consensus-node-config
+  version: 0.0.0
+- name: consensus-node-config
+  repository: file://../consensus-node-config
+  version: 0.0.0
+- name: consensus-node-config
+  repository: file://../consensus-node-config
+  version: 0.0.0
+digest: sha256:585033a6825cc23b77f8d008534ee1c5ac1b9a03c9e551aeafaeeec16efcfba2
+generated: "2022-02-20T19:26:34.072235811-06:00"

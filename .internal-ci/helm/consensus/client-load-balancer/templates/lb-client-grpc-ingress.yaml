@@ -1,0 +1,64 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "chart.fullname" . }}-client-grpc
+  annotations:
+    {{ .Values.certManagerIssuer.issuerAnnotationKey }}: {{ .Values.certManagerIssuer.issuerName }}
+
+    ### HAProxy Ingress
+    haproxy.org/server-proto: "h2"              # Force GRPC/H2 mode
+    haproxy.org/server-ssl: "false"             # The backend (server) is http
+    haproxy.org/cookie-persistence: "consensus"
+    haproxy.org/timeout-client: 239s            # 4 min timeout on azure
+    haproxy.org/timeout-server: 239s
+    haproxy.org/timeout-http-keep-alive: 120s
+    haproxy.org/abortonclose: "true"
+    haproxy.org/backend-config-snippet: |-
+      http-reuse aggressive
+
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
+    nginx.ingress.kubernetes.io/affinity: "cookie"
+    nginx.ingress.kubernetes.io/affinity-mode: "persistent"
+    nginx.ingress.kubernetes.io/session-cookie-change-on-failure: "true"
+    nginx.ingress.kubernetes.io/session-cookie-max-age: "3600"
+    nginx.ingress.kubernetes.io/session-cookie-path: "/"
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+spec:
+  tls:
+  - hosts:
+      - {{ .Values.loadBalancedConsensusHostname }}
+    secretName: {{ .Values.loadBalancedConsensusHostname }}-tls
+  rules:
+    - host: {{ .Values.loadBalancedConsensusHostname }}
+      http:
+        paths:
+          - path: /attest.AttestedApi
+            pathType: Prefix
+            backend:
+              service: 
+                name: {{ include "chart.fullname" . }}-consensus-client
+                port: 
+                  number: 3223
+          - path: /build_info.BuildInfoApi
+            pathType: Prefix
+            backend:
+              service: 
+                name: {{ include "chart.fullname" . }}-consensus-client
+                port: 
+                  number: 3223
+          - path: /consensus_common.BlockchainAPI
+            pathType: Prefix
+            backend:
+              service: 
+                name: {{ include "chart.fullname" . }}-consensus-client
+                port: 
+                  number: 3223
+          - path: /consensus_client.ConsensusClientAPI
+            pathType: Prefix
+            backend:
+              service: 
+                name: {{ include "chart.fullname" . }}-consensus-client
+                port: 
+                  number: 3223
