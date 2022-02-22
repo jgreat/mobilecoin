@@ -149,7 +149,7 @@ jobs:
     - name: Generate version metadata
       id: meta
       run: |
-        .github/workflows/helpers/metadata.sh
+        .internal-ci/util/metadata.sh
 
     - name: Populate origin data
       if: steps.sample_data_cache.outputs.cache-hit != 'true'
