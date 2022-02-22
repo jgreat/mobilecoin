@@ -124,6 +124,8 @@ jobs:
 
   create-sample-data:
     runs-on: self-hosted
+    needs:
+    - build-cargo-hardware
     steps:
     - name: Checkout
       uses: actions/checkout@v2
