@@ -12,7 +12,7 @@ env:
   LEDGER_ENCLAVE_PRIVKEY: /var/tmp/enclave_signing.pem
   VIEW_ENCLAVE_PRIVKEY: /var/tmp/enclave_signing.pem
   INGEST_ENCLAVE_PRIVKEY: /var/tmp/enclave_signing.pem
-  FOG_REPORT_URL: fog://fog.demo.mobilecoin.com
+  
 
   # CHART_RELEASE_NAME: 
   # CHART_PATH: ./chart
@@ -146,10 +146,16 @@ jobs:
           sample_data
         key: sample-data-build-cargo-hardware-${{ github.sha }}
 
+    - name: Generate version metadata
+      id: meta
+      run: |
+        .github/workflows/helpers/metadata.sh
+
     - name: Populate origin data
       if: steps.sample_data_cache.outputs.cache-hit != 'true'
       env:
         BIN_PATH: build_artifacts
+        FOG_REPORT_URL: fog://fog.${{ steps.meta.outputs.branch }}.development.mobilecoin.com
       run: |
         .internal-ci/util/populate_origin_data.sh
 
@@ -160,7 +166,6 @@ jobs:
   # docker:
   #   runs-on: self-hosted
   #   needs:
-  #   - build-cargo-hardware
   #   - create-sample-data
   #   strategy:
   #     matrix:
@@ -298,47 +303,3 @@ jobs:
   #           "delete": "true",
   #           "version": "0.0.0-release-1-2-0-ci.16.sha-0fb7a7ba"
   #         }
-
-  # deploy-staging:
-  #   if: github.ref == 'refs/heads/develop'
-  #   needs: docker
-  #   runs-on: ubuntu-latest
-  #   container:
-  #     image: alpine/helm
-  #     options: --entrypoint /bin/sh
-  #   env:
-  #     RANCHER_URL: ${{ secrets.RANCHER_URL }}
-  #     RANCHER_TOKEN: ${{ secrets.RANCHER_TOKEN }}
-  #     RANCHER_CLUSTER: ${{ secrets.STAGING_CLUSTER }}
-  #     RANCHER_CLUSTER_NAMESPACE: ${{ secrets.STAGING_NAMESPACE }}
-  #     VALUES: ${{ secrets.STAGING_VALUES }}
-  #     TAGS: ${{ needs.docker.outputs.tags }}
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v2
-  #     - name: Deploy
-  #       run: |
-  #         apk add --no-cache bash curl jq
-  #         .github/workflows/helpers/rancher_deploy.sh
-
-  # deploy-production:
-  #   if: startsWith(github.ref, 'refs/tags/')
-  #   needs: docker
-  #   runs-on: ubuntu-latest
-  #   container:
-  #     image: alpine/helm
-  #     options: --entrypoint /bin/sh
-  #   env:
-  #     RANCHER_URL: ${{ secrets.RANCHER_URL }}
-  #     RANCHER_TOKEN: ${{ secrets.RANCHER_TOKEN }}
-  #     RANCHER_CLUSTER: ${{ secrets.PRODUCTION_CLUSTER }}
-  #     RANCHER_CLUSTER_NAMESPACE: ${{ secrets.PRODUCTION_NAMESPACE }}
-  #     VALUES: ${{ secrets.PRODUCTION_VALUES }}
-  #     TAGS: ${{ needs.docker.outputs.tags }}
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v2
-  #     - name: Deploy
-  #       run: |
-  #         apk add --no-cache bash curl jq
-  #         .github/workflows/helpers/rancher_deploy.sh
