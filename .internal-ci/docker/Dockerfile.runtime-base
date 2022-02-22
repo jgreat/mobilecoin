@@ -22,7 +22,7 @@ RUN  curl --retry 5 -fL https://artifacts.elastic.co/GPG-KEY-elasticsearch | apt
   && echo "deb https://artifacts.elastic.co/packages/oss-8.x/apt stable main" > /etc/apt/sources.list.d/elastic-8.x.list 
 
 # Install SGX ASEM repo
-COPY docker/support/intel-sgx-archive-keyring.gpg /etc/apt/trusted.gpg.d/
+COPY .internal-ci/docker/support/intel-sgx-archive-keyring.gpg /etc/apt/trusted.gpg.d/
 RUN  echo "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/intel-sgx-archive-keyring.gpg] https://download.01.org/intel-sgx/sgx_repo/ubuntu/ focal main" > /etc/apt/sources.list.d/intel-sgx.list
 
 # Install packages
