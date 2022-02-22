@@ -37,7 +37,7 @@ on:
     # tags:
     # - 'v*'
     branches:
-    - release-1.2.0-ci
+    - release-1.2.0-ci-2
   # pull_request: {}
 
 jobs:
