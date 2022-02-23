@@ -35,7 +35,7 @@ jobs:
         echo delete ${{ github.event.inputs.delete }}
         echo version ${{ github.event.inputs.version }}
 
-  delete-namespace:
+  delete:
     # start after a successful build or destroy is checked on a dispatch
     if: github.event.inputs.delete == 'true'
     runs-on: self-hosted
@@ -53,7 +53,7 @@ jobs:
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
         # chart_version: ${{ github.events.input.version }}
 
-  reset-dev-env:
+  reset:
     if: github.event.inputs.reset == 'true'
     runs-on: self-hosted
     strategy:
@@ -85,10 +85,13 @@ jobs:
 
   deploy:
     needs:
-    - delete-namespace
-    - reset-dev-env
+    - delete
+    - reset
     runs-on: self-hosted
-    if: ! failure() || ! canceled()
+    if: |
+      always() &&
+      (needs.reset.result == 'success' || needs.reset.result == 'skipped') &&
+      (needs.delete.result == 'success' || needs.delete.result == 'skipped')
     steps:
     - name: Checkout
       uses: actions/checkout@v2
