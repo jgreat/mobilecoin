@@ -180,10 +180,15 @@ then
                 mkdir -p .tmp/values
                 echo "${INPUT_CHART_VALUES}" > .tmp/values/values.yaml
                 
-                helm upgrade "${INPUT_RELEASE_NAME}" "repo/${INPUT_CHART_NAME}" -i --wait --timeout=20m -f .tmp/values/values.yaml
+                helm upgrade "${INPUT_RELEASE_NAME}" "repo/${INPUT_CHART_NAME}" \
+                -i --wait --timeout=20m \
+                -f .tmp/values/values.yaml \
+                --version "${INPUT_CHART_VERSION}"
             else
                 echo "-- deploy ${INPUT_CHART_NAME}"
-                helm upgrade "${INPUT_RELEASE_NAME}" "repo/${INPUT_CHART_NAME}" -i --wait --timeout=20m
+                helm upgrade "${INPUT_RELEASE_NAME}" "repo/${INPUT_CHART_NAME}" \
+                -i --wait --timeout=20m \
+                --version "${INPUT_CHART_VERSION}"
             fi
             ;;
         *)
