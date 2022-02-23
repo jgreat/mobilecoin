@@ -76,7 +76,7 @@ jobs:
     - name: Delete release
       uses: ./.github/actions/helm
       with:
-        action: rancher-delete-chart
+        action: rancher-delete-release
         namespace: ${{ github.event.inputs.namespace }}
         release_name: ${{ matrix.chart }}
         rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
