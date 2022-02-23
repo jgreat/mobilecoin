@@ -89,6 +89,7 @@ jobs:
     - reset
     runs-on: self-hosted
     if: |
+      always() &&
       (needs.reset.result == 'success' || needs.reset.result == 'skipped') &&
       (needs.delete.result == 'success' || needs.delete.result == 'skipped')
     steps:
