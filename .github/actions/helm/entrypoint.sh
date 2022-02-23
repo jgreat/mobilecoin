@@ -172,6 +172,7 @@ then
 
             echo "-- Add chart repo ${INPUT_CHART_REPO}"
             helm repo add repo "${INPUT_CHART_REPO}"
+            helm repo update
 
             if [ -n "${INPUT_CHART_VALUES}" ]
             then
