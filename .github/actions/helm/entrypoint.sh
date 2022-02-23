@@ -43,24 +43,6 @@ rancher_get_kubeconfig()
     curl -sSLf -H "${auth_header}" -X POST "${kubeconfig_url}" | jq -r .config > ~/.kube/config
 }
 
-repo_add()
-{
-    is_set INPUT_AWS_ACCESS_KEY_ID
-    is_set INPUT_AWS_DEFAULT_REGION
-    is_set INPUT_AWS_SECRET_ACCESS_KEY
-    is_set INPUT_CHART_REPO
-
-    # Convert input to AWS env vars.
-    export AWS_ACCESS_KEY_ID="${INPUT_AWS_ACCESS_KEY_ID}"
-    export AWS_DEFAULT_REGION="${INPUT_AWS_DEFAULT_REGION}"
-    export AWS_SECRET_ACCESS_KEY="${INPUT_AWS_SECRET_ACCESS_KEY}"
-
-    echo "-- Add chart repo"
-    helm repo add repo "${INPUT_CHART_REPO}"
-
-}
-
-
 echo "Installed Plugins"
 helm plugin list
 
@@ -71,6 +53,15 @@ then
             is_set INPUT_CHART_APP_VERSION
             is_set INPUT_CHART_PATH
             is_set INPUT_CHART_VERSION
+            is_set INPUT_AWS_ACCESS_KEY_ID
+            is_set INPUT_AWS_DEFAULT_REGION
+            is_set INPUT_AWS_SECRET_ACCESS_KEY
+            is_set INPUT_CHART_REPO
+
+            # Convert input to AWS env vars.
+            export AWS_ACCESS_KEY_ID="${INPUT_AWS_ACCESS_KEY_ID}"
+            export AWS_DEFAULT_REGION="${INPUT_AWS_DEFAULT_REGION}"
+            export AWS_SECRET_ACCESS_KEY="${INPUT_AWS_SECRET_ACCESS_KEY}"
 
             if [ "${INPUT_CHART_SIGN}" == "true" ]
             then
@@ -102,11 +93,12 @@ then
                     --version="${INPUT_CHART_VERSION}"
             fi
 
-            repo_add
+            echo "-- Add chart repo ${INPUT_CHART_REPO}"
+            helm repo add repo "${INPUT_CHART_REPO}"
 
             echo "-- Push chart"
             chart_name=$(basename "${INPUT_CHART_PATH}")
-            helm s3 push --force ".tmp/charts/${chart_name}-${INPUT_CHART_VERSION}.tgz" repo
+            helm s3 push --relative --force ".tmp/charts/${chart_name}-${INPUT_CHART_VERSION}.tgz" repo
             ;;
 
         rancher-namespace-delete)
@@ -178,7 +170,8 @@ then
             is_set INPUT_CHART_VERSION
             is_set INPUT_CHART_NAME
 
-            repo_add
+            echo "-- Add chart repo ${INPUT_CHART_REPO}"
+            helm repo add repo "${INPUT_CHART_REPO}"
 
             if [ -n "${INPUT_CHART_VALUES}" ]
             then
