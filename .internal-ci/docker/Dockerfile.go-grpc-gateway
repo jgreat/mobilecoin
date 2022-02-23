@@ -21,7 +21,7 @@ RUN apt-get update \
 
 COPY --from=builder /app/go-grpc-gateway/go-grpc-gateway /usr/bin/
 
-COPY docker/entrypoints/go-grpc-gateway.sh /usr/bin/entrypoint.sh
+COPY .internal-ci/docker/entrypoints/go-grpc-gateway.sh /usr/bin/entrypoint.sh
 ENTRYPOINT ["/usr/bin/entrypoint.sh"]
 
 EXPOSE 8000
