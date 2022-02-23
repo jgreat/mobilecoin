@@ -207,7 +207,7 @@ jobs:
     - name: Generate version metadata
       id: meta
       run: |
-        .github/workflows/helpers/metadata.sh
+        .internal-ci/util/metadata.sh
 
     - name: Generate Docker Tags
       id: docker_meta
@@ -264,7 +264,7 @@ jobs:
     - name: Generate version metadata
       id: meta
       run: |
-        .github/workflows/helpers/metadata.sh
+        .internal-ci/util/metadata.sh
 
     - name: Package and publish chart
       uses: ./.github/actions/helm
