@@ -25,6 +25,9 @@ inputs:
   chart_repo:
     description: "url for chart repo"
     required: false
+  release_name:
+    description: "helm release name"
+    required: false
   namespace:
     description: "kubernets namespace"
     required: false

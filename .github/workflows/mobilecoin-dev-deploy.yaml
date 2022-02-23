@@ -16,7 +16,11 @@ on:
         type: string
         required: true
       delete:
-        description: "Delete target namespace before deploying"
+        description: "Delete target namespace"
+        type: boolean
+        required: false
+      reset:
+        description: "Reset data in target namespace"
         type: boolean
         required: false
 
@@ -31,7 +35,7 @@ jobs:
         echo delete ${{ github.event.inputs.delete }}
         echo version ${{ github.event.inputs.version }}
 
-  destroy:
+  delete-namespace:
     # start after a successful build or destroy is checked on a dispatch
     if: github.event.inputs.delete == 'true'
     runs-on: self-hosted
@@ -49,10 +53,41 @@ jobs:
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
         # chart_version: ${{ github.events.input.version }}
 
+  reset-dev-env:
+    if: github.event.inputs.reset == 'true'
+    runs-on: self-hosted
+    strategy:
+      matrix:
+        chart:
+        - consensus-node-1
+        - consensus-node-2
+        - consensus-node-3
+        - consensus-node-4
+        - consensus-node-5
+        # - postgres
+        # - fog-ingest-blue
+        # - fog-services
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    # We don't want to just delete the namespace on every run we need to preserve letsEncrypt certificates due to rate limits.
+    # We can delete app charts, postgres and dangling PVCs
+    - name: Delete release
+      uses: ./.github/actions/helm
+      with:
+        action: rancher-delete-chart
+        namespace: ${{ github.event.inputs.namespace }}
+        release_name: ${{ matrix.chart }}
+        rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
+        rancher_url: ${{ secrets.RANCHER_URL }}
+        rancher_token: ${{ secrets.RANCHER_TOKEN }}
+
   deploy:
     needs:
-    - destroy
-    if: needs.destroy.result == 'success' || needs.destroy.result == 'skipped'
+    - delete-namespace
+    - reset-dev-env
+    if: (needs.delete-namespace.result == 'success' || needs.delete.namespace.result == 'skipped') && (needs.reset-namespace.result == 'success' || needs.reset-namespace.result == 'skipped')
     runs-on: self-hosted
     steps:
     - name: Checkout

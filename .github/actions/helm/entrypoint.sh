@@ -1,23 +1,31 @@
 #!/bin/bash
 
-set -e
+set -o errexit
 set -o pipefail
 
 error_exit()
 {
-  msg="${1}"
+    msg="${1}"
 
-  echo "${msg}" 1>&2
-  exit 1
+    echo "${msg}" 1>&2
+    exit 1
+}
+
+echo_exit()
+{
+    msg="${1}"
+
+    echo "${msg}"
+    exit 0
 }
 
 is_set()
 {
-  var_name="${1}"
+    var_name="${1}"
 
-  if [ -z "${!var_name}" ]; then
-    error_exit "${var_name} is not set."
-  fi
+    if [ -z "${!var_name}" ]; then
+        error_exit "${var_name} is not set."
+    fi
 }
 
 rancher_get_kubeconfig()
@@ -92,6 +100,7 @@ then
             chart_name=$(basename "${INPUT_CHART_PATH}")
             helm s3 push --force ".tmp/charts/${chart_name}-${INPUT_CHART_VERSION}.tgz" my-repo
             ;;
+
         rancher-namespace-delete)
             rancher_get_kubeconfig
             is_set INPUT_NAMESPACE
@@ -99,6 +108,7 @@ then
             echo "-- Deleting ${INPUT_NAMESPACE} namespace from ${INPUT_RANCHER_CLUSTER}"
             kubectl delete ns "${INPUT_NAMESPACE}" --now --wait --request-timeout=5m --ignore-not-found
             ;;
+
         rancher-namespace-create)
             # Create a namespace in the default project so we get all the default configs and secrets
             rancher_get_kubeconfig
@@ -106,7 +116,8 @@ then
             is_set INPUT_RANCHER_PROJECT
 
             echo "-- Create namespace ${INPUT_NAMESPACE}"
-            kubectl create ns "${INPUT_NAMESPACE}"
+            # Don't sweat it if the namespace already exists.
+            kubectl create ns "${INPUT_NAMESPACE}" || echo "Namespace already exists"
 
             auth_header="Authorization: Bearer ${INPUT_RANCHER_TOKEN}"
 
@@ -130,6 +141,27 @@ then
                 -H 'Content-Type: application/json' \
                 -X POST "${namespaces_url}/${INPUT_NAMESPACE}?action=move" \
                 -d "{\"projectId\":\"${default_project_id}\"}"
+            ;;
+        rancher-delete-release)
+            # Delete a helm release
+            rancher_get_kubeconfig
+            is_set INPUT_NAMESPACE
+            is_set INPUT_RELEASE_NAME
+
+            kubectl get ns "${INPUT_NAMESPACE}" || echo_exit "Namespace doesn't exist"
+
+            echo "-- Get release list"
+            releases=$(helm list -q -n "${INPUT_NAMESPACE}")
+            if [[ "${releases}" =~ /^${INPUT_RELEASE_NAME}$/ ]]
+            then
+                echo "-- Deleting release ${INPUT_RELEASE_NAME}"
+                helm delete "${INPUT_RELEASE_NAME}" -n "${INPUT_NAMESPACE}"
+            else
+                echo "-- Release not found"
+            fi
+            ;;
+        rancher-delete-pvcs)
+            echo "delete some pvcs"
             ;;
         rancher-deploy)
             rancher_get_kubeconfig
