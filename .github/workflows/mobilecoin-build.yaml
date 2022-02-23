@@ -276,7 +276,7 @@ jobs:
         chart_repo: s3://charts.mobilecoin.com
         chart_app_version: ${{ steps.meta.outputs.tag }}
         chart_version: ${{ steps.meta.outputs.tag }}
-        chart_path: helm/${{ matrix.chart }}
+        chart_path: .internal-ci/helm/${{ matrix.chart }}
 
   # deploy:
   #   runs-on: self-hosted
