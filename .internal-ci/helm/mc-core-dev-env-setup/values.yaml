@@ -9,7 +9,7 @@ global:
       awsRegion: us-west-1
       s3Bucket: mobilecoin.chain
       startFrom: last
-    
+
     networkConfig:
       threshold: '3'
       peers:
@@ -17,31 +17,31 @@ global:
           peer:
             hostname: '{{ printf "peer1.%s.development.mobilecoin.com" .Release.Namespace }}'
             port: '443'
-          signerPublicKey: 'MCowBQYDK2VwAyEA6yqHNM3VAFbp2Y732Xk0VRK6JTpV261gz5TJFGlseTg='
+          signerPublicKey: ''
           ledgerArchiveLocation: '{{ with .Values.global.node.ledgerDistribution }}{{ printf "https://s3-%s.amazonaws.com/%s/%s/" .awsRegion .s3Bucket (printf "node1.%s.development.mobilecoin.com" $.Release.Namespace) }}{{ end }}'
         2: 
           peer:
             hostname: '{{ printf "peer2.%s.development.mobilecoin.com" .Release.Namespace }}'
             port: '443'
-          signerPublicKey: 'MCowBQYDK2VwAyEA6yqHNM3VAFbp2Y732Xk0VRK6JTpV261gz5TJFGlseTg='
+          signerPublicKey: ''
           ledgerArchiveLocation: '{{ with .Values.global.node.ledgerDistribution }}{{ printf "https://s3-%s.amazonaws.com/%s/%s/" .awsRegion .s3Bucket (printf "node2.%s.development.mobilecoin.com" $.Release.Namespace) }}{{ end }}'
         3: 
           peer:
             hostname: '{{ printf "peer3.%s.development.mobilecoin.com" .Release.Namespace }}'
             port: '443'
-          signerPublicKey: 'MCowBQYDK2VwAyEA6yqHNM3VAFbp2Y732Xk0VRK6JTpV261gz5TJFGlseTg='
+          signerPublicKey: ''
           ledgerArchiveLocation: '{{ with .Values.global.node.ledgerDistribution }}{{ printf "https://s3-%s.amazonaws.com/%s/%s/" .awsRegion .s3Bucket (printf "node3.%s.development.mobilecoin.com" $.Release.Namespace) }}{{ end }}'
         4: 
           peer:
             hostname: '{{ printf "peer4.%s.development.mobilecoin.com" .Release.Namespace }}'
             port: '443'
-          signerPublicKey: 'MCowBQYDK2VwAyEA6yqHNM3VAFbp2Y732Xk0VRK6JTpV261gz5TJFGlseTg='
+          signerPublicKey: ''
           ledgerArchiveLocation: '{{ with .Values.global.node.ledgerDistribution }}{{ printf "https://s3-%s.amazonaws.com/%s/%s/" .awsRegion .s3Bucket (printf "node4.%s.development.mobilecoin.com" $.Release.Namespace) }}{{ end }}'
         5: 
           peer:
             hostname: '{{ printf "peer5.%s.development.mobilecoin.com" .Release.Namespace }}'
             port: '443'
-          signerPublicKey: 'MCowBQYDK2VwAyEA6yqHNM3VAFbp2Y732Xk0VRK6JTpV261gz5TJFGlseTg='
+          signerPublicKey: ''
           ledgerArchiveLocation: '{{ with .Values.global.node.ledgerDistribution }}{{ printf "https://s3-%s.amazonaws.com/%s/%s/" .awsRegion .s3Bucket (printf "node5.%s.development.mobilecoin.com" $.Release.Namespace) }}{{ end }}'
 
 mcCoreCommonConfig:

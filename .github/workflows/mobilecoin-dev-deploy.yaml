@@ -104,22 +104,36 @@ jobs:
         rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
-    
-    - name: Deploy core common config
+
+    - name: Generate environment values file
+      env:
+        IAS_KEY: ${{ secrets.IAS_KEY }}
+        IAS_SPID: ${{ secrets.IAS_SPID }}
+        LEDGER_AWS_ACCESS_KEY_ID: ${{ secrets.LEDGER_AWS_ACCESS_KEY_ID }}
+        LEDGER_AWS_SECRET_ACCESS_KEY: ${{ secrets.LEDGER_AWS_SECRET_ACCESS_KEY }}
+        # CLIENT_AUTH_TOKEN:
+        # SENTRY_DSN_CONSENSUS:
+        # SENTRY_DSN_LEDGER_DISTRIBUTION:
+        # SENTRY_DSN_FOG_INGEST:
+        # SENTRY_DSN_FOG_VIEW:
+        # SENTRY_DSN_FOG_LEDGER:
+        # SENTRY_DSN_FOG_INGEST:
+      run: |
+        .internal-ci/util/generate_dev_values.sh
+
+    - name: Deploy environment setup
       uses: ./.github/actions/helm
       with:
         action: rancher-helm-deploy
         chart_repo: https://s3.us-east-2.amazonaws.com/charts.mobilecoin.com/
-        chart_name: mc-core-common-config
+        chart_name: mc-core-dev-env-setup
         chart_version: ${{ github.event.inputs.version }}
-        chart_values: ${{ secrets.MC_CORE_COMMON_CONFIG_VALUES }}
-        release_name: mc-core-common-config
+        chart_values: .tmp/values/mc-core-dev-env-values.yaml
+        release_name: mc-core-dev-env-setup
         namespace: ${{ github.event.inputs.namespace }}
         rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
-
-    # populate data for consensus
 
     - name: Deploy
       run: echo "Deployment!"

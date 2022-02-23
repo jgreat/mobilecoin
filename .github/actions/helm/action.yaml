@@ -26,7 +26,7 @@ inputs:
     description: "url for chart repo"
     required: false
   chart_values:
-    description: "values for chart release"
+    description: "values file path for chart release"
     required: false
   chart_name:
     description: "name of chart in repo"
