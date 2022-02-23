@@ -25,6 +25,16 @@ inputs:
   chart_repo:
     description: "url for chart repo"
     required: false
+  chart_values:
+    description: "values for chart release"
+    required: false
+  chart_name:
+    description: "name of chart in repo"
+    required: false
+  chart_wait_timeout:
+    description: "timeout to wait for resources to be healthy"
+    required: false
+    default: "20m"
   release_name:
     description: "helm release name"
     required: false

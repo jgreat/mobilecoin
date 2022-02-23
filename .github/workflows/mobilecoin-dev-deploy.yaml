@@ -104,6 +104,21 @@ jobs:
         rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
+    
+    - name: Deploy core common config
+      uses: ./.github/actions/helm
+      with:
+        action: rancher-helm-deploy
+        chart_repo: s3://charts.mobilecoin.com
+        chart_name: mc-core-common-config
+        chart_version: ${{ github.event.inputs.version }}
+        chart_values: ${{ secrets.MC_CORE_COMMON_CONFIG_VALUES }}
+        release_name: mc-core-common-config
+        namespace: ${{ github.event.inputs.namespace }}
+        rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
+        rancher_url: ${{ secrets.RANCHER_URL }}
+        rancher_token: ${{ secrets.RANCHER_TOKEN }}
+
 
     # populate data for consensus
 

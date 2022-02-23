@@ -43,6 +43,24 @@ rancher_get_kubeconfig()
     curl -sSLf -H "${auth_header}" -X POST "${kubeconfig_url}" | jq -r .config > ~/.kube/config
 }
 
+repo_add()
+{
+    is_set INPUT_AWS_ACCESS_KEY_ID
+    is_set INPUT_AWS_DEFAULT_REGION
+    is_set INPUT_AWS_SECRET_ACCESS_KEY
+    is_set INPUT_CHART_REPO
+
+    # Convert input to AWS env vars.
+    export AWS_ACCESS_KEY_ID="${INPUT_AWS_ACCESS_KEY_ID}"
+    export AWS_DEFAULT_REGION="${INPUT_AWS_DEFAULT_REGION}"
+    export AWS_SECRET_ACCESS_KEY="${INPUT_AWS_SECRET_ACCESS_KEY}"
+
+    echo "-- Add chart repo"
+    helm repo add repo "${INPUT_CHART_REPO}"
+
+}
+
+
 echo "Installed Plugins"
 helm plugin list
 
@@ -50,18 +68,9 @@ if [ -n "${INPUT_ACTION}" ]
 then
     case "${INPUT_ACTION}" in
         s3-publish)
-            is_set INPUT_AWS_ACCESS_KEY_ID
-            is_set INPUT_AWS_DEFAULT_REGION
-            is_set INPUT_AWS_SECRET_ACCESS_KEY
             is_set INPUT_CHART_APP_VERSION
             is_set INPUT_CHART_PATH
             is_set INPUT_CHART_VERSION
-            is_set INPUT_CHART_REPO
-
-            # Convert input to AWS env vars.
-            export AWS_ACCESS_KEY_ID="${INPUT_AWS_ACCESS_KEY_ID}"
-            export AWS_DEFAULT_REGION="${INPUT_AWS_DEFAULT_REGION}"
-            export AWS_SECRET_ACCESS_KEY="${INPUT_AWS_SECRET_ACCESS_KEY}"
 
             if [ "${INPUT_CHART_SIGN}" == "true" ]
             then
@@ -93,12 +102,11 @@ then
                     --version="${INPUT_CHART_VERSION}"
             fi
 
-            echo "-- Add chart repo"
-            helm repo add my-repo "${INPUT_CHART_REPO}"
+            repo_add
 
             echo "-- Push chart"
             chart_name=$(basename "${INPUT_CHART_PATH}")
-            helm s3 push --force ".tmp/charts/${chart_name}-${INPUT_CHART_VERSION}.tgz" my-repo
+            helm s3 push --force ".tmp/charts/${chart_name}-${INPUT_CHART_VERSION}.tgz" repo
             ;;
 
         rancher-namespace-delete)
@@ -163,8 +171,26 @@ then
         rancher-delete-pvcs)
             echo "delete some pvcs"
             ;;
-        rancher-deploy)
+        rancher-helm-deploy)
             rancher_get_kubeconfig
+            is_set INPUT_NAMESPACE
+            is_set INPUT_RELEASE_NAME
+            is_set INPUT_CHART_VERSION
+            is_set INPUT_CHART_NAME
+
+            repo_add
+
+            if [ -n "${INPUT_CHART_VALUES}" ]
+            then
+                echo "-- deploy ${INPUT_CHART_NAME} with values."
+                mkdir -p .tmp/values
+                echo "${INPUT_CHART_VALUES}" > .tmp/values/values.yaml
+                
+                helm upgrade "${INPUT_RELEASE_NAME}" "repo/${INPUT_CHART_NAME}" -i --wait --timeout=20m -f .tmp/values/values.yaml
+            else
+                echo "-- deploy ${INPUT_CHART_NAME}"
+                helm upgrade "${INPUT_RELEASE_NAME}" "repo/${INPUT_CHART_NAME}" -i --wait --timeout=20m
+            fi
             ;;
         *)
             error_exit "Command ${INPUT_ACTION} not recognized"
