@@ -75,10 +75,8 @@ jobs:
     - name: Write environment values
       env:
         ENCLAVE_SIGNING_KEY: ${{ secrets.ENCLAVE_SIGNING_KEY }}
-        FOG_AUTHORITY_ROOT_CA_CERT: ${{ secrets.FOG_AUTHORITY_ROOT_CA_CERT }}
       run: |
         echo "${ENCLAVE_SIGNING_KEY}" > "${ENCLAVE_SIGNING_KEY_PATH}"
-        echo "${FOG_AUTHORITY_ROOT_CA_CERT}" > "${FOG_AUTHORITY_ROOT_CA_CERT_PATH}"
 
     - name: Build Rust
       # Only build if we don't have a cached set of binaries.
@@ -150,6 +148,12 @@ jobs:
       id: meta
       run: |
         .internal-ci/util/metadata.sh
+
+    - name: Write environment values
+      env:
+        FOG_AUTHORITY_ROOT_CA_CERT: ${{ secrets.FOG_AUTHORITY_ROOT_CA_CERT }}
+      run: |
+        echo "${FOG_AUTHORITY_ROOT_CA_CERT}" > "${FOG_AUTHORITY_ROOT_CA_CERT_PATH}"
 
     - name: Populate origin data
       if: steps.sample_data_cache.outputs.cache-hit != 'true'

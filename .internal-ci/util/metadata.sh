@@ -20,7 +20,7 @@ then
 fi
 
 # Remove leading branch designator.
-branch=$(echo ${GITHUB_REF_NAME} | sed -E 's/(feature|deploy|release)\///')
+branch=$(echo "${GITHUB_REF_NAME}" | sed -E 's/(feature|deploy|release)\///')
 
 if [[ "${GITHUB_REF_NAME}" =~ ^release/ ]]
 then
