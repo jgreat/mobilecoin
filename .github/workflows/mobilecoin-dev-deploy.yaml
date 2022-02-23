@@ -87,8 +87,8 @@ jobs:
     needs:
     - delete-namespace
     - reset-dev-env
-    if: (needs.delete-namespace.result == 'success' || needs.delete.namespace.result == 'skipped') && (needs.reset-namespace.result == 'success' || needs.reset-namespace.result == 'skipped')
     runs-on: self-hosted
+    if: success() || skipped()
     steps:
     - name: Checkout
       uses: actions/checkout@v2
