@@ -236,7 +236,7 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
         context: .
-        file: docker/Dockerfile.${{ matrix.image }}
+        file: .internal-ci/docker/Dockerfile.${{ matrix.image }}
         labels: ${{ steps.docker_meta.outputs.labels }}
         push: true
         tags: ${{ steps.docker_meta.outputs.tags }}
