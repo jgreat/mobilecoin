@@ -167,116 +167,116 @@ jobs:
       run: |
         ls -alR sample_data
 
-  # docker:
-  #   runs-on: self-hosted
-  #   needs:
-  #   - create-sample-data
-  #   strategy:
-  #     matrix:
-  #       image:
-  #       - go-grpc-gateway
-  #       - node_hw
-  #       - mobilecoind
-  #       - watcher
-  #       - fogingest
-  #       - fogreport
-  #       - fogview
-  #       - fog-ledger
-  #       - fog-test-client
-  #       - bootstrap-tools
-  #   steps:
-  #   - name: Checkout
-  #     uses: actions/checkout@v2
+  docker:
+    runs-on: self-hosted
+    needs:
+    - create-sample-data
+    strategy:
+      matrix:
+        image:
+        - go-grpc-gateway
+        - node_hw
+        - mobilecoind
+        - watcher
+        - fogingest
+        - fogreport
+        - fogview
+        - fog-ledger
+        - fog-test-client
+        - bootstrap-tools
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
 
-  #   - name: Cache build binaries
-  #     id: artifact_cache
-  #     uses: actions/cache@v2
-  #     with:
-  #       path: |
-  #         build_artifacts
-  #       key: ${{ runner.os }}-build-cargo-hardware-build-artifacts-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml') }}
+    - name: Cache build binaries
+      id: artifact_cache
+      uses: actions/cache@v2
+      with:
+        path: |
+          build_artifacts
+        key: ${{ runner.os }}-build-cargo-hardware-build-artifacts-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml') }}
 
-  #   - name: Cache sample_data
-  #     id: sample_data_cache
-  #     uses: actions/cache@v2
-  #     with:
-  #       path: |
-  #         sample_data
-  #       key: sample-data-build-cargo-hardware-${{ github.sha }}
+    - name: Cache sample_data
+      id: sample_data_cache
+      uses: actions/cache@v2
+      with:
+        path: |
+          sample_data
+        key: sample-data-build-cargo-hardware-${{ github.sha }}
 
-  #   - name: Generate version metadata
-  #     id: meta
-  #     run: |
-  #       .github/workflows/helpers/metadata.sh
+    - name: Generate version metadata
+      id: meta
+      run: |
+        .github/workflows/helpers/metadata.sh
 
-  #   - name: Generate Docker Tags
-  #     id: docker_meta
-  #     uses: docker/metadata-action@v3
-  #     with:
-  #       images: ${{ env.DOCKER_ORG }}/${{ matrix.image }}
-  #       tags: |
-  #         type=raw,value=${{ steps.meta.outputs.tag }}
+    - name: Generate Docker Tags
+      id: docker_meta
+      uses: docker/metadata-action@v3
+      with:
+        images: ${{ env.DOCKER_ORG }}/${{ matrix.image }}
+        tags: |
+          type=raw,value=${{ steps.meta.outputs.tag }}
 
-  #   - name: Set up Docker Buildx
-  #     uses: docker/setup-buildx-action@v1
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
 
-  #   - name: Login to DockerHub
-  #     uses: docker/login-action@v1
-  #     with:
-  #       username: ${{ secrets.DOCKERHUB_USERNAME }}
-  #       password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Login to DockerHub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-  #   - name: Publish to DockerHub
-  #     id: docker_publish_dockerhub
-  #     uses: docker/build-push-action@v2
-  #     with:
-  #       build-args: |
-  #         REPO_ORG=${{ env.DOCKER_ORG }}
-  #         BIN_PATH=build_artifacts
-  #       cache-from: type=gha
-  #       cache-to: type=gha,mode=max
-  #       context: .
-  #       file: docker/Dockerfile.${{ matrix.image }}
-  #       labels: ${{ steps.docker_meta.outputs.labels }}
-  #       push: true
-  #       tags: ${{ steps.docker_meta.outputs.tags }}
+    - name: Publish to DockerHub
+      id: docker_publish_dockerhub
+      uses: docker/build-push-action@v2
+      with:
+        build-args: |
+          REPO_ORG=${{ env.DOCKER_ORG }}
+          BIN_PATH=build_artifacts
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        context: .
+        file: docker/Dockerfile.${{ matrix.image }}
+        labels: ${{ steps.docker_meta.outputs.labels }}
+        push: true
+        tags: ${{ steps.docker_meta.outputs.tags }}
 
-  # charts:
-  #   runs-on: self-hosted
-  #   needs:
-  #   - docker
-  #   strategy:
-  #     # Updating the chart index can only be done by one process at a time.
-  #     max-parallel: 1
-  #     matrix:
-  #       chart:
-  #       - fog-ingest
-  #       - fog-services
-  #       - consensus-node
-  #       - consensus-node-config
-  #       - mobilecoind
-  #       - mc-core-common-config
-  #       - mc-core-dev-env-setup
-  #   steps:
-  #   - name: Checkout
-  #     uses: actions/checkout@v2
+  charts:
+    runs-on: self-hosted
+    needs:
+    - docker
+    strategy:
+      # Updating the chart index can only be done by one process at a time.
+      max-parallel: 1
+      matrix:
+        chart:
+        # - fog-ingest
+        # - fog-services
+        - consensus-node
+        - consensus-node-config
+        # - mobilecoind
+        - mc-core-common-config
+        - mc-core-dev-env-setup
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
 
-  #   - name: Generate version metadata
-  #     id: meta
-  #     run: |
-  #       .github/workflows/helpers/metadata.sh
+    - name: Generate version metadata
+      id: meta
+      run: |
+        .github/workflows/helpers/metadata.sh
 
-  #   - name: Package and publish chart
-  #     uses: ./.github/actions/helm
-  #     with:
-  #       action: s3-publish
-  #       aws_access_key_id: ${{ secrets.CHARTS_AWS_ACCESS_KEY_ID }}
-  #       aws_secret_access_key: ${{ secrets.CHARTS_AWS_SECRET_ACCESS_KEY }}
-  #       aws_default_region: us-east-2
-  #       chart_repo: s3://charts.mobilecoin.com
-  #       chart_app_version: ${{ steps.meta.outputs.tag }}
-  #       chart_version: ${{ steps.meta.outputs.tag }}
-  #       chart_path: helm/${{ matrix.chart }}
+    - name: Package and publish chart
+      uses: ./.github/actions/helm
+      with:
+        action: s3-publish
+        aws_access_key_id: ${{ secrets.CHARTS_AWS_ACCESS_KEY_ID }}
+        aws_secret_access_key: ${{ secrets.CHARTS_AWS_SECRET_ACCESS_KEY }}
+        aws_default_region: us-east-2
+        chart_repo: s3://charts.mobilecoin.com
+        chart_app_version: ${{ steps.meta.outputs.tag }}
+        chart_version: ${{ steps.meta.outputs.tag }}
+        chart_path: helm/${{ matrix.chart }}
 
   # deploy:
   #   runs-on: self-hosted
