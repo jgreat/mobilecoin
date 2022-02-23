@@ -289,7 +289,7 @@ jobs:
     - name: Generate version metadata
       id: meta
       run: |
-        .github/workflows/helpers/metadata.sh
+        .internal-ci/util/metadata.sh
 
     - name: Mobilecoin Development Deploy (Dispatch)
       uses: aurelien-baudet/workflow-dispatch@v2.1.1
