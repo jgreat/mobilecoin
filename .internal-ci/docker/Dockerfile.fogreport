@@ -11,8 +11,8 @@ COPY ${BIN_PATH}/mc-util-grpc-admin-tool /usr/bin/
 COPY ${BIN_PATH}/report_server /usr/bin/
 
 # Entrypoint
-COPY docker/entrypoints/fogreport.sh /usr/bin/entrypoint.sh
-ENTRYPOINT ["/usr/bin/entrypoint.sh"]
+# COPY docker/entrypoints/fogreport.sh /usr/bin/entrypoint.sh
+# ENTRYPOINT ["/usr/bin/entrypoint.sh"]
 
 # Rust defaults
 ENV RUST_BACKTRACE="1"

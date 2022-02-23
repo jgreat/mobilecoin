@@ -16,8 +16,8 @@ ARG ORIGIN_DATA_DIR=sample_data
 COPY ${ORIGIN_DATA_DIR}/ledger /var/lib/mobilecoin/origin_data
 
 # Entrypoint
-COPY docker/entrypoints/fogview.sh /usr/bin/entrypoint.sh
-ENTRYPOINT ["/usr/bin/entrypoint.sh"]
+# COPY docker/entrypoints/fogview.sh /usr/bin/entrypoint.sh
+# ENTRYPOINT ["/usr/bin/entrypoint.sh"]
 
 # Rust defaults
 ENV RUST_BACKTRACE="1"
