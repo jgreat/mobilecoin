@@ -15,7 +15,7 @@ do
   key=$("${location}/generate_msg_signer_keys.sh")
   signer_keys_pub+=("$(echo -n "${key}" | grep public | awk '{print $2}')")
   signer_keys_pri+=("$(echo -n "${key}" | grep private | awk '{print $2}')")
-  count++
+  ((count++))
 done
 
 mkdir -p .tmp/values
