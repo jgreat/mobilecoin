@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "chart.fullname" . }}
+  labels:
+    publish: grafana-cloud
+    app: fog-ingest
+    {{- include "chart.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app: fog-ingest
+      {{- include "chart.selectorLabels" . | nindent 6 }}
+  endpoints:
+  - port: mgmt
+    relabelings:
+    - targetLabel: network
+      replacement: {{ include "chart.mobileCoinNetwork" . }}

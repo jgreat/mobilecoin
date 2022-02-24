@@ -135,40 +135,40 @@ jobs:
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
 
-  deploy-consensus:
-    needs:
-    - setup-environment
-    - delete
-    - reset
-    if: |
-      always() &&
-      (needs.reset.result == 'success' || needs.reset.result == 'skipped') &&
-      (needs.delete.result == 'success' || needs.delete.result == 'skipped')
-    runs-on: self-hosted
-    strategy:
-      matrix:
-        release_name:
-        - consensus-node-1
-        - consensus-node-2
-        - consensus-node-3
-        - consensus-node-4
-        - consensus-node-5
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+  # deploy-consensus:
+  #   needs:
+  #   - setup-environment
+  #   - delete
+  #   - reset
+  #   if: |
+  #     always() &&
+  #     (needs.reset.result == 'success' || needs.reset.result == 'skipped') &&
+  #     (needs.delete.result == 'success' || needs.delete.result == 'skipped')
+  #   runs-on: self-hosted
+  #   strategy:
+  #     matrix:
+  #       release_name:
+  #       - consensus-node-1
+  #       - consensus-node-2
+  #       - consensus-node-3
+  #       - consensus-node-4
+  #       - consensus-node-5
+  #   steps:
+  #   - name: Checkout
+  #     uses: actions/checkout@v2
 
-    - name: Deploy Consensus Nodes
-      uses: ./.github/actions/helm
-      with:
-        action: rancher-helm-deploy
-        chart_repo: https://s3.us-east-2.amazonaws.com/charts.mobilecoin.com/
-        chart_name: consensus-node
-        chart_version: ${{ github.event.inputs.version }}
-        chart_set: |
-          --set image.org=jgreat
-        chart_wait_timeout: 5m
-        release_name: ${{ matrix.release_name }}
-        namespace: ${{ github.event.inputs.namespace }}
-        rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
-        rancher_url: ${{ secrets.RANCHER_URL }}
-        rancher_token: ${{ secrets.RANCHER_TOKEN }}
+  #   - name: Deploy Consensus Nodes
+  #     uses: ./.github/actions/helm
+  #     with:
+  #       action: rancher-helm-deploy
+  #       chart_repo: https://s3.us-east-2.amazonaws.com/charts.mobilecoin.com/
+  #       chart_name: consensus-node
+  #       chart_version: ${{ github.event.inputs.version }}
+  #       chart_set: |
+  #         --set image.org=jgreat
+  #       chart_wait_timeout: 5m
+  #       release_name: ${{ matrix.release_name }}
+  #       namespace: ${{ github.event.inputs.namespace }}
+  #       rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
+  #       rancher_url: ${{ secrets.RANCHER_URL }}
+  #       rancher_token: ${{ secrets.RANCHER_TOKEN }}

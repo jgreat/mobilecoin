@@ -44,7 +44,7 @@ jobs:
   build-cargo-hardware:
     runs-on: self-hosted
     container:
-      image: jgreat/rust-sgx-base:0.0.7
+      image: mobilecoin/rust-sgx-base@sha256:efe2873257fa08a8468d704dcd9bc1b6c2e9ce5a08378d57bb1073b2f50416a7
     steps:
     - name: Checkout
       uses: actions/checkout@v2

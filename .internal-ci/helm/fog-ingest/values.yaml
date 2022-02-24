@@ -1,0 +1,101 @@
+### Chart wide values.
+nameOverride: ''
+fullnameOverride: ''
+
+imagePullSecrets:
+- name: docker-credentials
+
+mcCoreCommonConfig:
+  enabled: false
+  # clientAuth:
+  #   token: ''
+  # ias:
+  #   key: ''
+  #   spid: ''
+  # mobileCoinNetwork:
+  #   network: ''
+  #   partner: ''
+  # sentry:
+  #   consensus-sentry-dsn: ''
+  #   ledger-distribution-sentry-dsn: ''
+  #   fog-report-sentry-dsn: ''
+  #   fog-view-sentry-dsn: ''
+  #   fog-ledger-sentry-dsn: ''
+  #   fog-ingest-sentry-dsn: ''
+  # mobilecoind:
+  #   quorumSetThreshold: 0
+  #   nodes: []
+
+# Pods share the image tag.
+image:
+  org: mobilecoin
+  tag: '' # Overrides the image tag whose default is the chart appVersion.
+
+
+### Fog Ingest Service Configuration
+fogIngest:
+  replicaCount: 2
+  image:
+    org: ''
+    name: fogingest
+    pullPolicy: Always
+
+  ### Persistent storage for LMDB
+  persistence:
+    enabled: true
+    spec:
+      storageClassName: fast
+      accessModes:
+        - 'ReadWriteOnce'
+      resources:
+        requests:
+          storage: 512Gi
+
+  rust:
+    backtrace: full
+    log: info,rustls=warn,hyper=warn,tokio_reactor=warn,mio=warn,want=warn,reqwest=warn,rusoto_core=error,rusoto_signature=error,h2=error,rocket=warn,<unknown>=warn
+
+  ### Ingest public key expiry window (blocks)
+  expiryWindow: 10
+
+  podAnnotations:
+    fluentbit.io/include: 'true' # collect logs with fluentbit
+
+  ### Intel SGX extended resources are defined with: https://github.com/sebva/sgx-device-plugin
+  resources:
+    limits:
+      intel.com/sgx: 5000
+    requests:
+      intel.com/sgx: 5000
+
+  nodeSelector:
+    builder-node: 'false'
+    sgx-enabled-node: 'true'
+
+  tolerations:
+  - key: sgx
+    operator: Equal
+    value: 'true'
+    effect: NoSchedule
+
+  affinity: {}
+
+### Toolbox deployment. Used for activating and retiring.
+toolbox:
+  image:
+    org: ''
+    name: bootstrap-tools
+    pullPolicy: Always
+    tag: '' # Overrides the image tag whose default is the chart appVersion.
+
+  nodeSelector:
+    builder-node: 'false'
+    sgx-enabled-node: 'false'
+
+  tolerations: []
+
+  affinity: {}
+
+jaegerTracing:
+  enabled: false
+  collector: 'dns:///jaeger-collector:14250'

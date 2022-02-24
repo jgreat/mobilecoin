@@ -1,0 +1,14 @@
+{{- if .Values.fogRecoveryDatabase.configMap.enabled }}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: fog-recover-postgresql
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+data:
+  postgresql-database: {{ .Values.fogRecoveryDatabase.database | quote }}
+  postgresql-hostname: {{ .Values.fogRecoveryDatabase.hostname | quote }}
+  postgresql-port: {{ .Values.fogRecoveryDatabase.port | quote }}
+  postgresql-ssl-options: {{ .Values.fogRecoveryDatabase.options | quote }}
+  postgresql-username: {{ .Values.fogRecoveryDatabase.username | quote }}
+{{- end }}

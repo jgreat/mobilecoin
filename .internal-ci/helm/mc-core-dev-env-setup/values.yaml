@@ -17,11 +17,17 @@ global:
           peer:
             hostname: '{{ printf "peer1.%s.development.mobilecoin.com" .Release.Namespace }}'
             port: '443'
+          client:
+            hostname: '{{ printf "node1.%s.development.mobilecoin.com" .Release.Namespace }}'
+            port: '443'
           signerPublicKey: ''
-          ledgerArchiveLocation: '{{ with .Values.global.node.ledgerDistribution }}{{ printf "https://s3-%s.amazonaws.com/%s/%s/" .awsRegion .s3Bucket (printf "node1.%s.development.mobilecoin.com" $.Release.Namespace) }}{{ end }}'
+          ledgerArchiveLocation: '{{ with .Values.global.node.ledgerDistribution }}{{ printf "https://s3-%s.amazonaws.com/%s/%s/" .awsRegion .s3Bucket $Values.global.networkConfig.peers.1.client.hostname }}{{ end }}'
         2: 
           peer:
             hostname: '{{ printf "peer2.%s.development.mobilecoin.com" .Release.Namespace }}'
+            port: '443'
+          client:
+            hostname: '{{ printf "node2.%s.development.mobilecoin.com" .Release.Namespace }}'
             port: '443'
           signerPublicKey: ''
           ledgerArchiveLocation: '{{ with .Values.global.node.ledgerDistribution }}{{ printf "https://s3-%s.amazonaws.com/%s/%s/" .awsRegion .s3Bucket (printf "node2.%s.development.mobilecoin.com" $.Release.Namespace) }}{{ end }}'
@@ -29,17 +35,26 @@ global:
           peer:
             hostname: '{{ printf "peer3.%s.development.mobilecoin.com" .Release.Namespace }}'
             port: '443'
+          client:
+            hostname: '{{ printf "node3.%s.development.mobilecoin.com" .Release.Namespace }}'
+            port: '443'
           signerPublicKey: ''
           ledgerArchiveLocation: '{{ with .Values.global.node.ledgerDistribution }}{{ printf "https://s3-%s.amazonaws.com/%s/%s/" .awsRegion .s3Bucket (printf "node3.%s.development.mobilecoin.com" $.Release.Namespace) }}{{ end }}'
         4: 
           peer:
             hostname: '{{ printf "peer4.%s.development.mobilecoin.com" .Release.Namespace }}'
             port: '443'
+          client:
+            hostname: '{{ printf "node4.%s.development.mobilecoin.com" .Release.Namespace }}'
+            port: '443'
           signerPublicKey: ''
           ledgerArchiveLocation: '{{ with .Values.global.node.ledgerDistribution }}{{ printf "https://s3-%s.amazonaws.com/%s/%s/" .awsRegion .s3Bucket (printf "node4.%s.development.mobilecoin.com" $.Release.Namespace) }}{{ end }}'
         5: 
           peer:
             hostname: '{{ printf "peer5.%s.development.mobilecoin.com" .Release.Namespace }}'
+            port: '443'
+          client:
+            hostname: '{{ printf "node5.%s.development.mobilecoin.com" .Release.Namespace }}'
             port: '443'
           signerPublicKey: ''
           ledgerArchiveLocation: '{{ with .Values.global.node.ledgerDistribution }}{{ printf "https://s3-%s.amazonaws.com/%s/%s/" .awsRegion .s3Bucket (printf "node5.%s.development.mobilecoin.com" $.Release.Namespace) }}{{ end }}'
@@ -50,6 +65,19 @@ mcCoreCommonConfig:
   mobileCoinNetwork:
     network: '{{ .Release.Namespace }}'
     partner: 'dev'
+  mobilecoind:
+    threshold: '{{ .Values.global.networkConfig.threshold }}'
+    nodes:
+    - client: '{{ printf "%s:443" .Values.global.networkConfig.1.peers.hostname }}'
+      txSourceUrl: '{{ .Values.global.networkConfig.1.ledgerArchiveLocation }}'
+    - client: '{{ printf "%s:443" .Values.global.networkConfig.2.peers.hostname }}'
+      txSourceUrl: '{{ .Values.global.networkConfig.2.ledgerArchiveLocation }}'
+    - client: '{{ printf "%s:443" .Values.global.networkConfig.3.peers.hostname }}'
+      txSourceUrl: '{{ .Values.global.networkConfig.3.ledgerArchiveLocation }}'
+    - client: '{{ printf "%s:443" .Values.global.networkConfig.4.peers.hostname }}'
+      txSourceUrl: '{{ .Values.global.networkConfig.4.ledgerArchiveLocation }}'
+    - client: '{{ printf "%s:443" .Values.global.networkConfig.5.peers.hostname }}'
+      txSourceUrl: '{{ .Values.global.networkConfig.5.ledgerArchiveLocation }}'
 
 consensusNodeConfig1:
   enabled: true
@@ -95,6 +123,14 @@ consensusNodeConfig5:
       hostname: '{{ printf "node5.%s.development.mobilecoin.com" .Release.Namespace }}'
     peer:
       hostname: '{{ printf "peer5.%s.development.mobilecoin.com" .Release.Namespace }}'
+
+fogIngestConfig:
+  enabled: true
+  fogRecoveryDatabase:
+    configMap:
+      enabled: true
+    secret:
+      enabled: true
 
 # fogPublicFQDN:
 #   configMap:
