@@ -21,7 +21,7 @@ global:
             hostname: '{{ printf "node1.%s.development.mobilecoin.com" .Release.Namespace }}'
             port: '443'
           signerPublicKey: ''
-          ledgerArchiveLocation: '{{ with .Values.global.node.ledgerDistribution }}{{ printf "https://s3-%s.amazonaws.com/%s/%s/" .awsRegion .s3Bucket $Values.global.networkConfig.peers.1.client.hostname }}{{ end }}'
+          ledgerArchiveLocation: '{{ with .Values.global.node.ledgerDistribution }}{{ printf "https://s3-%s.amazonaws.com/%s/%s/" .awsRegion .s3Bucket $.Values.global.node.networkConfig.peers.1.client.hostname }}{{ end }}'
         2: 
           peer:
             hostname: '{{ printf "peer2.%s.development.mobilecoin.com" .Release.Namespace }}'
@@ -68,16 +68,16 @@ mcCoreCommonConfig:
   mobilecoind:
     threshold: '{{ .Values.global.networkConfig.threshold }}'
     nodes:
-    - client: '{{ printf "%s:443" .Values.global.networkConfig.peers.1.client.hostname }}'
-      txSourceUrl: '{{ .Values.global.networkConfig.1.ledgerArchiveLocation }}'
-    - client: '{{ printf "%s:443" .Values.global.networkConfig.peers.2.client.hostname }}'
-      txSourceUrl: '{{ .Values.global.networkConfig.2.ledgerArchiveLocation }}'
-    - client: '{{ printf "%s:443" .Values.global.networkConfig.peers.3.client.hostname }}'
-      txSourceUrl: '{{ .Values.global.networkConfig.3.ledgerArchiveLocation }}'
-    - client: '{{ printf "%s:443" .Values.global.networkConfig.peers.4.client.hostname }}'
-      txSourceUrl: '{{ .Values.global.networkConfig.4.ledgerArchiveLocation }}'
-    - client: '{{ printf "%s:443" .Values.global.networkConfig.peers.5.client.hostname }}'
-      txSourceUrl: '{{ .Values.global.networkConfig.5.ledgerArchiveLocation }}'
+    - client: '{{ printf "%s:443" .Values.global.node.networkConfig.peers.1.client.hostname }}'
+      txSourceUrl: '{{ .Values.global.node.networkConfig.1.ledgerArchiveLocation }}'
+    - client: '{{ printf "%s:443" .Values.global.node.networkConfig.peers.2.client.hostname }}'
+      txSourceUrl: '{{ .Values.global.node.networkConfig.2.ledgerArchiveLocation }}'
+    - client: '{{ printf "%s:443" .Values.global.node.networkConfig.peers.3.client.hostname }}'
+      txSourceUrl: '{{ .Values.global.node.networkConfig.3.ledgerArchiveLocation }}'
+    - client: '{{ printf "%s:443" .Values.global.node.networkConfig.peers.4.client.hostname }}'
+      txSourceUrl: '{{ .Values.global.node.networkConfig.4.ledgerArchiveLocation }}'
+    - client: '{{ printf "%s:443" .Values.global.node.networkConfig.peers.5.client.hostname }}'
+      txSourceUrl: '{{ .Values.global.node.networkConfig.5.ledgerArchiveLocation }}'
 
 consensusNodeConfig1:
   enabled: true

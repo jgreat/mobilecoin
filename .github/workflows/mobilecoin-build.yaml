@@ -176,14 +176,14 @@ jobs:
         image:
         - go-grpc-gateway
         - node_hw
-        - mobilecoind
-        - watcher
-        - fogingest
-        - fogreport
-        - fogview
-        - fog-ledger
-        - fog-test-client
-        - bootstrap-tools
+        # - mobilecoind
+        # - watcher
+        # - fogingest
+        # - fogreport
+        # - fogview
+        # - fog-ledger
+        # - fog-test-client
+        # - bootstrap-tools
     steps:
     - name: Checkout
       uses: actions/checkout@v2
