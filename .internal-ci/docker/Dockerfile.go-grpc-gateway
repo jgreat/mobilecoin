@@ -7,8 +7,8 @@ RUN apt-get update \
   && apt-get clean \
   && rm -r /var/lib/apt/lists
 
-ARG GO_BUILD_PATH=./go-grpc-gateway
-COPY ${GO_BUILD_PATH}/grpc-proxy /usr/bin/go-grpc-gateway
+ARG GO_BIN_PATH=go-grpc-gateway
+COPY ${GO_BIN_PATH}/grpc-proxy /usr/bin/go-grpc-gateway
 
 COPY .internal-ci/docker/entrypoints/go-grpc-gateway.sh /usr/bin/entrypoint.sh
 ENTRYPOINT ["/usr/bin/entrypoint.sh"]
