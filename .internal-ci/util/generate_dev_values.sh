@@ -24,17 +24,17 @@ global:
       awsSecretAccessKey: ${LEDGER_AWS_SECRET_ACCESS_KEY}
 
     networkConfig:
-    peers:
-      1:
-        signerPublicKey: ${signer_keys_pub[0]}
-      2:
-        signerPublicKey: ${signer_keys_pub[1]}
-      3:
-        signerPublicKey: ${signer_keys_pub[2]}
-      4:
-        signerPublicKey: ${signer_keys_pub[3]}
-      5:
-        signerPublicKey: ${signer_keys_pub[4]}
+      peers:
+        1:
+          signerPublicKey: ${signer_keys_pub[0]}
+        2:
+          signerPublicKey: ${signer_keys_pub[1]}
+        3:
+          signerPublicKey: ${signer_keys_pub[2]}
+        4:
+          signerPublicKey: ${signer_keys_pub[3]}
+        5:
+          signerPublicKey: ${signer_keys_pub[4]}
 
 mcCoreCommonConfig:
   ias:
