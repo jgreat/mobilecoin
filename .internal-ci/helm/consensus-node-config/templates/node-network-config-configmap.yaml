@@ -28,17 +28,11 @@ data:
   {{- end }}
     ]
 
-    quorum_set = { 
-      threshold = {{ $threshold }}
-      members = [
+    quorum_set = { threshold = {{ $threshold }}, members = [
   {{- range $key, $value := $peers }}
     {{- $peerHostname := tpl $value.peer.hostname $ }}
     {{- if not (eq $peerHostname $localPeerHostname) }}
-        {
-          type = "Node"
-          args = "{{ $peerHostname }}:{{ $value.peer.port }}"
-        },
+      { type = "Node", args = "{{ $peerHostname }}:{{ $value.peer.port }}" },
     {{- end }}
   {{- end }}
-      ]
-    }
+    ] }

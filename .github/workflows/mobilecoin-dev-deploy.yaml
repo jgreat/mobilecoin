@@ -157,7 +157,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Deploy environment setup
+    - name: Deploy Consensus Nodes
       uses: ./.github/actions/helm
       with:
         action: rancher-helm-deploy

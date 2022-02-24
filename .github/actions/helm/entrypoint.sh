@@ -152,13 +152,14 @@ then
 
             echo "-- Get release list"
             releases=$(helm list -q -n "${INPUT_NAMESPACE}")
-            if [[ "${releases}" =~ /^${INPUT_RELEASE_NAME}$/ ]]
-            then
-                echo "-- Deleting release ${INPUT_RELEASE_NAME}"
-                helm delete "${INPUT_RELEASE_NAME}" -n "${INPUT_NAMESPACE}"
-            else
-                echo "-- Release not found"
-            fi
+            for r in ${releases}
+            do 
+                if [ "${r}" == "${INPUT_RELEASE_NAME}" ]
+                then
+                    echo "-- Deleting release ${INPUT_RELEASE_NAME}"
+                    helm delete "${INPUT_RELEASE_NAME}" -n "${INPUT_NAMESPACE}"
+                fi
+            done
             ;;
         rancher-delete-pvcs)
             echo "delete some pvcs"
