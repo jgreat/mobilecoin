@@ -34,7 +34,10 @@ inputs:
   chart_wait_timeout:
     description: "timeout to wait for resources to be healthy"
     required: false
-    default: "20m"
+    default: "10m"
+  chart_set: 
+    description: "new line list of --set commands"
+    required: false
   release_name:
     description: "helm release name"
     required: false

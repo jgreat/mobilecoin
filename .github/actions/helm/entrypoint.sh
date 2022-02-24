@@ -181,13 +181,13 @@ then
                 -i --wait --timeout=20m \
                 -f "${INPUT_CHART_VALUES}" \
                 --namespace "${INPUT_NAMESPACE}" \
-                --version "${INPUT_CHART_VERSION}"
+                --version "${INPUT_CHART_VERSION}" ${INPUT_CHART_SET}
             else
                 echo "-- deploy ${INPUT_CHART_NAME}"
                 helm upgrade "${INPUT_RELEASE_NAME}" "repo/${INPUT_CHART_NAME}" \
                 -i --wait --timeout=20m \
                 --namespace "${INPUT_NAMESPACE}" \
-                --version "${INPUT_CHART_VERSION}"
+                --version "${INPUT_CHART_VERSION}" ${INPUT_CHART_SET}
             fi
             ;;
         *)

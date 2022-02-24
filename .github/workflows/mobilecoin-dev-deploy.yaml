@@ -164,6 +164,8 @@ jobs:
         chart_repo: https://s3.us-east-2.amazonaws.com/charts.mobilecoin.com/
         chart_name: consensus-node
         chart_version: ${{ github.event.inputs.version }}
+        chart_set: |
+          --set image.org=jgreat
         release_name: ${{ matrix.release_name }}
         namespace: ${{ github.event.inputs.namespace }}
         rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
