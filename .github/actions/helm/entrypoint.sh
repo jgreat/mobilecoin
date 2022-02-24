@@ -177,12 +177,9 @@ then
             if [ -n "${INPUT_CHART_VALUES}" ]
             then
                 echo "-- deploy ${INPUT_CHART_NAME} with values."
-                mkdir -p .tmp/values
-                echo "${INPUT_CHART_VALUES}" > .tmp/values/values.yaml
-                
                 helm upgrade "${INPUT_RELEASE_NAME}" "repo/${INPUT_CHART_NAME}" \
                 -i --wait --timeout=20m \
-                -f .tmp/values/values.yaml \
+                -f "${INPUT_CHART_VALUES}" \
                 --namespace "${INPUT_NAMESPACE}" \
                 --version "${INPUT_CHART_VERSION}"
             else
