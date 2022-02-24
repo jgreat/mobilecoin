@@ -83,7 +83,7 @@ jobs:
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
 
-  deploy:
+  setup-environment:
     needs:
     - delete
     - reset
@@ -135,5 +135,31 @@ jobs:
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
 
-    - name: Deploy
-      run: echo "Deployment!"
+  deploy-consensus:
+    needs:
+    - setup-environment
+    runs-on: self-hosted
+    strategy:
+      matrix:
+        release_name:
+        - consensus-node-1
+        - consensus-node-2
+        - consensus-node-3
+        - consensus-node-4
+        - consensus-node-5
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Deploy environment setup
+      uses: ./.github/actions/helm
+      with:
+        action: rancher-helm-deploy
+        chart_repo: https://s3.us-east-2.amazonaws.com/charts.mobilecoin.com/
+        chart_name: consensus-node
+        chart_version: ${{ github.event.inputs.version }}
+        release_name: ${{ matrix.release_name }}
+        namespace: ${{ github.event.inputs.namespace }}
+        rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
+        rancher_url: ${{ secrets.RANCHER_URL }}
+        rancher_token: ${{ secrets.RANCHER_TOKEN }}
