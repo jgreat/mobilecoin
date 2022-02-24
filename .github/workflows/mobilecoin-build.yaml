@@ -150,7 +150,7 @@ jobs:
         cd go-grpc-gateway
         ./install_tools.sh
         ./build.sh
-        cp grpc-proxy ../go_artifact_cache/
+        cp grpc-proxy ../go_build_artifacts/
 
   create-sample-data:
     runs-on: self-hosted
