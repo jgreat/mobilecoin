@@ -169,25 +169,28 @@ then
             is_set INPUT_RELEASE_NAME
             is_set INPUT_CHART_VERSION
             is_set INPUT_CHART_NAME
+            is_set INPUT_CHART_WAIT_TIMEOUT
 
             echo "-- Add chart repo ${INPUT_CHART_REPO}"
             helm repo add repo "${INPUT_CHART_REPO}"
             helm repo update
 
+            sets=$(echo -n "${INPUT_CHART_SET}" | tr '\n' ' ')
+
             if [ -n "${INPUT_CHART_VALUES}" ]
             then
                 echo "-- deploy ${INPUT_CHART_NAME} with values."
                 helm upgrade "${INPUT_RELEASE_NAME}" "repo/${INPUT_CHART_NAME}" \
-                -i --wait --timeout=20m \
+                -i --wait --timeout="${INPUT_CHART_WAIT_TIMEOUT}" \
                 -f "${INPUT_CHART_VALUES}" \
                 --namespace "${INPUT_NAMESPACE}" \
-                --version "${INPUT_CHART_VERSION}" ${INPUT_CHART_SET}
+                --version "${INPUT_CHART_VERSION}" ${sets}
             else
                 echo "-- deploy ${INPUT_CHART_NAME}"
                 helm upgrade "${INPUT_RELEASE_NAME}" "repo/${INPUT_CHART_NAME}" \
-                -i --wait --timeout=20m \
+                -i --wait --timeout="${INPUT_CHART_WAIT_TIMEOUT}" \
                 --namespace "${INPUT_NAMESPACE}" \
-                --version "${INPUT_CHART_VERSION}" ${INPUT_CHART_SET}
+                --version "${INPUT_CHART_VERSION}" ${sets}
             fi
             ;;
         *)

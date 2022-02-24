@@ -166,6 +166,7 @@ jobs:
         chart_version: ${{ github.event.inputs.version }}
         chart_set: |
           --set image.org=jgreat
+        chart_wait_timeout: 5m
         release_name: ${{ matrix.release_name }}
         namespace: ${{ github.event.inputs.namespace }}
         rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
