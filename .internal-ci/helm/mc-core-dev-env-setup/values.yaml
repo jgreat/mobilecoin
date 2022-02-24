@@ -69,15 +69,15 @@ mcCoreCommonConfig:
     threshold: '{{ .Values.global.networkConfig.threshold }}'
     nodes:
     - client: '{{ printf "%s:443" .Values.global.node.networkConfig.peers.p1.client.hostname }}'
-      txSourceUrl: '{{ .Values.global.node.networkConfig.p1.ledgerArchiveLocation }}'
+      txSourceUrl: '{{ tpl .Values.global.node.networkConfig.p1.ledgerArchiveLocation $ }}'
     - client: '{{ printf "%s:443" .Values.global.node.networkConfig.peers.p2.client.hostname }}'
-      txSourceUrl: '{{ .Values.global.node.networkConfig.p2.ledgerArchiveLocation }}'
+      txSourceUrl: '{{ tpl .Values.global.node.networkConfig.p2.ledgerArchiveLocation $ }}'
     - client: '{{ printf "%s:443" .Values.global.node.networkConfig.peers.p3.client.hostname }}'
-      txSourceUrl: '{{ .Values.global.node.networkConfig.p3.ledgerArchiveLocation }}'
+      txSourceUrl: '{{ tpl .Values.global.node.networkConfig.p3.ledgerArchiveLocation $ }}'
     - client: '{{ printf "%s:443" .Values.global.node.networkConfig.peers.p4.client.hostname }}'
-      txSourceUrl: '{{ .Values.global.node.networkConfig.p4.ledgerArchiveLocation }}'
+      txSourceUrl: '{{ tpl .Values.global.node.networkConfig.p4.ledgerArchiveLocation $ }}'
     - client: '{{ printf "%s:443" .Values.global.node.networkConfig.peers.p5.client.hostname }}'
-      txSourceUrl: '{{ .Values.global.node.networkConfig.p5.ledgerArchiveLocation }}'
+      txSourceUrl: '{{ tpl .Values.global.node.networkConfig.p5.ledgerArchiveLocation $ }}'
 
 consensusNodeConfig1:
   enabled: true
