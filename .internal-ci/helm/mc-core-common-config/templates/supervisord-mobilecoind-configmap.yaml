@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: supervisord-mobilecoind
   labels:
-    {{- include "chart.labels" . | nindent 4 }}
+    {{- include "mcCoreCommonConfig.labels" . | nindent 4 }}
 data:
   mobilecoind.conf: |
     [program:mobilecoind-sync]
