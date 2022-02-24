@@ -163,10 +163,10 @@ then
             ;;
         rancher-delete-pvcs)
             pvcs=$(kubectl get pvc -o=jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}')
-            for p in pvcs
+            for p in $pvcs
             do
                 echo "-- Delete PVC ${p}"
-                kubectl delete pvc ${p} --now --wait --request-timeout=5m --ignore-not-found
+                kubectl delete pvc "${p}" --now --wait --request-timeout=5m --ignore-not-found
             done
             ;;
         rancher-helm-deploy)
@@ -178,8 +178,9 @@ then
             is_set INPUT_CHART_WAIT_TIMEOUT
 
             echo "-- Add chart repo ${INPUT_CHART_REPO}"
-            helm repo add repo "${INPUT_CHART_REPO}"
-            helm repo list
+            repo_name=$(cat /dev/urandom | tr -dc '[:alpha:]' | fold -w ${1:-20} | head -n 1)
+
+            helm repo add "${repo_name}" "${INPUT_CHART_REPO}"
             helm repo update
 
             sets=$(echo -n "${INPUT_CHART_SET}" | tr '\n' ' ')

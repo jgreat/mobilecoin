@@ -84,9 +84,11 @@ jobs:
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
 
   reset-storage:
-    if: github.event.inputs.reset == 'true'
+    if: |
+      always() &&
+      needs.reset.result == 'success'
     needs:
-      - reset
+    - reset
     runs-on: self-hosted
     steps:
     - name: Checkout
