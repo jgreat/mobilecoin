@@ -5,8 +5,8 @@ ARG REPO_ORG=mobilecoin
 FROM ${REPO_ORG}/runtime-base:latest
 
 # Copy binaries
-ARG BIN_PATH=target/release
-COPY ${BIN_PATH}/mc-watcher /usr/bin/
+ARG RUST_BIN_PATH=target/release
+COPY ${RUST_BIN_PATH}/mc-watcher /usr/bin/
 
 # Rust defaults
 ENV RUST_BACKTRACE="1"

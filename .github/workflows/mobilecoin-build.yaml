@@ -49,7 +49,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Cache build binaries
+    - name: Cache rust build binaries
       id: artifact_cache
       uses: actions/cache@v2
       with:
@@ -120,6 +120,38 @@ jobs:
       run: |
         ls -alR build_artifacts
 
+  build-go-projects:
+    runs-on: self-hosted
+    container:
+      image: golang:1.16.4
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Cache go build binaries
+      id: go_artifact_cache
+      uses: actions/cache@v2
+      with:
+        path: |
+          go_build_artifacts
+        # Key is a hash of all the .rs, .proto and Cargo.toml files.
+        # if code changes, invalidate cache and rebuild
+        key: ${{ runner.os }}-go-build-artifacts-${{ hashFiles('go-grpc-gateway/**/*.go', 'go-grpc-gateway/go.*', '**/*.proto') }}
+
+    - name: Add protobuf-compiler
+      if: steps.go_artifact_cache.outputs.cache-hit != 'true'
+      run: |
+        apt update
+        apt install -y protobuf-compiler
+
+    - name: Build go-grpc-gateway
+      if: steps.go_artifact_cache.outputs.cache-hit != 'true'
+      run: |
+        cd go-grpc-gateway
+        ./install_tools.sh
+        ./build.sh
+        cp grpc-proxy ../go_build_artifacts/
+
   create-sample-data:
     runs-on: self-hosted
     needs:
@@ -128,7 +160,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Cache build binaries
+    - name: Cache rust build binaries
       id: artifact_cache
       uses: actions/cache@v2
       with:
@@ -142,7 +174,7 @@ jobs:
       with:
         path: |
           sample_data
-        key: sample-data-build-cargo-hardware-${{ github.sha }}
+        key: sample-data-build-cargo-hardware-${{ github.ref_name }}-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml') }}
 
     - name: Generate version metadata
       id: meta
@@ -171,6 +203,7 @@ jobs:
     runs-on: self-hosted
     needs:
     - create-sample-data
+    - build-go-projects
     strategy:
       matrix:
         image:
@@ -188,13 +221,23 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Cache build binaries
+    - name: Cache rust build binaries
       id: artifact_cache
       uses: actions/cache@v2
       with:
         path: |
           build_artifacts
         key: ${{ runner.os }}-build-cargo-hardware-build-artifacts-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml') }}
+
+    - name: Cache go build binaries
+      id: go_artifact_cache
+      uses: actions/cache@v2
+      with:
+        path: |
+          go_build_artifacts
+        # Key is a hash of all the .rs, .proto and Cargo.toml files.
+        # if code changes, invalidate cache and rebuild
+        key: ${{ runner.os }}-go-build-artifacts-${{ hashFiles('go-grpc-gateway/**/*.go', 'go-grpc-gateway/go.*', '**/*.proto') }}
 
     - name: Cache sample_data
       id: sample_data_cache
@@ -232,7 +275,8 @@ jobs:
       with:
         build-args: |
           REPO_ORG=${{ env.DOCKER_ORG }}
-          BIN_PATH=build_artifacts
+          RUST_BIN_PATH=build_artifacts
+          GO_BIN_PATH=go_build_artifacts
         cache-from: type=gha
         cache-to: type=gha,mode=max
         context: .

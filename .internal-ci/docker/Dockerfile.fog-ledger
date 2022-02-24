@@ -5,13 +5,13 @@ ARG REPO_ORG=mobilecoin
 FROM ${REPO_ORG}/runtime-base:latest
 
 # Copy binaries
-ARG BIN_PATH=target/release
-COPY ${BIN_PATH}/libledger-enclave.signed.so /usr/bin/
-COPY ${BIN_PATH}/ledger_server /usr/bin/
-COPY ${BIN_PATH}/mobilecoind /usr/bin/
-COPY ${BIN_PATH}/mc-admin-http-gateway /usr/bin/
-COPY ${BIN_PATH}/mc-ledger-migration /usr/bin/
-COPY ${BIN_PATH}/mc-util-grpc-admin-tool /usr/bin/
+ARG RUST_BIN_PATH=target/release
+COPY ${RUST_BIN_PATH}/libledger-enclave.signed.so /usr/bin/
+COPY ${RUST_BIN_PATH}/ledger_server /usr/bin/
+COPY ${RUST_BIN_PATH}/mobilecoind /usr/bin/
+COPY ${RUST_BIN_PATH}/mc-admin-http-gateway /usr/bin/
+COPY ${RUST_BIN_PATH}/mc-ledger-migration /usr/bin/
+COPY ${RUST_BIN_PATH}/mc-util-grpc-admin-tool /usr/bin/
 
 # Populate origin data
 ARG ORIGIN_DATA_DIR=sample_data

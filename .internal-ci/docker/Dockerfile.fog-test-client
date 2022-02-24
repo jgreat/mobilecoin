@@ -12,10 +12,10 @@ RUN apt-get update \
   && rm -r /var/lib/apt/lists
 
 # Copy binaries
-ARG BIN_PATH=target/release
-COPY ${BIN_PATH}/test_client /usr/local/bin/
-COPY ${BIN_PATH}/mc-admin-http-gateway /usr/local/bin/
-COPY ${BIN_PATH}/mc-util-grpc-token-generator /usr/local/bin/
+ARG RUST_BIN_PATH=target/release
+COPY ${RUST_BIN_PATH}/test_client /usr/local/bin/
+COPY ${RUST_BIN_PATH}/mc-admin-http-gateway /usr/local/bin/
+COPY ${RUST_BIN_PATH}/mc-util-grpc-token-generator /usr/local/bin/
 
 # Entrypoint
 COPY .internal-ci/docker/entrypoints/fog-test-client.sh /usr/local/bin/entrypoint.sh

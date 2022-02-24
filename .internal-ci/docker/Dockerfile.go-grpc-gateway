@@ -1,15 +1,3 @@
-FROM golang:1.16.4 as builder
-
-RUN  apt update \
-  && apt install -y protobuf-compiler
-
-COPY . /app/
-
-WORKDIR /app/go-grpc-gateway
-
-RUN  ./install_tools.sh \
-  && ./build.sh
-
 # Runtime Image
 FROM ubuntu:focal-20220113
 
@@ -19,7 +7,8 @@ RUN apt-get update \
   && apt-get clean \
   && rm -r /var/lib/apt/lists
 
-COPY --from=builder /app/go-grpc-gateway/grpc-proxy /usr/bin/go-grpc-gateway
+ARG GO_BUILD_PATH=./go-grpc-gateway
+COPY ${GO_BUILD_PATH}/grpc-proxy /usr/bin/go-grpc-gateway
 
 COPY .internal-ci/docker/entrypoints/go-grpc-gateway.sh /usr/bin/entrypoint.sh
 ENTRYPOINT ["/usr/bin/entrypoint.sh"]

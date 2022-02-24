@@ -20,9 +20,9 @@ RUN apt-get update && \
     rm -rf /var/cache/apt && \
     rm -rf /var/lib/apt/lists/*
 
-ARG BIN_PATH=target/release
-COPY ${BIN_PATH}/fog-sql-recovery-db-migrations /usr/local/bin/
-COPY ${BIN_PATH}/generate-sample-ledger /usr/local/bin/
-COPY ${BIN_PATH}/sample-keys /usr/local/bin/
-COPY ${BIN_PATH}/fog-distribution /usr/local/bin/
-COPY ${BIN_PATH}/fog_ingest_client /usr/local/bin/
+ARG RUST_BIN_PATH=target/release
+COPY ${RUST_BIN_PATH}/fog-sql-recovery-db-migrations /usr/local/bin/
+COPY ${RUST_BIN_PATH}/generate-sample-ledger /usr/local/bin/
+COPY ${RUST_BIN_PATH}/sample-keys /usr/local/bin/
+COPY ${RUST_BIN_PATH}/fog-distribution /usr/local/bin/
+COPY ${RUST_BIN_PATH}/fog_ingest_client /usr/local/bin/
