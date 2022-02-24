@@ -157,12 +157,17 @@ then
                 if [ "${r}" == "${INPUT_RELEASE_NAME}" ]
                 then
                     echo "-- Deleting release ${INPUT_RELEASE_NAME}"
-                    helm delete "${INPUT_RELEASE_NAME}" -n "${INPUT_NAMESPACE}"
+                    helm delete "${INPUT_RELEASE_NAME}" -n "${INPUT_NAMESPACE}" --wait --wait-timeout="${INPUT_CHART_WAIT_TIMEOUT}}"
                 fi
             done
             ;;
         rancher-delete-pvcs)
-            echo "delete some pvcs"
+            pvcs=$(kubectl get pvc -o=jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}')
+            for p in pvcs
+            do
+                echo "-- Delete PVC ${p}"
+                kubectl delete pvc ${p} --now --wait --request-timeout=5m --ignore-not-found
+            done
             ;;
         rancher-helm-deploy)
             rancher_get_kubeconfig

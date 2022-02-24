@@ -64,9 +64,30 @@ jobs:
         - consensus-node-3
         - consensus-node-4
         - consensus-node-5
-        # - postgres
+        - fog-recovery-postgresql
         # - fog-ingest-blue
         # - fog-services
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    # We don't want to just delete the namespace on every run we need to preserve letsEncrypt certificates due to rate limits.
+    # We can delete app charts, postgres and dangling PVCs
+    - name: Delete release
+      uses: ./.github/actions/helm
+      with:
+        action: rancher-delete-release
+        namespace: ${{ github.event.inputs.namespace }}
+        release_name: ${{ matrix.chart }}
+        rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
+        rancher_url: ${{ secrets.RANCHER_URL }}
+        rancher_token: ${{ secrets.RANCHER_TOKEN }}
+
+  reset-storage:
+    if: github.event.inputs.reset == 'true'
+    needs:
+      - reset
+    runs-on: self-hosted
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -86,11 +107,11 @@ jobs:
   setup-environment:
     needs:
     - delete
-    - reset
+    - reset-storage
     runs-on: self-hosted
     if: |
       always() &&
-      (needs.reset.result == 'success' || needs.reset.result == 'skipped') &&
+      (needs.reset-storage.result == 'success' || needs.reset-storage.result == 'skipped') &&
       (needs.delete.result == 'success' || needs.delete.result == 'skipped')
     steps:
     - name: Checkout
@@ -154,7 +175,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Deploy Consensus Nodes
+    - name: Deploy Consensus nodes
       uses: ./.github/actions/helm
       with:
         action: rancher-helm-deploy
@@ -181,7 +202,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Deploy Consensus Nodes
+    - name: Deploy PostgreSQL instance
       uses: ./.github/actions/helm
       with:
         action: rancher-helm-deploy
@@ -189,10 +210,10 @@ jobs:
         chart_name: postgresql
         chart_version: 11.1.1
         chart_set: |
-          --set global.postgresql.auth.existingSecret=fog-recover-postgresql
+          --set global.postgresql.auth.existingSecret=fog-recovery-postgresql
           --set global.postgresql.auth.database=fog_recovery
         chart_wait_timeout: 5m
-        release_name: fog-recovery
+        release_name: fog-recovery-postgresql
         namespace: ${{ github.event.inputs.namespace }}
         rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
         rancher_url: ${{ secrets.RANCHER_URL }}
