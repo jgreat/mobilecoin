@@ -4,7 +4,7 @@ apiVersion: v1
 metadata:
   name: fog-recover-postgresql
   labels:
-    {{- include "chart.labels" . | nindent 4 }}
+    {{- include "fogIngestConfig.labels" . | nindent 4 }}
 data:
   postgresql-database: {{ .Values.fogRecoveryDatabase.database | quote }}
   postgresql-hostname: {{ .Values.fogRecoveryDatabase.hostname | quote }}
