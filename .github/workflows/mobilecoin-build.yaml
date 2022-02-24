@@ -150,6 +150,7 @@ jobs:
         cd go-grpc-gateway
         ./install_tools.sh
         ./build.sh
+        mkdir -p ../go_build_artifacts
         cp grpc-proxy ../go_build_artifacts/
 
   create-sample-data:
