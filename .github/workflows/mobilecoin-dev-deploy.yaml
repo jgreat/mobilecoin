@@ -138,6 +138,12 @@ jobs:
   deploy-consensus:
     needs:
     - setup-environment
+    - delete
+    - reset
+    if: |
+      always() &&
+      (needs.reset.result == 'success' || needs.reset.result == 'skipped') &&
+      (needs.delete.result == 'success' || needs.delete.result == 'skipped')
     runs-on: self-hosted
     strategy:
       matrix:
