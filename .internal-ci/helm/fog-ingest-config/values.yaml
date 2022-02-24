@@ -15,7 +15,7 @@ fogRecoveryDatabase:
   #   --
   #   For helm deployed postgres, set configMap.enabled and secret.enabled true
   hostname: fog-recovery-postgresql
-  password: postgres
+  password: ''
   username: postgres
   database: fog_recovery
   port: '5432'

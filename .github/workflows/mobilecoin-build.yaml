@@ -351,5 +351,5 @@ jobs:
             "namespace": "${{ steps.meta.outputs.branch }}",
             "delete": "false",
             "reset": "true",
-            "version": "${{ steps.meta.outputs.tag }}"
+            "version": "0.0.0-release-1-2-0-ci-2.97.sha-5f03abcb"
           }

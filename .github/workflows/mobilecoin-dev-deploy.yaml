@@ -138,8 +138,6 @@ jobs:
   deploy-consensus:
     needs:
     - setup-environment
-    - delete
-    - reset
     if: |
       always() &&
       needs.setup-environment.result == 'success'

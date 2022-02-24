@@ -5,18 +5,17 @@ location=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 # shellcheck disable=SC1091 # Shellcheck doesn't like variable source path.
 . "${location}/source.sh"
 
-# generate postgres password
-postgres_password=$(openssl rand -hex 48)
-
 # generate msg signer keys
 declare -a signer_keys_pub
 declare -a signer_keys_pri
 
-for i in 1 2 3 4 5
+count=1
+while [ ${count} -le 5 ]
 do
   key=$("${location}/generate_msg_signer_keys.sh")
   signer_keys_pub+=("$(echo -n "${key}" | grep public | awk '{print $2}')")
   signer_keys_pri+=("$(echo -n "${key}" | grep private | awk '{print $2}')")
+  count++
 done
 
 mkdir -p .tmp/values
@@ -78,9 +77,5 @@ consensusNodeConfig5:
   node:
     msgSignerKey:
       privateKey: ${signer_keys_pri[4]}
-
-fogIngestConfig:
-  fogRecoveryDatabase:
-    password: ${postgres_password}
 
 EOF

@@ -173,6 +173,7 @@ then
             is_set INPUT_CHART_WAIT_TIMEOUT
 
             echo "-- Add chart repo ${INPUT_CHART_REPO}"
+            helm repo list
             helm repo add repo "${INPUT_CHART_REPO}"
             helm repo update
 
