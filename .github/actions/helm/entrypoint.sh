@@ -181,8 +181,6 @@ then
             is_set INPUT_CHART_WAIT_TIMEOUT
 
             echo "-- Add chart repo ${INPUT_CHART_REPO}"
-            ls -al /dev/urandom
-            
             repo_name=$(dd bs=10 count=1 if=/dev/urandom | base64 | tr -d +/=)
             echo "-- Repo random name ${repo_name}"
             helm repo add "${repo_name}" "${INPUT_CHART_REPO}"
