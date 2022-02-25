@@ -11,4 +11,9 @@ data:
   postgres-port: {{ .Values.fogRecoveryDatabase.port | quote }}
   postgres-ssl-options: {{ .Values.fogRecoveryDatabase.options | quote }}
   postgres-username: {{ .Values.fogRecoveryDatabase.username | quote }}
+  postgresql-database: {{ .Values.fogRecoveryDatabase.database | quote }}
+  postgresql-hostname: {{ .Values.fogRecoveryDatabase.hostname | quote }}
+  postgresql-port: {{ .Values.fogRecoveryDatabase.port | quote }}
+  postgresql-ssl-options: {{ .Values.fogRecoveryDatabase.options | quote }}
+  postgresql-username: {{ .Values.fogRecoveryDatabase.username | quote }}
 {{- end }}
