@@ -181,8 +181,10 @@ then
             is_set INPUT_CHART_WAIT_TIMEOUT
 
             echo "-- Add chart repo ${INPUT_CHART_REPO}"
+            ls -al /dev/urandom
+            
             repo_name=$(cat /dev/urandom | tr -dc '[:alpha:]' | fold -w ${1:-20} | head -n 1)
-
+            echo "-- Repo random name ${repo_name}"
             helm repo add "${repo_name}" "${INPUT_CHART_REPO}"
             helm repo update
 
@@ -191,14 +193,14 @@ then
             if [ -n "${INPUT_CHART_VALUES}" ]
             then
                 echo "-- deploy ${INPUT_CHART_NAME} with values."
-                helm upgrade "${INPUT_RELEASE_NAME}" "repo/${INPUT_CHART_NAME}" \
+                helm upgrade "${INPUT_RELEASE_NAME}" "${repo_name}/${INPUT_CHART_NAME}" \
                 -i --wait --timeout="${INPUT_CHART_WAIT_TIMEOUT}" \
                 -f "${INPUT_CHART_VALUES}" \
                 --namespace "${INPUT_NAMESPACE}" \
                 --version "${INPUT_CHART_VERSION}" ${sets}
             else
                 echo "-- deploy ${INPUT_CHART_NAME}"
-                helm upgrade "${INPUT_RELEASE_NAME}" "repo/${INPUT_CHART_NAME}" \
+                helm upgrade "${INPUT_RELEASE_NAME}" "${repo_name}/${INPUT_CHART_NAME}" \
                 -i --wait --timeout="${INPUT_CHART_WAIT_TIMEOUT}" \
                 --namespace "${INPUT_NAMESPACE}" \
                 --version "${INPUT_CHART_VERSION}" ${sets}
