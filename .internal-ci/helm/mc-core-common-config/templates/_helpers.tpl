@@ -54,7 +54,7 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 mobilecoind quorum value
 */}}
 {{- define "mcCoreCommonConfig.mobilecoindQuorum" -}}
-{ "threshold": {{ .Values.mobilecoind.quorumSetThreshold }}, "members": {{ include "mcCoreCommonConfig.mobilecoindQuorumMembers" . }} }
+{ "threshold": {{ tpl .Values.mobilecoind.quorumSetThreshold . }}, "members": {{ include "mcCoreCommonConfig.mobilecoindQuorumMembers" . }} }
 {{- end }}
 
 {{/*
@@ -63,7 +63,7 @@ Generate mobilecoind quorum value
 {{- define "mcCoreCommonConfig.mobilecoindQuorumMembers" }}
   {{- $members := list }}
   {{- range .Values.mobilecoind.nodes }}
-    {{- $members = append $members (dict "type" "Node" "args" .client) }}
+    {{- $members = append $members (dict "type" "Node" "args" (tpl .client $)) }}
   {{- end }}
   {{- toJson $members }}
 {{- end }}
