@@ -4,14 +4,14 @@ env:
   DOCKER_ORG: jgreat
 
   # Fog authority certificate path
-  FOG_AUTHORITY_ROOT_CA_CERT_PATH: /var/tmp/fog_authority_root_ca_cert.pem
+  FOG_AUTHORITY_ROOT_CA_CERT_PATH: .tmp/fog_authority_root_ca_cert.pem
 
   # Enclave signing cert paths
-  ENCLAVE_SIGNING_KEY_PATH: /var/tmp/enclave_signing.pem
-  CONSENSUS_ENCLAVE_PRIVKEY: /var/tmp/enclave_signing.pem
-  LEDGER_ENCLAVE_PRIVKEY: /var/tmp/enclave_signing.pem
-  VIEW_ENCLAVE_PRIVKEY: /var/tmp/enclave_signing.pem
-  INGEST_ENCLAVE_PRIVKEY: /var/tmp/enclave_signing.pem
+  ENCLAVE_SIGNING_KEY_PATH: .tmp/enclave_signing.pem
+  CONSENSUS_ENCLAVE_PRIVKEY: .tmp/enclave_signing.pem
+  LEDGER_ENCLAVE_PRIVKEY: .tmp/enclave_signing.pem
+  VIEW_ENCLAVE_PRIVKEY: .tmp/enclave_signing.pem
+  INGEST_ENCLAVE_PRIVKEY: .tmp/enclave_signing.pem
   
 
   # CHART_RELEASE_NAME: 
@@ -76,6 +76,7 @@ jobs:
       env:
         ENCLAVE_SIGNING_KEY: ${{ secrets.ENCLAVE_SIGNING_KEY }}
       run: |
+        mkdir -p .tmp
         echo "${ENCLAVE_SIGNING_KEY}" > "${ENCLAVE_SIGNING_KEY_PATH}"
 
     - name: Build Rust
@@ -186,6 +187,7 @@ jobs:
       env:
         FOG_AUTHORITY_ROOT_CA_CERT: ${{ secrets.FOG_AUTHORITY_ROOT_CA_CERT }}
       run: |
+        mkdir -p .tmp
         echo "${FOG_AUTHORITY_ROOT_CA_CERT}" > "${FOG_AUTHORITY_ROOT_CA_CERT_PATH}"
 
     - name: Populate origin data
