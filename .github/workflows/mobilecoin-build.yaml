@@ -325,8 +325,8 @@ jobs:
 
   deploy:
     runs-on: self-hosted
-    # needs:
-    # - charts
+    needs:
+    - charts
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -351,5 +351,5 @@ jobs:
             "namespace": "${{ steps.meta.outputs.branch }}",
             "delete": "false",
             "reset": "true",
-            "version": "${{ steps.meta.outputs.tag }}"
+            "version": "${{ steps.meta.outputs.}}"
           }
