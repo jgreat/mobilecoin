@@ -52,7 +52,7 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 {{- $pgSecret := (lookup "v1" "Secret" .Release.Namespace "fog-recovery-postgresql") }}
 {{- if $pgSecret }}
-{{- $pgPassword = index $pgSecret.data "postgres-password" }}
+{{- $pgPassword = index $pgSecret.data "postgres-password" | b64dec }}
 {{- end }}
 {{- $pgPassword }}
 {{- end }}
@@ -62,7 +62,7 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- $pgReplicationPassword := randAlphaNum 48 }}
 {{- $pgSecret := (lookup "v1" "Secret" .Release.Namespace "fog-recovery-postgresql") }}
 {{- if $pgSecret }}
-{{- $pgReplicationPassword = index $pgSecret.data "replication-password" }}
+{{- $pgReplicationPassword = index $pgSecret.data "replication-password" | b64dec }}
 {{- end }}
 {{- $pgReplicationPassword }}
 {{- end }}
