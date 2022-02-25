@@ -46,10 +46,9 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 
 {{/* pgPassword - reuse existing password */}}
 {{- define "fogIngestConfig.pgPassword" -}}
-{{- if .Values.fogRecoveryDatabase.password }}
-{{- $pgPassword := .Values.fogRecoveryDatabase.password }}
-{{- else }}
 {{- $pgPassword := randAlphaNum 48 }}
+{{- if .Values.fogRecoveryDatabase.password }}
+{{- $pgPassword = .Values.fogRecoveryDatabase.password }}
 {{- end }}
 {{- $pgSecret := (lookup "v1" "Secret" .Release.Namespace "fog-recovery-postgresql") }}
 {{- if $pgSecret }}
