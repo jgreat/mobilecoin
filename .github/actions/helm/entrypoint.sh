@@ -183,7 +183,11 @@ then
             echo "-- Add chart repo ${INPUT_CHART_REPO}"
             ls -al /dev/urandom
             
-            repo_name=$(cat /dev/urandom | tr -dc '[:alpha:]' | fold -w 20 | head -n 1)
+            rand=$(cat /dev/urandom | tr -dc '[:alpha:]')
+            echo "-- rand and tr success"
+            folded=$(echo -n "${rand}" | fold -w 20)
+            echo "-- folded"
+            repo_name=$(echo -n "${folded}" | head -n 1)
             echo "-- Repo random name ${repo_name}"
             helm repo add "${repo_name}" "${INPUT_CHART_REPO}"
             helm repo update
