@@ -14,7 +14,7 @@ env:
   INGEST_ENCLAVE_PRIVKEY: .tmp/enclave_signing.pem
   
 
-  # CHART_RELEASE_NAME: 
+  # CHART_RELEASE_NAME:
   # CHART_PATH: ./chart
 
 
@@ -47,7 +47,7 @@ jobs:
       image: mobilecoin/rust-sgx-base@sha256:efe2873257fa08a8468d704dcd9bc1b6c2e9ce5a08378d57bb1073b2f50416a7
     steps:
     - name: Start with clean workspace
-      run: rm -rf ${{ github.workspace }}
+      run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
 
     - name: Checkout
       uses: actions/checkout@v2
@@ -130,7 +130,7 @@ jobs:
       image: golang:1.16.4
     steps:
     - name: Start with clean workspace
-      run: rm -rf ${{ github.workspace }}
+      run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
 
     - name: Checkout
       uses: actions/checkout@v2
@@ -166,7 +166,7 @@ jobs:
     - build-cargo-hardware
     steps:
     - name: Start with clean workspace
-      run: sudo rm -rf ${{ github.workspace }}
+      run: sudo find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
 
     - name: Checkout
       uses: actions/checkout@v2
@@ -231,7 +231,7 @@ jobs:
         # - fog-test-client
     steps:
     - name: Start with clean workspace
-      run: sudo rm -rf ${{ github.workspace }}
+      run: sudo find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
 
     - name: Checkout
       uses: actions/checkout@v2
@@ -318,7 +318,7 @@ jobs:
         - mc-core-dev-env-setup
     steps:
     - name: Start with clean workspace
-      run: sudo rm -rf ${{ github.workspace }}
+      run: sudo find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
 
     - name: Checkout
       uses: actions/checkout@v2
@@ -346,7 +346,7 @@ jobs:
     - charts
     steps:
     - name: Start with clean workspace
-      run: sudo rm -rf ${{ github.workspace }}
+      run: sudo find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
 
     - name: Checkout
       uses: actions/checkout@v2
