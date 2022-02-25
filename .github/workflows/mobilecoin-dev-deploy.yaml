@@ -103,9 +103,8 @@ jobs:
     - name: Delete release
       uses: ./.github/actions/helm
       with:
-        action: rancher-delete-release
+        action: rancher-delete-pvcs
         namespace: ${{ github.event.inputs.namespace }}
-        release_name: ${{ matrix.chart }}
         rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}

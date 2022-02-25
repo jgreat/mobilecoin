@@ -162,11 +162,14 @@ then
             done
             ;;
         rancher-delete-pvcs)
-            pvcs=$(kubectl get pvc -o=jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}')
+            rancher_get_kubeconfig
+            is_set INPUT_NAMESPACE
+
+            pvcs=$(kubectl get pvc -n "${INPUT_NAMESPACE}" -o=jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}')
             for p in $pvcs
             do
                 echo "-- Delete PVC ${p}"
-                kubectl delete pvc "${p}" --now --wait --request-timeout=5m --ignore-not-found
+                kubectl delete pvc "${p}" -n "${INPUT_NAMESPACE}" --now --wait --request-timeout=5m --ignore-not-found
             done
             ;;
         rancher-helm-deploy)
