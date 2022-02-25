@@ -13,7 +13,7 @@ data:
       --tx-source-url {{ tpl .txSourceUrl $ }}
 {{- end }}
       --poll-interval 1
-      --quorum-set {{ .Values.mobilecoind.threshold }}
+      --quorum-set {{ include "mcCoreCommonConfig.mobilecoindQuorum" . | squote }}
       --ledger-db /fog-data/ledger
       --watcher-db /fog-data/watcher
 

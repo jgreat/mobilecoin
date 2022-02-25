@@ -1,3 +1,5 @@
+
+
 clientAuth:
   token: ''
 
@@ -24,9 +26,9 @@ sentry:
 mobilecoind:
   quorumSetThreshold: 0
   nodes: []
-  #   - peer: 'mc://node1.prod.mobilecoinww.com:443/'
+  #   - client: 'node1.prod.mobilecoinww.com:443'
   #     txSourceUrl: https://ledger.mobilecoinww.com/node1.prod.mobilecoinww.com
-  #   - peer: 'mc://node2.prod.mobilecoinww.com:443/'
+  #   - client: 'node2.prod.mobilecoinww.com:443'
   #     txSourceUrl: https://ledger.mobilecoinww.com/node2.prod.mobilecoinww.com
-  #   - peer: 'mc//:node3.prod.mobilecoinww.com:443/'
+  #   - client: 'node3.prod.mobilecoinww.com:443'
   #     txSourceUrl: https://ledger.mobilecoinww.com/node3.prod.mobilecoinww.com
