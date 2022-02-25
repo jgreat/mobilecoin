@@ -1,16 +1,16 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "chart.fullname" . }}
+  name: {{ include "fogIngest.fullname" . }}
   labels:
     app: fog-ingest
-    {{- include "chart.labels" . | nindent 4 }}
+    {{- include "fogIngest.labels" . | nindent 4 }}
 spec:
   type: ClusterIP
   clusterIP: None
   publishNotReadyAddresses: true
   selector:
-    {{- include "chart.selectorLabels" . | nindent 4 }}
+    {{- include "fogIngest.selectorLabels" . | nindent 4 }}
     app: fog-ingest
   ports:
     - name: ingest

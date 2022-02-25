@@ -18,7 +18,7 @@ Note: generated PersistentVolumeClaims will stick around if the Helm Chart is re
 
 `fog-ingest` is only designed to have one active instance. We should run at-least 2 in order to have a hot standby incase the active instance fails. Scaling the replicas doesn't improve performance.
 
-The peer list generation happens when the chart is generated.  In order to scale the fog-ingest service you should adjust the `fogIngest.replicaCount` value and upgrade the chart.  The peer list is added to the ConfigMap additional pods will be added, but existing pods will not automatically update.  Either destroy and re-create the pods or execute a restart of the fog services with supervisord.
+The peer list generation happens when the chart is generated.  In order to scale the fog-ingest service you should adjust the `fogIngest.replicaCount` value and upgrade the fogIngest.  The peer list is added to the ConfigMap additional pods will be added, but existing pods will not automatically update.  Either destroy and re-create the pods or execute a restart of the fog services with supervisord.
 
 ## Setup
 

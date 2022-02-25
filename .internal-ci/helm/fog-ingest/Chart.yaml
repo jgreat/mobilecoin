@@ -10,3 +10,8 @@ dependencies:
   version: 0.0.0
   condition: mcCoreCommonConfig.enabled
   alias: mcCoreCommonConfig
+- name: fog-ingest-config
+  repository: file://../fog-ingest-config
+  version: 0.0.0
+  condition: fogIngestConfig.enabled
+  alias: fogIngestConfig

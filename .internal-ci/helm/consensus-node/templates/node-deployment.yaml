@@ -41,6 +41,8 @@ spec:
                   values:
                   - consensus-node
               topologyKey: 'kubernetes.io/hostname'
+      tolerations:
+      {{- toYaml .Values.node.tolerations | nindent 6 }}
       imagePullSecrets:
       {{- toYaml .Values.imagePullSecrets | nindent 6 }}
       initContainers:

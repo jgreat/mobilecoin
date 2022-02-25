@@ -5,26 +5,15 @@ fullnameOverride: ''
 imagePullSecrets:
 - name: docker-credentials
 
+# mc-core-common-config child chart configuration.
+# See ../mc-core-common-config for details.
 mcCoreCommonConfig:
   enabled: false
-  # clientAuth:
-  #   token: ''
-  # ias:
-  #   key: ''
-  #   spid: ''
-  # mobileCoinNetwork:
-  #   network: ''
-  #   partner: ''
-  # sentry:
-  #   consensus-sentry-dsn: ''
-  #   ledger-distribution-sentry-dsn: ''
-  #   fog-report-sentry-dsn: ''
-  #   fog-view-sentry-dsn: ''
-  #   fog-ledger-sentry-dsn: ''
-  #   fog-ingest-sentry-dsn: ''
-  # mobilecoind:
-  #   quorumSetThreshold: 0
-  #   nodes: []
+
+# fog-ingest-config child chart configuration.
+# See ../fog-ingest-config for details.
+fogIngestConfig:
+  enabled: false
 
 # Pods share the image tag.
 image:
@@ -55,9 +44,6 @@ fogIngest:
     backtrace: full
     log: info,rustls=warn,hyper=warn,tokio_reactor=warn,mio=warn,want=warn,reqwest=warn,rusoto_core=error,rusoto_signature=error,h2=error,rocket=warn,<unknown>=warn
 
-  ### Ingest public key expiry window (blocks)
-  expiryWindow: 10
-
   podAnnotations:
     fluentbit.io/include: 'true' # collect logs with fluentbit
 
@@ -69,7 +55,6 @@ fogIngest:
       intel.com/sgx: 5000
 
   nodeSelector:
-    builder-node: 'false'
     sgx-enabled-node: 'true'
 
   tolerations:
@@ -78,7 +63,30 @@ fogIngest:
     value: 'true'
     effect: NoSchedule
 
-  affinity: {}
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: app
+              operator: In
+              values:
+              - fog-ingest
+          topologyKey: 'kubernetes.io/hostname'
+
+  initContainers:
+  - name: sysctl
+    image: ubuntu:20.04
+    command:
+    - sysctl
+    - -w
+    - net.ipv4.tcp_retries2=5
+    securityContext:
+      privileged: true
+      runAsUser: 0
+      runAsNonRoot: False
 
 ### Toolbox deployment. Used for activating and retiring.
 toolbox:

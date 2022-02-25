@@ -75,6 +75,12 @@ node:
     requests:
       intel.com/sgx: 5000
 
+  tolerations:
+  - key: sgx
+    operator: Equal
+    value: 'true'
+    effect: NoSchedule
+
   initContainers:
   - name: copy-ledger-from-container
     image: '{{ .Values.node.image.org | default .Values.image.org }}/{{ .Values.node.image.name }}:{{ .Values.image.tag | default .Chart.AppVersion }}'
