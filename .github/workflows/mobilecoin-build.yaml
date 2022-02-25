@@ -212,9 +212,9 @@ jobs:
         image:
         - go-grpc-gateway
         - node_hw
+        - fogingest
         # - mobilecoind
         # - watcher
-        # - fogingest
         # - fogreport
         # - fogview
         # - fog-ledger
@@ -297,7 +297,7 @@ jobs:
       max-parallel: 1
       matrix:
         chart:
-        # - fog-ingest
+        - fog-ingest
         # - fog-services
         - consensus-node
         - consensus-node-config

@@ -54,5 +54,5 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- if $pgSecret }}
 {{- $pgPassword = index $pgSecret.data "postgres-password" }}
 {{- end }}
-{{ $pgPassword }}
+{{- $pgPassword }}
 {{- end }}

@@ -217,8 +217,34 @@ jobs:
         chart_set: |
           --set global.postgresql.auth.existingSecret=fog-recovery-postgresql
           --set global.postgresql.auth.database=fog_recovery
+          --set architecture=replication
         chart_wait_timeout: 5m
         release_name: fog-recovery-postgresql
+        namespace: ${{ github.event.inputs.namespace }}
+        rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
+        rancher_url: ${{ secrets.RANCHER_URL }}
+        rancher_token: ${{ secrets.RANCHER_TOKEN }}
+
+  deploy-fog-ingest:
+    needs:
+    - deploy-postgresql
+    - deploy-consensus
+    runs-on: self-hosted
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Deploy fog-ingest
+      uses: ./.github/actions/helm
+      with:
+        action: rancher-helm-deploy
+        chart_repo: https://s3.us-east-2.amazonaws.com/charts.mobilecoin.com/
+        chart_name: fog-ingest
+        chart_version: ${{ github.event.inputs.version }}
+        chart_wait_timeout: 5m
+        chart_set: |
+          --set image.org=jgreat
+        release_name: fog-ingest-blue
         namespace: ${{ github.event.inputs.namespace }}
         rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
         rancher_url: ${{ secrets.RANCHER_URL }}
