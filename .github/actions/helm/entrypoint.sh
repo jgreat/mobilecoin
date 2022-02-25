@@ -157,7 +157,7 @@ then
                 if [ "${r}" == "${INPUT_RELEASE_NAME}" ]
                 then
                     echo "-- Deleting release ${INPUT_RELEASE_NAME}"
-                    helm delete "${INPUT_RELEASE_NAME}" -n "${INPUT_NAMESPACE}" --wait --timeout="${INPUT_CHART_WAIT_TIMEOUT}}"
+                    helm delete "${INPUT_RELEASE_NAME}" -n "${INPUT_NAMESPACE}" --wait --timeout="${INPUT_CHART_WAIT_TIMEOUT}"
                 fi
             done
             ;;
