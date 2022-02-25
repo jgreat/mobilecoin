@@ -120,6 +120,10 @@ jobs:
     - name: check artifacts
       run: |
         ls -alR build_artifacts
+    
+    - name: Clean up Workspace
+      run: |
+        rm -rf ${{ github.workspace }}
 
   build-go-projects:
     runs-on: self-hosted
@@ -153,6 +157,10 @@ jobs:
         ./build.sh
         mkdir -p ../go_build_artifacts
         cp grpc-proxy ../go_build_artifacts/
+
+    - name: Clean up Workspace
+      run: |
+        rm -rf ${{ github.workspace }}
 
   create-sample-data:
     runs-on: self-hosted
@@ -201,6 +209,10 @@ jobs:
     - name: check sample_data
       run: |
         ls -alR sample_data
+
+    - name: Clean up Workspace
+      run: |
+        rm -rf ${{ github.workspace }}
 
   docker:
     runs-on: self-hosted
@@ -287,6 +299,10 @@ jobs:
         labels: ${{ steps.docker_meta.outputs.labels }}
         push: true
         tags: ${{ steps.docker_meta.outputs.tags }}
+    
+    - name: Clean up Workspace
+      run: |
+        rm -rf ${{ github.workspace }}
 
   charts:
     runs-on: self-hosted
@@ -324,6 +340,10 @@ jobs:
         chart_app_version: ${{ steps.meta.outputs.tag }}
         chart_version: ${{ steps.meta.outputs.tag }}
         chart_path: .internal-ci/helm/${{ matrix.chart }}
+    
+    - name: Clean up Workspace
+      run: |
+        rm -rf ${{ github.workspace }}
 
   deploy:
     runs-on: self-hosted
@@ -355,3 +375,7 @@ jobs:
             "reset": "true",
             "version": "${{ steps.meta.outputs.tag }}"
           }
+    
+    - name: Clean up Workspace
+      run: |
+        rm -rf ${{ github.workspace }}

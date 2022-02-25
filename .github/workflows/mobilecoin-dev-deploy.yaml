@@ -52,6 +52,10 @@ jobs:
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
         # chart_version: ${{ github.events.input.version }}
+    
+    - name: Clean up Workspace
+      run: |
+        rm -rf ${{ github.workspace }}
 
   reset:
     if: github.event.inputs.reset == 'true'
@@ -85,6 +89,10 @@ jobs:
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
 
+    - name: Clean up Workspace
+      run: |
+        rm -rf ${{ github.workspace }}
+
   reset-storage:
     if: success() || failure()
     needs:
@@ -110,6 +118,10 @@ jobs:
         rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
+
+    - name: Clean up Workspace
+      run: |
+        rm -rf ${{ github.workspace }}
 
   setup-environment:
     needs:
@@ -163,6 +175,10 @@ jobs:
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
 
+    - name: Clean up Workspace
+      run: |
+        rm -rf ${{ github.workspace }}
+
   deploy-consensus:
     needs:
     - setup-environment
@@ -198,6 +214,10 @@ jobs:
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
 
+    - name: Clean up Workspace
+      run: |
+        rm -rf ${{ github.workspace }}
+
   deploy-postgresql:
     needs:
     - setup-environment
@@ -227,6 +247,10 @@ jobs:
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
 
+    - name: Clean up Workspace
+      run: |
+        rm -rf ${{ github.workspace }}
+
   deploy-fog-ingest:
     needs:
     - deploy-postgresql
@@ -255,3 +279,7 @@ jobs:
         rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
+
+    - name: Clean up Workspace
+      run: |
+        rm -rf ${{ github.workspace }}
