@@ -24,7 +24,7 @@ sentry:
 #   peer url must have '?responder-id=' query string if 'load balanced'
 #   tx-source-id is the public url for the s3 bucket containing the ledger from the node.
 mobilecoind:
-  quorumSetThreshold: 0
+  threshold: ''
   nodes: []
   #   - client: 'node1.prod.mobilecoinww.com:443'
   #     txSourceUrl: https://ledger.mobilecoinww.com/node1.prod.mobilecoinww.com

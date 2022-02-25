@@ -54,7 +54,7 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 mobilecoind quorum value
 */}}
 {{- define "mcCoreCommonConfig.mobilecoindQuorum" -}}
-{ "threshold": {{ tpl .Values.mobilecoind.quorumSetThreshold . }}, "members": {{ include "mcCoreCommonConfig.mobilecoindQuorumMembers" . }} }
+{ "threshold": {{ tpl .Values.mobilecoind.threshold . }}, "members": {{ include "mcCoreCommonConfig.mobilecoindQuorumMembers" . }} }
 {{- end }}
 
 {{/*
