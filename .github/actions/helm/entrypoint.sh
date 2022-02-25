@@ -36,11 +36,11 @@ rancher_get_kubeconfig()
 
     echo "-- Get kubeconfig for ${INPUT_RANCHER_CLUSTER} ${INPUT_RANCHER_URL}"
     auth_header="Authorization: Bearer ${INPUT_RANCHER_TOKEN}"
-    kubeconfig_url=$(curl -sSLf -H "${auth_header}" "${INPUT_RANCHER_URL}/v3/clusters/?name=${INPUT_RANCHER_CLUSTER}" | jq -r .data[0].actions.generateKubeconfig)
+    kubeconfig_url=$(curl --retry 5 -sSLf -H "${auth_header}" "${INPUT_RANCHER_URL}/v3/clusters/?name=${INPUT_RANCHER_CLUSTER}" | jq -r .data[0].actions.generateKubeconfig)
 
     echo "-- Write kubeconfig to default location"
     mkdir -p ~/.kube
-    curl -sSLf -H "${auth_header}" -X POST "${kubeconfig_url}" | jq -r .config > ~/.kube/config
+    curl --retry 5 -sSLf -H "${auth_header}" -X POST "${kubeconfig_url}" | jq -r .config > ~/.kube/config
 }
 
 echo "Installed Plugins"
@@ -124,19 +124,19 @@ then
             # Add namespace to Default project
             # Get cluster data and resource links
             echo "-- Query Rancher for cluster info"
-            cluster=$(curl -sSLf -H "${auth_header}" "${INPUT_RANCHER_URL}/v3/clusters/?name=${INPUT_RANCHER_CLUSTER}") 
+            cluster=$(curl --retry 5 -sSLf -H "${auth_header}" "${INPUT_RANCHER_URL}/v3/clusters/?name=${INPUT_RANCHER_CLUSTER}") 
 
             namespaces_url=$(echo "${cluster}" | jq -r .data[0].links.namespaces)
             projects_url=$(echo "${cluster}" | jq -r .data[0].links.projects)
 
             # Get Default project id
             echo "-- Query Rancher for Default project id"
-            default_project=$(curl -sSLf -H "${auth_header}" "${projects_url}?name=Default")
+            default_project=$(curl --retry 5 -sSLf -H "${auth_header}" "${projects_url}?name=Default")
             default_project_id=$(echo "${default_project}" | jq -r .data[0].id)
 
             # Add namespace to Default project
             echo "-- Add ${INPUT_NAMESPACE} to Default project ${default_project_id}"
-            curl -sSLf -H "${auth_header}" \
+            curl --retry 5 -sSLf -H "${auth_header}" \
                 -H 'Accept: application/json' \
                 -H 'Content-Type: application/json' \
                 -X POST "${namespaces_url}/${INPUT_NAMESPACE}?action=move" \

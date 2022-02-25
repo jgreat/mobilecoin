@@ -64,6 +64,8 @@ jobs:
         - consensus-node-3
         - consensus-node-4
         - consensus-node-5
+        - fog-ingest-blue
+        - fog-ingest-green
         - fog-recovery-postgresql
         # - fog-ingest-blue
         # - fog-services
