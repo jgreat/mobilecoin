@@ -9,7 +9,7 @@ data:
     [program:fog-ingest]
     environment=MC_SENTRY_DSN="%(ENV_FOG_INGEST_SENTRY_DSN)s"
     command=/usr/bin/fog_ingest_server
-      --pubkey-expiry-window %(FOG_PUBKEY_EXPIRY_WINDOW)s
+      --pubkey-expiry-window %(ENV_FOG_PUBKEY_EXPIRY_WINDOW)s
       --peers {{ include "fogIngest.peerURLs" . }}
       --local-node-id %(ENV_LOCAL_NODE_ID)s
       --ias-spid %(ENV_IAS_SPID)s
