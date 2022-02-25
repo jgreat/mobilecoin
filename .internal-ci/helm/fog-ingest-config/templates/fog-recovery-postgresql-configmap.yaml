@@ -6,9 +6,9 @@ metadata:
   labels:
     {{- include "fogIngestConfig.labels" . | nindent 4 }}
 data:
-  postgresql-database: {{ .Values.fogRecoveryDatabase.database | quote }}
-  postgresql-hostname: {{ .Values.fogRecoveryDatabase.hostname | quote }}
-  postgresql-port: {{ .Values.fogRecoveryDatabase.port | quote }}
-  postgresql-ssl-options: {{ .Values.fogRecoveryDatabase.options | quote }}
-  postgresql-username: {{ .Values.fogRecoveryDatabase.username | quote }}
+  postgres-database: {{ .Values.fogRecoveryDatabase.database | quote }}
+  postgres-hostname: {{ .Values.fogRecoveryDatabase.hostname | quote }}
+  postgres-port: {{ .Values.fogRecoveryDatabase.port | quote }}
+  postgres-ssl-options: {{ .Values.fogRecoveryDatabase.options | quote }}
+  postgres-username: {{ .Values.fogRecoveryDatabase.username | quote }}
 {{- end }}
