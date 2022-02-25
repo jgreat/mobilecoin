@@ -231,6 +231,10 @@ jobs:
     needs:
     - deploy-postgresql
     - deploy-consensus
+    if: |
+      always() &&
+      needs.deploy-postgresql.result == 'success' &&
+      needs.deploy-consensus.result == 'success'
     runs-on: self-hosted
     steps:
     - name: Checkout
