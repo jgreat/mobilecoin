@@ -18,13 +18,12 @@ do
   ((count++))
 done
 
-mkdir -p .tmp/values
-cat << EOF > .tmp/values/mc-core-dev-env-values.yaml
+cat << EOF
 global:
   node:
     ledgerDistribution:
-      awsAccessKeyId: ${LEDGER_AWS_ACCESS_KEY_ID}
-      awsSecretAccessKey: ${LEDGER_AWS_SECRET_ACCESS_KEY}
+      awsAccessKeyId: '${LEDGER_AWS_ACCESS_KEY_ID}'
+      awsSecretAccessKey: '${LEDGER_AWS_SECRET_ACCESS_KEY}'
 
     networkConfig:
       peers:
@@ -41,8 +40,8 @@ global:
 
 mcCoreCommonConfig:
   ias:
-    key: ${IAS_KEY}
-    spid: ${IAS_SPID}
+    key: '${IAS_KEY}'
+    spid: '${IAS_SPID}'
   clientAuth:
     token: '${CLIENT_AUTH_TOKEN}'
   sentry:

@@ -54,7 +54,6 @@ jobs:
         rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
-        # chart_version: ${{ github.events.input.version }}
 
   reset:
     if: github.event.inputs.reset == 'true'
@@ -70,7 +69,6 @@ jobs:
         - fog-ingest-blue
         - fog-ingest-green
         - fog-recovery-postgresql
-        # - fog-ingest-blue
         # - fog-services
     steps:
     - name: Clean up Workspace
@@ -160,7 +158,8 @@ jobs:
         # SENTRY_DSN_FOG_LEDGER:
         # SENTRY_DSN_FOG_INGEST:
       run: |
-        .internal-ci/util/generate_dev_values.sh
+        mkdir -p .tmp/values/
+        .internal-ci/util/generate_dev_values.sh > .tmp/values/mc-core-dev-env-values.yaml
 
     - name: Deploy environment setup
       uses: ./.github/actions/helm
