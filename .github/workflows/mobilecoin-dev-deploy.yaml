@@ -40,6 +40,9 @@ jobs:
     if: github.event.inputs.delete == 'true'
     runs-on: self-hosted
     steps:
+    - name: Start with clean workspace
+      run: sudo rm -rf ${{ github.workspace }}
+
     - name: Checkout
       uses: actions/checkout@v2
 
@@ -52,10 +55,6 @@ jobs:
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
         # chart_version: ${{ github.events.input.version }}
-    
-    - name: Clean up Workspace
-      run: |
-        rm -rf ${{ github.workspace }}
 
   reset:
     if: github.event.inputs.reset == 'true'
@@ -74,6 +73,10 @@ jobs:
         # - fog-ingest-blue
         # - fog-services
     steps:
+    - name: Clean up Workspace
+      run: |
+        rm -rf ${{ github.workspace }}
+
     - name: Checkout
       uses: actions/checkout@v2
 
@@ -89,10 +92,6 @@ jobs:
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
 
-    - name: Clean up Workspace
-      run: |
-        rm -rf ${{ github.workspace }}
-
   reset-storage:
     if: success() || failure()
     needs:
@@ -104,6 +103,9 @@ jobs:
         STATUS: ${{ needs.reset.result }}
       run: |
         if [ "${STATUS}" == "failure" ]; then exit 1; fi
+
+    - name: Start with clean workspace
+      run: sudo rm -rf ${{ github.workspace }}
 
     - name: Checkout
       uses: actions/checkout@v2
@@ -119,10 +121,6 @@ jobs:
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
 
-    - name: Clean up Workspace
-      run: |
-        rm -rf ${{ github.workspace }}
-
   setup-environment:
     needs:
     - delete
@@ -133,6 +131,9 @@ jobs:
       (needs.reset-storage.result == 'success' || needs.reset-storage.result == 'skipped') &&
       (needs.delete.result == 'success' || needs.delete.result == 'skipped')
     steps:
+    - name: Start with clean workspace
+      run: rm -rf ${{ github.workspace }}
+
     - name: Checkout
       uses: actions/checkout@v2
 
@@ -175,10 +176,6 @@ jobs:
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
 
-    - name: Clean up Workspace
-      run: |
-        rm -rf ${{ github.workspace }}
-
   deploy-consensus:
     needs:
     - setup-environment
@@ -195,6 +192,9 @@ jobs:
         - consensus-node-4
         - consensus-node-5
     steps:
+    - name: Start with clean workspace
+      run: sudo rm -rf ${{ github.workspace }}
+
     - name: Checkout
       uses: actions/checkout@v2
 
@@ -214,10 +214,6 @@ jobs:
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
 
-    - name: Clean up Workspace
-      run: |
-        rm -rf ${{ github.workspace }}
-
   deploy-postgresql:
     needs:
     - setup-environment
@@ -226,6 +222,9 @@ jobs:
       needs.setup-environment.result == 'success'
     runs-on: self-hosted
     steps:
+    - name: Start with clean workspace
+      run: sudo rm -rf ${{ github.workspace }}
+
     - name: Checkout
       uses: actions/checkout@v2
 
@@ -247,10 +246,6 @@ jobs:
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
 
-    - name: Clean up Workspace
-      run: |
-        rm -rf ${{ github.workspace }}
-
   deploy-fog-ingest:
     needs:
     - deploy-postgresql
@@ -261,6 +256,9 @@ jobs:
       needs.deploy-consensus.result == 'success'
     runs-on: self-hosted
     steps:
+    - name: Start with clean workspace
+      run: sudo rm -rf ${{ github.workspace }}
+
     - name: Checkout
       uses: actions/checkout@v2
 
@@ -280,6 +278,3 @@ jobs:
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
 
-    - name: Clean up Workspace
-      run: |
-        rm -rf ${{ github.workspace }}

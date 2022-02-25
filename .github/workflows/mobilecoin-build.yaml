@@ -46,6 +46,9 @@ jobs:
     container:
       image: mobilecoin/rust-sgx-base@sha256:efe2873257fa08a8468d704dcd9bc1b6c2e9ce5a08378d57bb1073b2f50416a7
     steps:
+    - name: Start with clean workspace
+      run: rm -rf ${{ github.workspace }}
+
     - name: Checkout
       uses: actions/checkout@v2
 
@@ -120,16 +123,15 @@ jobs:
     - name: check artifacts
       run: |
         ls -alR build_artifacts
-    
-    - name: Clean up Workspace
-      run: |
-        rm -rf ${{ github.workspace }}
 
   build-go-projects:
     runs-on: self-hosted
     container:
       image: golang:1.16.4
     steps:
+    - name: Start with clean workspace
+      run: rm -rf ${{ github.workspace }}
+
     - name: Checkout
       uses: actions/checkout@v2
 
@@ -158,15 +160,14 @@ jobs:
         mkdir -p ../go_build_artifacts
         cp grpc-proxy ../go_build_artifacts/
 
-    - name: Clean up Workspace
-      run: |
-        rm -rf ${{ github.workspace }}
-
   create-sample-data:
     runs-on: self-hosted
     needs:
     - build-cargo-hardware
     steps:
+    - name: Start with clean workspace
+      run: sudo rm -rf ${{ github.workspace }}
+
     - name: Checkout
       uses: actions/checkout@v2
 
@@ -210,10 +211,6 @@ jobs:
       run: |
         ls -alR sample_data
 
-    - name: Clean up Workspace
-      run: |
-        rm -rf ${{ github.workspace }}
-
   docker:
     runs-on: self-hosted
     needs:
@@ -233,6 +230,9 @@ jobs:
         # - fog-ledger
         # - fog-test-client
     steps:
+    - name: Start with clean workspace
+      run: sudo rm -rf ${{ github.workspace }}
+
     - name: Checkout
       uses: actions/checkout@v2
 
@@ -299,10 +299,6 @@ jobs:
         labels: ${{ steps.docker_meta.outputs.labels }}
         push: true
         tags: ${{ steps.docker_meta.outputs.tags }}
-    
-    - name: Clean up Workspace
-      run: |
-        rm -rf ${{ github.workspace }}
 
   charts:
     runs-on: self-hosted
@@ -321,6 +317,9 @@ jobs:
         - mc-core-common-config
         - mc-core-dev-env-setup
     steps:
+    - name: Start with clean workspace
+      run: sudo rm -rf ${{ github.workspace }}
+
     - name: Checkout
       uses: actions/checkout@v2
 
@@ -340,16 +339,15 @@ jobs:
         chart_app_version: ${{ steps.meta.outputs.tag }}
         chart_version: ${{ steps.meta.outputs.tag }}
         chart_path: .internal-ci/helm/${{ matrix.chart }}
-    
-    - name: Clean up Workspace
-      run: |
-        rm -rf ${{ github.workspace }}
 
   deploy:
     runs-on: self-hosted
     needs:
     - charts
     steps:
+    - name: Start with clean workspace
+      run: sudo rm -rf ${{ github.workspace }}
+
     - name: Checkout
       uses: actions/checkout@v2
 
@@ -375,7 +373,3 @@ jobs:
             "reset": "true",
             "version": "${{ steps.meta.outputs.tag }}"
           }
-    
-    - name: Clean up Workspace
-      run: |
-        rm -rf ${{ github.workspace }}
