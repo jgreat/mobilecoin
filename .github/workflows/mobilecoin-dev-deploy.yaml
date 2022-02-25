@@ -84,7 +84,7 @@ jobs:
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
 
   reset-storage:
-    if: success() || failed()
+    if: success() || failure()
     needs:
     - reset
     runs-on: self-hosted
@@ -93,7 +93,7 @@ jobs:
       env:
         STATUS: ${{ needs.reset.result }}
       run: |
-        if [ "${STATUS}" == "failed" ]; then exit 1; fi
+        if [ "${STATUS}" == "failure" ]; then exit 1; fi
 
     - name: Checkout
       uses: actions/checkout@v2
