@@ -233,7 +233,7 @@ then
             for p in "${peers[@]}"
             do
                 command="fog_ingest_client --uri 'insecure-fog-ingest://${p}:3226' get-status 2>/dev/null | jq -r .mode"
-                mode=$(kubectl exec -n "${INPUT_NAMESPACE}" -it "${toolbox}" -- "${command}")
+                mode=$(kubectl exec -n "${INPUT_NAMESPACE}" "${toolbox}" -- /bin/bash -c "${command}")
 
                 if [ "${mode}" == "Active" ]
                 then
@@ -244,7 +244,7 @@ then
 
             echo "-- Activate ingest 0"
             command="fog_ingest_client --uri 'insecure-fog-ingest://${p}:3226' activate 2>/dev/null | jq -r ."
-            kubectl exec -n "${INPUT_NAMESPACE}" -it "${toolbox}" -- "${command}"
+            kubectl exec -n "${INPUT_NAMESPACE}" "${toolbox}" -- /bin/bash -c "${command}"
             ;;
         fog-ingest-retire)
             rancher_get_kubeconfig
@@ -261,13 +261,13 @@ then
             for p in "${peers[@]}"
             do
                 command="fog_ingest_client --uri 'insecure-fog-ingest://${p}:3226' get-status 2>/dev/null | jq -r .mode"
-                mode=$(kubectl exec -n "${INPUT_NAMESPACE}" -it "${toolbox}" -- "${command}")
+                mode=$(kubectl exec -n "${INPUT_NAMESPACE}" "${toolbox}" -- /bin/bash -c "${command}")
 
                 if [ "${mode}" == "Active" ]
                 then
                     echo "-- Retire ingest"
                     command="fog_ingest_client --uri 'insecure-fog-ingest://${p}:3226' retire 2>/dev/null | jq -r ."
-                    kubectl -n "${INPUT_NAMESPACE}" exec -it "${toolbox}" -- "${command}"
+                    kubectl exec -n "${INPUT_NAMESPACE}" "${toolbox}" -- /bin/bash -c "${command}"
                     exit 0
                 fi
             done

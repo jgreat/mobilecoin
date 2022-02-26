@@ -374,3 +374,7 @@ jobs:
             "color": "blue",
             "version": "${{ steps.meta.outputs.tag }}"
           }
+
+# run test
+# deploy green
+# run test
