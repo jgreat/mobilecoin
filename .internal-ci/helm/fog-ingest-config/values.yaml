@@ -14,7 +14,7 @@ fogRecoveryDatabase:
   #   --set global.postgresql.auth.database=fog_recovery \
   #   --
   #   For helm deployed postgres, set configMap.enabled and secret.enabled true
-  hostname: fog-recovery-postgresql
+  hostname: fog-recovery-postgresql-primary
   password: ''
   username: postgres
   database: fog_recovery

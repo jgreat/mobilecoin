@@ -204,6 +204,76 @@ then
                 --version "${INPUT_CHART_VERSION}" ${sets}
             fi
             ;;
+        fog-recovery-migrate)
+            rancher_get_kubeconfig
+            is_set INPUT_NAMESPACE
+            is_set INPUT_INGEST_COLOR
+
+            instance="fog-ingest-${INPUT_INGEST_COLOR}"
+            peers=("${instance}-0.${instance}" "${instance}-1.${instance}")
+
+            echo "-- Get toolbox pod"
+            toolbox=$(kubectl get pods -n "${INPUT_NAMESPACE}" -l "app.kubernetes.io/instance=${instance}" -l app=toolbox -o=name)
+
+            command="fog-sql-recovery-db-migrations"
+            kubectl exec -n "${INPUT_NAMESPACE}" -it "${toolbox}" -- "${command}"
+            ;;
+        fog-ingest-activate)
+            rancher_get_kubeconfig
+            is_set INPUT_NAMESPACE
+            is_set INPUT_INGEST_COLOR
+            
+            instance="fog-ingest-${INPUT_INGEST_COLOR}"
+            peers=("${instance}-0.${instance}" "${instance}-1.${instance}")
+
+            echo "-- Get toolbox pod"
+            toolbox=$(kubectl get pods -n "${INPUT_NAMESPACE}" -l "app.kubernetes.io/instance=${instance}" -l app=toolbox -o=name)
+
+            echo "-- Check for active ingest"
+            for p in "${peers[@]}"
+            do
+                command="fog_ingest_client --uri 'insecure-fog-ingest://${p}:3226' get-status 2>/dev/null | jq -r .mode"
+                mode=$(kubectl exec -n "${INPUT_NAMESPACE}" -it "${toolbox}" -- "${command}")
+
+                if [ "${mode}" == "Active" ]
+                then
+                    echo "-- Active ingest found, no action needed."
+                    exit 0
+                fi
+            done
+
+            echo "-- Activate ingest 0"
+            command="fog_ingest_client --uri 'insecure-fog-ingest://${p}:3226' activate 2>/dev/null | jq -r ."
+            kubectl exec -n "${INPUT_NAMESPACE}" -it "${toolbox}" -- "${command}"
+            ;;
+        fog-ingest-retire)
+            rancher_get_kubeconfig
+            is_set INPUT_NAMESPACE
+            is_set INPUT_INGEST_COLOR
+
+            instance="fog-ingest-${INPUT_INGEST_COLOR}"
+            peers=("${instance}-0.${instance}" "${instance}-1.${instance}")
+
+            echo "-- Get toolbox pod"
+            toolbox=$(kubectl get pods -n "${INPUT_NAMESPACE}" -l "app.kubernetes.io/instance=${instance}" -l app=toolbox -o=name)
+
+            echo "-- Find active ingest"
+            for p in "${peers[@]}"
+            do
+                command="fog_ingest_client --uri 'insecure-fog-ingest://${p}:3226' get-status 2>/dev/null | jq -r .mode"
+                mode=$(kubectl exec -n "${INPUT_NAMESPACE}" -it "${toolbox}" -- "${command}")
+
+                if [ "${mode}" == "Active" ]
+                then
+                    echo "-- Retire ingest"
+                    command="fog_ingest_client --uri 'insecure-fog-ingest://${p}:3226' retire 2>/dev/null | jq -r ."
+                    kubectl -n "${INPUT_NAMESPACE}" exec -it "${toolbox}" -- "${command}"
+                    exit 0
+                fi
+            done
+
+            echo "-- No active ingest found, no action needed"
+            ;;
         *)
             error_exit "Command ${INPUT_ACTION} not recognized"
             ;;
