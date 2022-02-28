@@ -247,6 +247,7 @@ then
 
             if [ -n "${flipside_pods}" ]
             then
+                active_found=""
                 echo "-- Looking for Active flipside ingest"
                 for p in "${flipside_peers[@]}"
                 do
@@ -258,10 +259,16 @@ then
                         echo "-- ${p} Active ingest found, retiring."
                         command="fog_ingest_client --uri 'insecure-fog-ingest://${p}:3226' retire 2>/dev/null | jq -r ."
                         mode=$(kubectl exec -n "${INPUT_NAMESPACE}" "${toolbox}" -- /bin/bash -c "${command}")
+                        active_found="yes"
                     fi
                 done
+
+                if [ -n "${active_found}" ]
+                then
+                    echo "-- No active flipside ingest found."
+                fi
             else
-                echo "-- No Active flipside ingest found"
+                echo "-- No flipside ingest found."
             fi
 
             echo "-- Check Primary for active ingest"

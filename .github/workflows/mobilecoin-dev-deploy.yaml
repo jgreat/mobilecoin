@@ -157,6 +157,8 @@ jobs:
         IAS_SPID: ${{ secrets.IAS_SPID }}
         LEDGER_AWS_ACCESS_KEY_ID: ${{ secrets.LEDGER_AWS_ACCESS_KEY_ID }}
         LEDGER_AWS_SECRET_ACCESS_KEY: ${{ secrets.LEDGER_AWS_SECRET_ACCESS_KEY }}
+        FOG_REPORT_SIGNING_CERT: ${{ secrets.FOG_REPORT_SIGNING_CERT }}
+        FOG_REPORT_SIGNING_CERT_KEY: ${{ secrets.FOG_REPORT_SIGNING_CERT_KEY }}
         # CLIENT_AUTH_TOKEN:
         # SENTRY_DSN_CONSENSUS:
         # SENTRY_DSN_LEDGER_DISTRIBUTION:
@@ -182,7 +184,7 @@ jobs:
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
 
-  deploy-consensus:
+  consensus-deploy:
     needs:
     - setup-environment
     if: |
@@ -220,7 +222,7 @@ jobs:
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
 
-  deploy-postgresql:
+  postgresql-deploy:
     needs:
     - setup-environment
     if: |
@@ -252,14 +254,14 @@ jobs:
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
 
-  deploy-fog-ingest:
+  fog-ingest-deploy:
     needs:
-    - deploy-postgresql
+    - postgresql-deploy
     - deploy-consensus
     if: |
       always() &&
-      needs.deploy-postgresql.result == 'success' &&
-      needs.deploy-consensus.result == 'success'
+      needs.postgresql-deploy.result == 'success' &&
+      needs.consensus-deploy.result == 'success'
     runs-on: self-hosted
     steps:
     - name: Start with clean workspace
@@ -286,10 +288,10 @@ jobs:
 
   fog-recovery-migrate-db:
     needs:
-    - deploy-fog-ingest
+    - fog-ingest-deploy
     if: |
       always() &&
-      needs.deploy-fog-ingest.result == 'success'
+      needs.fog-ingest-deploy.result == 'success'
     runs-on: self-hosted
     steps:
     - name: Start with clean workspace
@@ -322,7 +324,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Run fog-recovery database migrations
+    - name: Activate primary ingest
       uses: ./.github/actions/helm
       with:
         action: fog-ingest-activate
@@ -331,3 +333,33 @@ jobs:
         rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
+
+  # fog-services-deploy:
+  #   needs:
+  #   - fog-recovery-migrate-db
+  #   if: |
+  #     always() &&
+  #     needs.fog-recovery-migrate-db.result == 'success'
+  #   runs-on: self-hosted
+  #   steps:
+  #   - name: Start with clean workspace
+  #     run: sudo find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
+
+  #   - name: Checkout
+  #     uses: actions/checkout@v2
+
+  #   - name: Deploy fog-ingest
+  #     uses: ./.github/actions/helm
+  #     with:
+  #       action: rancher-helm-deploy
+  #       chart_repo: https://s3.us-east-2.amazonaws.com/charts.mobilecoin.com/
+  #       chart_name: fog-services
+  #       chart_version: ${{ github.event.inputs.version }}
+  #       chart_wait_timeout: 5m
+  #       chart_set: |
+  #         --set image.org=jgreat
+  #       release_name: fog-ingest-${{ github.event.inputs.color }}
+  #       namespace: ${{ github.event.inputs.namespace }}
+  #       rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
+  #       rancher_url: ${{ secrets.RANCHER_URL }}
+  #       rancher_token: ${{ secrets.RANCHER_TOKEN }}

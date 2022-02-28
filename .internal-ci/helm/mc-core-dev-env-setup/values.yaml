@@ -118,59 +118,9 @@ fogIngestConfig:
     secret:
       enabled: true
 
-# fogPublicFQDN:
-#   configMap:
-#     external: true
-#     name: fog-public-fqdn
-#   value: ""
-#   # Since you can't put structured data in a config-map entry
-#   # String value, list of SANs one per line
-#   fogReportSANs: ""
-#   # fogReportSANs: |-
-#   #   one.mc.com
-#   #   two.mc.com
-
-# fogReport:
-#   signingCert:
-#     crt: ""
-#     key: ""
-#   configMap:
-#     data:
-#       # https://docs.diesel.rs/diesel/r2d2/struct.Builder.html
-#       POSTGRES_IDLE_TIMEOUT: "60"
-#       POSTGRES_MAX_LIFETIME: "120"
-#       POSTGRES_CONNECTION_TIMEOUT: "5"
-#       POSTGRES_MAX_CONNECTIONS: "3"
-
-# fogView:
-#   configMap:
-#     data:
-#       POSTGRES_IDLE_TIMEOUT: "60"
-#       POSTGRES_MAX_LIFETIME: "120"
-#       POSTGRES_CONNECTION_TIMEOUT: "5"
-#       POSTGRES_MAX_CONNECTIONS: "3"
-
-# fogLedger:
-#   configMap:
-#     data:
-#       POSTGRES_IDLE_TIMEOUT: "60"
-#       POSTGRES_MAX_LIFETIME: "120"
-#       POSTGRES_CONNECTION_TIMEOUT: "5"
-#       POSTGRES_MAX_CONNECTIONS: "3"
-
-# fogIngest:
-#   configMap:
-#     data:
-#       POSTGRES_IDLE_TIMEOUT: "60"
-#       POSTGRES_MAX_LIFETIME: "120"
-#       POSTGRES_CONNECTION_TIMEOUT: "5"
-#       POSTGRES_MAX_CONNECTIONS: "3"
-
-# ### helm install fog-recovery bitnami/postgresql -n <namespace> --set postgresqlDatabase=fog --set auth.existingSecret=fog-recovery-postgresql
-# recoveryDatabase:
-#   hostname: fog-recovery-postgresql
-#   password: postgres
-#   username: postgres
-#   database: fog
-#   port: "5432"
-#   options: "?sslmode=disable"
+fogServicesConfig:
+  enabled: true
+  fogPublicFQDN:
+    domainname: '{{ printf "fog.%s.development.mobilecoin.com" .Release.Namespace }}'
+    fogReportSANs: |-
+      {{ printf "fog-report.%s.development.mobilecoin.com" .Release.Namespace }}
