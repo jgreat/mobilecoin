@@ -42,7 +42,7 @@ inputs:
     description: "helm release name"
     required: false
   namespace:
-    description: "kubernets namespace"
+    description: "kubernetes namespace"
     required: false
   rancher_project:
     description: "rancher project"
@@ -56,6 +56,9 @@ inputs:
     required: false
   rancher_cluster:
     description: "Rancher K8s Cluster"
+    required: false
+  ingest_color:
+    description: "Ingest blue or green"
     required: false
   commands:
     description: "shell commands to run"

@@ -216,20 +216,55 @@ then
             toolbox=$(kubectl get pods -n "${INPUT_NAMESPACE}" -l "app.kubernetes.io/instance=${instance}" -l app=toolbox -o=name)
 
             command="fog-sql-recovery-db-migrations"
-            kubectl exec -n "${INPUT_NAMESPACE}" -it "${toolbox}" -- "${command}"
+            kubectl exec -n "${INPUT_NAMESPACE}" "${toolbox}" -- /bin/bash -c "${command}"
             ;;
         fog-ingest-activate)
             rancher_get_kubeconfig
             is_set INPUT_NAMESPACE
             is_set INPUT_INGEST_COLOR
             
+            if [ "${INPUT_INGEST_COLOR}" == "blue" ]
+            then
+                flipside="green"
+            else
+                flipside="blue"
+            fi
+
             instance="fog-ingest-${INPUT_INGEST_COLOR}"
             peers=("${instance}-0.${instance}" "${instance}-1.${instance}")
+
+            flipside_instance="fog-ingest-${flipside}"
+            flipside_peers=("${flipside_instance}-0.${flipside_instance}" "${flipside_instance}-1.${flipside_instance}")
+
+            echo "-- Primary Peers: ${INPUT_INGEST_COLOR} ${peers[*]}"
+            echo "-- Flipside Peers: ${flipside} ${flipside_peers[*]}"
 
             echo "-- Get toolbox pod"
             toolbox=$(kubectl get pods -n "${INPUT_NAMESPACE}" -l "app.kubernetes.io/instance=${instance}" -l app=toolbox -o=name)
 
-            echo "-- Check for active ingest"
+            echo "-- Check for flipside ingest"
+            flipside_pods=$(kubectl get pods -n "${INPUT_NAMESPACE}" -l "app.kubernetes.io/instance=${flipside_instance}" -l app=fog-ingest -o=name)
+
+            if [ -n "${flipside_pods}" ]
+            then
+                echo "-- Looking for Active flipside ingest"
+                for p in "${flipside_peers[@]}"
+                do
+                    command="fog_ingest_client --uri 'insecure-fog-ingest://${p}:3226' get-status 2>/dev/null | jq -r .mode"
+                    mode=$(kubectl exec -n "${INPUT_NAMESPACE}" "${toolbox}" -- /bin/bash -c "${command}")
+
+                    if [ "${mode}" == "Active" ]
+                    then
+                        echo "-- ${p} Active ingest found, retiring."
+                        command="fog_ingest_client --uri 'insecure-fog-ingest://${p}:3226' retire 2>/dev/null | jq -r ."
+                        mode=$(kubectl exec -n "${INPUT_NAMESPACE}" "${toolbox}" -- /bin/bash -c "${command}")
+                    fi
+                done
+            else
+                echo "-- No Active flipside ingest found"
+            fi
+
+            echo "-- Check Primary for active ingest"
             for p in "${peers[@]}"
             do
                 command="fog_ingest_client --uri 'insecure-fog-ingest://${p}:3226' get-status 2>/dev/null | jq -r .mode"
@@ -242,37 +277,9 @@ then
                 fi
             done
 
-            echo "-- Activate ingest 0"
-            command="fog_ingest_client --uri 'insecure-fog-ingest://${p}:3226' activate 2>/dev/null | jq -r ."
+            echo "-- No Active Primary ingest found. Activating ingest 0."
+            command="fog_ingest_client --uri 'insecure-fog-ingest:${instance}-0.${instance}//:3226' activate 2>/dev/null | jq -r ."
             kubectl exec -n "${INPUT_NAMESPACE}" "${toolbox}" -- /bin/bash -c "${command}"
-            ;;
-        fog-ingest-retire)
-            rancher_get_kubeconfig
-            is_set INPUT_NAMESPACE
-            is_set INPUT_INGEST_COLOR
-
-            instance="fog-ingest-${INPUT_INGEST_COLOR}"
-            peers=("${instance}-0.${instance}" "${instance}-1.${instance}")
-
-            echo "-- Get toolbox pod"
-            toolbox=$(kubectl get pods -n "${INPUT_NAMESPACE}" -l "app.kubernetes.io/instance=${instance}" -l app=toolbox -o=name)
-
-            echo "-- Find active ingest"
-            for p in "${peers[@]}"
-            do
-                command="fog_ingest_client --uri 'insecure-fog-ingest://${p}:3226' get-status 2>/dev/null | jq -r .mode"
-                mode=$(kubectl exec -n "${INPUT_NAMESPACE}" "${toolbox}" -- /bin/bash -c "${command}")
-
-                if [ "${mode}" == "Active" ]
-                then
-                    echo "-- Retire ingest"
-                    command="fog_ingest_client --uri 'insecure-fog-ingest://${p}:3226' retire 2>/dev/null | jq -r ."
-                    kubectl exec -n "${INPUT_NAMESPACE}" "${toolbox}" -- /bin/bash -c "${command}"
-                    exit 0
-                fi
-            done
-
-            echo "-- No active ingest found, no action needed"
             ;;
         *)
             error_exit "Command ${INPUT_ACTION} not recognized"
