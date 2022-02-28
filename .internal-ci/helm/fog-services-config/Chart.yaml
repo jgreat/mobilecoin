@@ -1,6 +1,6 @@
 apiVersion: v2
-name: fog-ingest-config
-description: fog ingest config
+name: fog-services-config
+description: fog services config
 type: application
 version: 0.0.0
 appVersion: 0.0.0
