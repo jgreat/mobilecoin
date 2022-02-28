@@ -334,32 +334,32 @@ jobs:
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
 
-  # fog-services-deploy:
-  #   needs:
-  #   - fog-recovery-migrate-db
-  #   if: |
-  #     always() &&
-  #     needs.fog-recovery-migrate-db.result == 'success'
-  #   runs-on: self-hosted
-  #   steps:
-  #   - name: Start with clean workspace
-  #     run: sudo find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
+  fog-services-deploy:
+    needs:
+    - fog-recovery-migrate-db
+    if: |
+      always() &&
+      needs.fog-recovery-migrate-db.result == 'success'
+    runs-on: self-hosted
+    steps:
+    - name: Start with clean workspace
+      run: sudo find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
 
-  #   - name: Checkout
-  #     uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v2
 
-  #   - name: Deploy fog-ingest
-  #     uses: ./.github/actions/helm
-  #     with:
-  #       action: rancher-helm-deploy
-  #       chart_repo: https://s3.us-east-2.amazonaws.com/charts.mobilecoin.com/
-  #       chart_name: fog-services
-  #       chart_version: ${{ github.event.inputs.version }}
-  #       chart_wait_timeout: 5m
-  #       chart_set: |
-  #         --set image.org=jgreat
-  #       release_name: fog-ingest-${{ github.event.inputs.color }}
-  #       namespace: ${{ github.event.inputs.namespace }}
-  #       rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
-  #       rancher_url: ${{ secrets.RANCHER_URL }}
-  #       rancher_token: ${{ secrets.RANCHER_TOKEN }}
+    - name: Deploy fog-services
+      uses: ./.github/actions/helm
+      with:
+        action: rancher-helm-deploy
+        chart_repo: https://s3.us-east-2.amazonaws.com/charts.mobilecoin.com/
+        chart_name: fog-services
+        chart_version: ${{ github.event.inputs.version }}
+        chart_wait_timeout: 5m
+        chart_set: |
+          --set image.org=jgreat
+        release_name: fog-services
+        namespace: ${{ github.event.inputs.namespace }}
+        rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
+        rancher_url: ${{ secrets.RANCHER_URL }}
+        rancher_token: ${{ secrets.RANCHER_TOKEN }}

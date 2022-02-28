@@ -291,7 +291,7 @@ jobs:
       matrix:
         chart:
         - fog-ingest
-        # - fog-services
+        - fog-services
         - fog-services-config
         - consensus-node
         - consensus-node-config

@@ -1,0 +1,206 @@
+### Chart wide values.
+nameOverride: ''
+fullnameOverride: ''
+
+###  mc-core-common-config child chart configuration.
+#    See ../mc-core-common-config for details.
+mcCoreCommonConfig:
+  enabled: false
+
+### fog-services-config child chart configuration
+#   See ../fog-services-config for details.
+fogServicesConfig:
+  enabled: false
+
+imagePullSecrets:
+- name: docker-credentials
+
+# Pods share the image tag.
+image:
+  org: mobilecoin
+  tag: '' # Overrides the image tag whose default is the chart appVersion.
+
+### Fog Report Service
+fogReport:
+  replicaCount: 2
+  image:
+    org: ''
+    repository: fogreport
+    pullPolicy: Always
+  
+  rust:
+    backtrace: full
+    log: info,rustls=warn,hyper=warn,tokio_reactor=warn,mio=warn,want=warn,reqwest=warn,rusoto_core=error,rusoto_signature=error,h2=error,rocket=warn,<unknown>=warn
+
+  signingCert:
+    secret:
+      external: true
+      name: fog-report-signing-cert
+    crt: ''
+    key: ''
+
+  ingress:
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-production-http
+
+      nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+      nginx.ingress.kubernetes.io/backend-protocol: 'GRPC'
+
+      haproxy.org/server-proto: h2              # Force GRPC/H2 mode
+      haproxy.org/server-ssl: 'false'             # The backend (server) is http
+      haproxy.org/timeout-client: 239s            # 4 min timeout on azure
+      haproxy.org/timeout-server: 239s
+      haproxy.org/timeout-http-keep-alive: 120s
+      haproxy.org/abortonclose: 'true'
+      haproxy.org/backend-config-snippet: |-
+        http-reuse aggressive
+
+  podAnnotations:
+    fluentbit.io/include: 'true' # collect logs with fluentbit
+
+  nodeSelector:
+    builder-node: 'false'
+    sgx-enabled-node: 'false'
+
+  affinity: {}
+  tolerations: []
+  resources: {}
+
+  configMap:
+    external: true
+    name: fog-report
+    data:
+      # https://docs.diesel.rs/diesel/r2d2/struct.Builder.html
+      POSTGRES_IDLE_TIMEOUT: '60'
+      POSTGRES_MAX_LIFETIME: '120'
+      POSTGRES_CONNECTION_TIMEOUT: '5'
+      POSTGRES_MAX_CONNECTIONS: '3'
+
+fogView:
+  replicaCount: 2
+  image:
+    org: ''
+    repository: fogview
+    pullPolicy: Always
+
+  rust:
+    backtrace: full
+    log: info,rustls=warn,hyper=warn,tokio_reactor=warn,mio=warn,want=warn,reqwest=warn,rusoto_core=error,rusoto_signature=error,h2=error,rocket=warn,<unknown>=warn
+
+  ingress:
+    # As string so we can template the cookie salt.
+    annotations: |-
+      cert-manager.io/cluster-issuer: letsencrypt-production-http
+
+      haproxy.org/server-proto: 'h2'              # Force GRPC/H2 mode
+      haproxy.org/server-ssl: 'false'             # The backend (server) is http
+      haproxy.org/timeout-client: 239s            # 4 min timeout on azure
+      haproxy.org/timeout-server: 239s
+      haproxy.org/timeout-http-keep-alive: 120s
+      haproxy.org/abortonclose: 'true'
+      haproxy.org/backend-config-snippet: |-
+        http-reuse aggressive
+        dynamic-cookie-key {{ include fogServices.fogViewCookieSalt . }}
+        cookie VIEW insert indirect nocache dynamic
+
+  podAnnotations:
+    fluentbit.io/include: 'true' # collect logs with fluentbit
+
+  ### Intel SGX extended resources are defined with: https://github.com/sebva/sgx-device-plugin
+  resources:
+    limits:
+      intel.com/sgx: 5000
+    requests:
+      intel.com/sgx: 5000
+
+  nodeSelector:
+    sgx-enabled-node: 'true'
+
+  tolerations:
+  - key: sgx
+    operator: Equal
+    value: 'true'
+    effect: NoSchedule
+
+fogLedger:
+  replicaCount: 2
+  image:
+    org: ''
+    repository: fog-ledger
+    pullPolicy: Always
+
+  rust:
+    backtrace: full
+    log: info,rustls=warn,hyper=warn,tokio_reactor=warn,mio=warn,want=warn,reqwest=warn,rusoto_core=error,rusoto_signature=error,h2=error,rocket=warn,<unknown>=warn
+
+  persistence:
+    enabled: true
+    spec:
+      storageClassName: fast
+      accessModes:
+        - 'ReadWriteOnce'
+      resources:
+        requests:
+          storage: 512Gi
+
+  ingress:
+    # As string so we can template the cookie salt.
+    annotations: |-
+      cert-manager.io/cluster-issuer: letsencrypt-production-http
+
+      haproxy.org/server-proto: 'h2'              # Force GRPC/H2 mode
+      haproxy.org/server-ssl: 'false'             # The backend (server) is http
+      # haproxy.org/cookie-persistence: 'fog-ledger'
+      haproxy.org/timeout-client: 239s            # 4 min timeout on azure
+      haproxy.org/timeout-server: 239s
+      haproxy.org/timeout-http-keep-alive: 120s
+      haproxy.org/abortonclose: 'true'
+      haproxy.org/backend-config-snippet: |-
+        http-reuse aggressive
+        dynamic-cookie-key {{ include fogServices.fogViewCookieSalt . }}
+        cookie 'LEDGER' insert indirect nocache dynamic
+
+  podAnnotations:
+    fluentbit.io/include: 'true' # collect logs with fluentbit
+
+  ### Intel SGX extended resources are defined with: https://github.com/sebva/sgx-device-plugin
+  resources:
+    limits:
+      intel.com/sgx: 5000
+    requests:
+      intel.com/sgx: 5000
+
+  nodeSelector:
+    sgx-enabled-node: 'true'
+
+  tolerations:
+  - key: sgx
+    operator: Equal
+    value: 'true'
+    effect: NoSchedule
+
+grpcGateway:
+  replicas: 2
+  image:
+    org: ''
+    repository: go-grpc-gateway
+    pullPolicy: Always
+  ingress:
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-production-http
+      haproxy.org/server-ssl: 'false'             # The backend (server) is http
+      haproxy.org/timeout-client: 239s            # 4 min timeout on azure
+      haproxy.org/timeout-server: 239s
+      haproxy.org/timeout-http-keep-alive: 120s
+      haproxy.org/abortonclose: 'true'
+      haproxy.org/backend-config-snippet: |-
+        http-reuse aggressive
+      haproxy.org/path-rewrite: '/gw/(.*) /\1'    # Strip the /gw prefix
+  resources: {}
+  tolerations: []
+  affinity: {}
+  nodeSelector: {}
+
+jaegerTracing:
+  enabled: false
+  collector: 'dns:///jaeger-collector:14250'
