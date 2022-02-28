@@ -125,5 +125,4 @@ fogServicesConfig:
       enabled: true
   fogPublicFQDN:
     domainname: '{{ printf "fog.%s.development.mobilecoin.com" .Release.Namespace }}'
-    fogReportSANs: |-
-      {{ printf "fog-report.%s.development.mobilecoin.com" .Release.Namespace }}
+    fogReportSANs: '{{ printf "fog-report.%s.development.mobilecoin.com" .Release.Namespace }}'

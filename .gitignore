@@ -84,3 +84,5 @@ libmobilecoin/rust-bitcode/*
 
 # build automation tmp
 .tmp
+**/charts/*.tgz
+**/Chart.lock
