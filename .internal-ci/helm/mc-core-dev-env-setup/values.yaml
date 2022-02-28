@@ -120,6 +120,9 @@ fogIngestConfig:
 
 fogServicesConfig:
   enabled: true
+  fogRecoveryDatabaseReader:
+    configMap:
+      enabled: true
   fogPublicFQDN:
     domainname: '{{ printf "fog.%s.development.mobilecoin.com" .Release.Namespace }}'
     fogReportSANs: |-

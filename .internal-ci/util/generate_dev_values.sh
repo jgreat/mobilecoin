@@ -80,7 +80,7 @@ consensusNodeConfig5:
 fogServicesConfig:
   fogReport:
     signingCert:
-      key: '${FOG_REPORT_SIGNING_CERT_KEY}'
-      crt: '${FOG_REPORT_SIGNING_CERT}'
+      key: "${FOG_REPORT_SIGNING_CERT_KEY}"
+      crt: "${FOG_REPORT_SIGNING_CERT}"
 
 EOF
