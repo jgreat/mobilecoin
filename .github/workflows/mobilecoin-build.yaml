@@ -354,7 +354,7 @@ jobs:
             "delete": "false",
             "reset": "true",
             "color": "blue",
-            "version": "${{ steps.meta.outputs.tag }"
+            "version": "${{ steps.meta.outputs.tag }}"
           }
 
 # ${{ steps.meta.outputs.tag }}
