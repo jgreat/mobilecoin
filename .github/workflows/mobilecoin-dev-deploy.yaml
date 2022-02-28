@@ -257,7 +257,7 @@ jobs:
   fog-ingest-deploy:
     needs:
     - postgresql-deploy
-    - deploy-consensus
+    - consensus-deploy
     if: |
       always() &&
       needs.postgresql-deploy.result == 'success' &&
