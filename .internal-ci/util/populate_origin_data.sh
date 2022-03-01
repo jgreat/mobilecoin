@@ -6,7 +6,6 @@
 # TODO: Restore ledger/data.mdb for persistent builds.
 
 set -e
-set -x
 
 is_set()
 {
@@ -27,18 +26,19 @@ mkdir -p sample_data/fog_keys
 
 BIN_PATH=${BIN_PATH:-"target/release"}
 REAL_BIN_PATH=$(realpath "${BIN_PATH}")
+REAL_CA_PATH=$(realpath "${FOG_AUTHORITY_ROOT_CA_CERT_PATH}")
 
 pushd sample_data || exit 1
 
 "${REAL_BIN_PATH}/sample-keys" --num 1000 \
     --fog-report-url "${FOG_REPORT_URL}" \
-    --fog-authority-root "${FOG_AUTHORITY_ROOT_CA_CERT_PATH}"
+    --fog-authority-root "${REAL_CA_PATH}"
 
 "${REAL_BIN_PATH}/generate-sample-ledger" --txs 100
 
 "${REAL_BIN_PATH}/sample-keys" --num 500 \
     --fog-report-url "${FOG_REPORT_URL}" \
-    --fog-authority-root "${FOG_AUTHORITY_ROOT_CA_CERT_PATH}" \
+    --fog-authority-root "${REAL_CA_PATH}" \
     --output-dir ./fog_keys
 
 rm -f ./ledger/lock.mdb
