@@ -100,7 +100,7 @@ fogView:
       haproxy.org/abortonclose: 'true'
       haproxy.org/backend-config-snippet: |-
         http-reuse aggressive
-        dynamic-cookie-key {{ include fogServices.fogViewCookieSalt . }}
+        dynamic-cookie-key {{ include "fogServices.fogViewCookieSalt" . }}
         cookie VIEW insert indirect nocache dynamic
 
   podAnnotations:
@@ -157,7 +157,7 @@ fogLedger:
       haproxy.org/abortonclose: 'true'
       haproxy.org/backend-config-snippet: |-
         http-reuse aggressive
-        dynamic-cookie-key {{ include fogServices.fogViewCookieSalt . }}
+        dynamic-cookie-key {{ include "fogServices.fogLedgerCookieSalt" . }}
         cookie 'LEDGER' insert indirect nocache dynamic
 
   podAnnotations:

@@ -1,4 +1,3 @@
-{{- if eq .Values.grpcGateway.enabled true }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -15,4 +14,3 @@ spec:
     - name: gateway
       port: 8000
       targetPort: gateway
-{{- end }}

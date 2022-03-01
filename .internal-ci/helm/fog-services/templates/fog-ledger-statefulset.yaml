@@ -39,6 +39,8 @@ spec:
         envFrom:
         - secretRef:
             name: ias
+        - configMapRef:
+            name: fog-ledger
         env:
         - name: RUST_BACKTRACE
           value: {{ .Values.fogLedger.rust.backtrace | quote }}

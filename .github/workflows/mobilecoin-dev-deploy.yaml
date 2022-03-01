@@ -76,7 +76,7 @@ jobs:
         - fog-ingest-blue
         - fog-ingest-green
         - fog-recovery-postgresql
-        # - fog-services
+        - fog-services
     steps:
     - name: Clean up Workspace
       run: |

@@ -6,7 +6,7 @@ metadata:
     app: fog-view
     {{- include "fogServices.labels" . | nindent 4 }}
   annotations:
-    {{ toYaml .Values.fogView.ingress.annotations | nindent 4 }}
+    {{ toYaml (tpl .Values.fogView.ingress.annotations . | fromYaml)| nindent 4 }}
 spec:
   tls:
   - hosts:

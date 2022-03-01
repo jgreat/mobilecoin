@@ -15,6 +15,6 @@ spec:
   - port: mgmt
     relabelings:
     - targetLabel: network
-      replacement: {{ include "fogServices.mobileCoinNetwork" . }}
+      replacement: {{ include "fogServices.mobileCoinNetwork.network" . }}
     - targetLabel: partner
       replacement: {{ include "fogServices.mobileCoinNetwork.partner" . }}

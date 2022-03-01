@@ -13,5 +13,5 @@ dependencies:
 - name: fog-services-config
   repository: file://../fog-services-config
   version: 0.0.0
-  condition: fogServices.enabled
+  condition: fogServicesConfig.enabled
   alias: fogServicesConfig

@@ -42,6 +42,9 @@ spec:
           containerPort: 3222
         - name: mgmt
           containerPort: 8000
+        envFrom:
+        - configMapRef:
+            name: fog-report
         env:
         - name: "RUST_BACKTRACE"
           value: {{ .Values.fogReport.rust.backtrace | quote }}
@@ -50,7 +53,7 @@ spec:
         - name: "FOG_REPORT_SENTRY_DSN"
           valueFrom:
             configMapKeyRef:
-              name: {{ include "fogServices.sentryConfigMapName" . }}
+              name: sentry
               key: fog-report-sentry-dsn
         # Maps to Sentry Environment
         - name: MC_BRANCH
@@ -60,50 +63,30 @@ spec:
         - name: FOGDB_HOST
           valueFrom:
             configMapKeyRef:
-              name: {{ include "fogServices.recoveryDatabaseConfigMapName" . }}
+              name: fog-recovery-reader-0-postgresql
               key: postgresql-hostname
         - name: FOGDB_USER
           valueFrom:
             configMapKeyRef:
-              name: {{ include "fogServices.recoveryDatabaseConfigMapName" . }}
+              name: fog-recovery-reader-0-postgresql
               key: postgresql-username
         - name: FOGDB_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: {{ include "fogServices.recoveryDatabaseSecretName" . }}
+              name: fog-recovery-postgresql
               key: postgresql-password
         - name: FOGDB_DATABASE
           valueFrom:
             configMapKeyRef:
-              name: {{ include "fogServices.recoveryDatabaseConfigMapName" . }}
+              name: fog-recovery-reader-0-postgresql
               key: postgresql-database
         - name: FOGDB_SSL_OPTIONS
           valueFrom:
             configMapKeyRef:
-              name: {{ include "fogServices.recoveryDatabaseConfigMapName" . }}
+              name: fog-recovery-reader-0-postgresql
               key: postgresql-ssl-options
         - name: DATABASE_URL
           value: "postgres://$(FOGDB_USER):$(FOGDB_PASSWORD)@$(FOGDB_HOST)/$(FOGDB_DATABASE)$(FOGDB_SSL_OPTIONS)"
-        - name: POSTGRES_IDLE_TIMEOUT
-          valueFrom:
-            configMapKeyRef:
-              name: {{ include "fogServices.fogReportConfigMapName" . }}
-              key: POSTGRES_IDLE_TIMEOUT
-        - name: POSTGRES_MAX_LIFETIME
-          valueFrom:
-            configMapKeyRef:
-              name: {{ include "fogServices.fogReportConfigMapName" . }}
-              key: POSTGRES_MAX_LIFETIME
-        - name: POSTGRES_CONNECTION_TIMEOUT
-          valueFrom:
-            configMapKeyRef:
-              name: {{ include "fogServices.fogReportConfigMapName" . }}
-              key: POSTGRES_CONNECTION_TIMEOUT
-        - name: POSTGRES_MAX_CONNECTIONS
-          valueFrom:
-            configMapKeyRef:
-              name: {{ include "fogServices.fogReportConfigMapName" . }}
-              key: POSTGRES_MAX_CONNECTIONS
         volumeMounts:
         - name: supervisor-conf
           mountPath: /etc/supervisor/conf.d

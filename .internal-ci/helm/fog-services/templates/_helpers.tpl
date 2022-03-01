@@ -44,11 +44,11 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 
 {{/* Fog Public FQDN */}}
 {{- define "fogServices.fogPublicFQDN" -}}
-{{- $domainname =: "" }}
+{{- $domainname := "" }}
 {{- if .Values.fogServicesConfig.fogPublicFQDN.domainname }}
 {{- $domainname = .Values.fogServicesConfig.fogPublicFQDN.domainname }}
 {{- end }}
-{{- $publicFQDNConfig =: lookup "v1" "ConfigMap" .Release.Namespace "fog-public-fqdn" }}
+{{- $publicFQDNConfig := lookup "v1" "ConfigMap" .Release.Namespace "fog-public-fqdn" }}
 {{- if $publicFQDNConfig }}
 {{- $domainname = index $publicFQDNConfig.data "domainname" }}
 {{- end }}
@@ -57,18 +57,67 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 
 {{/* FogReport Hosts (fogPublicFQDN + fogReportSANs) */}}
 {{- define "fogServices.fogReportHosts" -}}
-{{- $reportHosts =: list (include fogServices.fogPublicFQDN .) }}
+{{- $reportHosts := list }}
 {{- if .Values.fogServicesConfig.fogPublicFQDN.fogReportSANs }}
-{{- $sans =: split "\n" (.Values.fogServicesConfig.fogPublicFQDN.fogReportSANs) }}
-{{- concat $reportHosts $reportHosts $sans }}
+{{- $reportHosts = split "\n" (.Values.fogServicesConfig.fogPublicFQDN.fogReportSANs) }}
 {{- end }}
-{{- $fogReportSansConfig =: lookup "v1" "ConfigMap" .Release.Namespace "fog-public-fqdn" }}
+{{- $fogReportSansConfig := lookup "v1" "ConfigMap" .Release.Namespace "fog-public-fqdn" }}
 {{- if $fogReportSansConfig }}
-{{- $sans =: index $fogReportSansConfig.data "fogReportSANs" }}
-{{- concat $reportHosts $reportHosts $sans }}
+{{- $reportHosts = split "\n" (index $fogReportSansConfig.data "fogReportSANs") }}
 {{- end }}
+{{ include "fogServices.fogPublicFQDN" . }}
 {{- range $reportHosts }}
-{{- . }}
+{{ . }}
 {{- end }}
 {{- end }}
 
+{{- define "fogServices.clientAuth" -}}
+  {{- if eq .Values.mcCoreCommonConfig.enabled false }}
+    {{- (lookup "v1" "Secret" .Release.Namespace "client-auth-token").data.token | default "" | b64dec }}
+  {{- else }}
+    {{- .Values.mcCoreCommonConfig.clientAuth.token | default ""}}
+  {{- end }}
+{{- end }}
+
+{{/* Mobilecoin Network monitoring labels */}}
+{{- define "fogServices.mobileCoinNetwork.network" -}}
+  {{- if eq .Values.mcCoreCommonConfig.enabled false }}
+    {{- (lookup "v1" "ConfigMap" .Release.Namespace "mobilecoin-network").data.network | default "" }}
+  {{- else }}
+    {{- tpl .Values.mcCoreCommonConfig.mobileCoinNetwork.network . }}
+  {{- end }}
+{{- end }}
+
+{{- define "fogServices.mobileCoinNetwork.partner" -}}
+  {{- if eq .Values.mcCoreCommonConfig.enabled false }}
+    {{- (lookup "v1" "ConfigMap" .Release.Namespace "mobilecoin-network").data.partner | default "" }}
+  {{- else }}
+    {{- tpl .Values.mcCoreCommonConfig.mobileCoinNetwork.partner . }}
+  {{- end }}
+{{- end }}
+
+{{/* fogViewCookieSalt - reuse existing password */}}
+{{- define "fogServices.fogViewCookieSalt" -}}
+{{- $salt := randAlphaNum 8 }}
+{{- if .Values.fogServicesConfig.fogView.cookie.salt }}
+{{- $salt = .Values.fogServicesConfig.fogView.cookie.salt }}
+{{- end }}
+{{- $saltSecret := (lookup "v1" "Secret" .Release.Namespace "fog-view-cookie") }}
+{{- if $saltSecret }}
+{{- $salt = index $saltSecret.data "salt" | b64dec }}
+{{- end }}
+{{- $salt }}
+{{- end }}
+
+{{/* fogLedgerCookieSalt - reuse existing password */}}
+{{- define "fogServices.fogLedgerCookieSalt" -}}
+{{- $salt := randAlphaNum 8 }}
+{{- if .Values.fogServicesConfig.fogLedger.cookie.salt }}
+{{- $salt = .Values.fogServicesConfig.fogLedger.cookie.salt }}
+{{- end }}
+{{- $saltSecret := (lookup "v1" "Secret" .Release.Namespace "fog-ledger-cookie") }}
+{{- if $saltSecret }}
+{{- $salt = index $saltSecret.data "salt" | b64dec }}
+{{- end }}
+{{- $salt }}
+{{- end }}

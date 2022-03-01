@@ -84,7 +84,7 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- if .Values.fogLedger.cookie.salt }}
 {{- $salt = .Values.fogLedger.cookie.salt }}
 {{- end }}
-{{- $saltSecret := (lookup "v1" "Secret" .Release.Namespace "fog-Ledger-cookie") }}
+{{- $saltSecret := (lookup "v1" "Secret" .Release.Namespace "fog-ledger-cookie") }}
 {{- if $saltSecret }}
 {{- $salt = index $saltSecret.data "salt" | b64dec }}
 {{- end }}
