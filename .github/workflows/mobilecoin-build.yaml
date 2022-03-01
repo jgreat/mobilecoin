@@ -208,6 +208,9 @@ jobs:
         mkdir -p .tmp
         echo "${FOG_AUTHORITY_ROOT_CA_CERT}" > "${FOG_AUTHORITY_ROOT_CA_CERT_PATH}"
 
+    - name: check ca cert
+      run: ls -al "${FOG_AUTHORITY_ROOT_CA_CERT_PATH}"
+
     - name: Populate origin data
       if: steps.sample_data_cache.outputs.cache-hit != 'true'
       env:
