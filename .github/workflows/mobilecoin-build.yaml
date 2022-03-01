@@ -358,8 +358,8 @@ jobs:
   #         }
   test-blue:
     runs-on: self-hosted
-    needs:
-    - deploy-blue
+    # needs:
+    # - deploy-blue
     steps:
     - name: Start with clean workspace
       run: sudo find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
