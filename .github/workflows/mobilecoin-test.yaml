@@ -42,7 +42,7 @@ jobs:
       with:
         path: |
           sample_data
-        key: sample-data-build-cargo-hardware-${{ github.ref_name }}-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml') }}
+        key: sample-data-build-cargo-hardware-${{ github.ref_name }}-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml', '**/populate_origin_data.sh') }}
 
     - name: Check cache successful
       env:
@@ -90,7 +90,7 @@ jobs:
       with:
         path: |
           sample_data
-        key: sample-data-build-cargo-hardware-${{ github.ref_name }}-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml') }}
+        key: sample-data-build-cargo-hardware-${{ github.ref_name }}-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml', '**/populate_origin_data.sh') }}
 
     - name: Check cache successful
       env:

@@ -166,7 +166,7 @@ jobs:
       with:
         path: |
           sample_data
-        key: sample-data-build-cargo-hardware-${{ github.ref_name }}-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml') }}
+        key: sample-data-build-cargo-hardware-${{ github.ref_name }}-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml', '**/populate_origin_data.sh') }}
 
     - name: Generate version metadata
       id: meta
@@ -241,7 +241,7 @@ jobs:
       with:
         path: |
           sample_data
-        key: sample-data-build-cargo-hardware-${{ github.ref_name }}-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml') }}
+        key: sample-data-build-cargo-hardware-${{ github.ref_name }}-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml', '**/populate_origin_data.sh') }}
 
     - name: Generate version metadata
       id: meta
@@ -322,10 +322,31 @@ jobs:
         chart_version: ${{ steps.meta.outputs.tag }}
         chart_path: .internal-ci/helm/${{ matrix.chart }}
 
-  deploy-blue:
+  dev-reset:
+    runs-on: self-hosted
+    steps:
+    - name: Start with clean workspace
+      run: sudo find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
+
+    - name: Mobilecoin Development Deploy (Dispatch)
+      uses: aurelien-baudet/workflow-dispatch@v2.1.1
+      with:
+        workflow: mobilecoin-dev-reset
+        token: ${{ secrets.ACTIONS_TOKEN }}
+        wait-for-completion: true
+        wait-for-completion-timeout: 30m
+        wait-for-completion-interval: 30s
+        display-workflow-run-url-interval: 30s
+        inputs: |
+          {
+            "namespace": "${{ steps.meta.outputs.branch }}"
+          }
+
+  blue-deploy:
     runs-on: self-hosted
     needs:
     - charts
+    - dev-reset
     steps:
     - name: Start with clean workspace
       run: sudo find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
@@ -349,17 +370,14 @@ jobs:
         display-workflow-run-url-interval: 30s
         inputs: |
           {
-            "cluster": "use secret",
             "namespace": "${{ steps.meta.outputs.branch }}",
-            "delete": "false",
-            "reset": "true",
-            "color": "blue",
             "version": "${{ steps.meta.outputs.tag }}"
           }
-  test-blue:
+
+  blue-test:
     runs-on: self-hosted
     needs:
-    - deploy-blue
+    - blue-test
     steps:
     - name: Start with clean workspace
       run: sudo find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;

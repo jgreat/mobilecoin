@@ -1,0 +1,73 @@
+name: mobilecoin-dev-reset
+
+on: 
+  workflow_dispatch:
+    inputs:
+      namespace:
+        description: "Target Namespace"
+        type: string
+        required: true
+
+jobs:
+  list-values:
+    runs-on: self-hosted
+    steps:
+    - name: values
+      run: |
+        echo namespace ${{ github.event.inputs.namespace }}
+
+  reset:
+    runs-on: self-hosted
+    strategy:
+      matrix:
+        chart:
+        - consensus-node-1
+        - consensus-node-2
+        - consensus-node-3
+        - consensus-node-4
+        - consensus-node-5
+        - fog-ingest-blue
+        - fog-ingest-green
+        - fog-recovery-postgresql
+        - fog-services
+    steps:
+    - name: Clean up Workspace
+      run: |
+        find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    # We don't want to just delete the namespace on every run we need to preserve letsEncrypt certificates due to rate limits.
+    # We can delete app charts, postgres and dangling PVCs
+    - name: Delete release
+      uses: ./.github/actions/helm
+      with:
+        action: rancher-delete-release
+        namespace: ${{ github.event.inputs.namespace }}
+        release_name: ${{ matrix.chart }}
+        rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
+        rancher_url: ${{ secrets.RANCHER_URL }}
+        rancher_token: ${{ secrets.RANCHER_TOKEN }}
+
+  reset-storage:
+    needs:
+    - reset
+    runs-on: self-hosted
+    steps:
+    - name: Start with clean workspace
+      run: sudo find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    # We don't want to just delete the namespace on every run we need to preserve letsEncrypt certificates due to rate limits.
+    # We can delete app charts, postgres and dangling PVCs
+    - name: Delete PersistentVolumeClaims
+      uses: ./.github/actions/helm
+      with:
+        action: rancher-delete-pvcs
+        namespace: ${{ github.event.inputs.namespace }}
+        rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
+        rancher_url: ${{ secrets.RANCHER_URL }}
+        rancher_token: ${{ secrets.RANCHER_TOKEN }}

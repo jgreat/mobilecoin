@@ -1,12 +1,8 @@
-name: mobilecoin-dev-deploy
+name: mobilecoin-dev-blue-deploy
 
 on: 
   workflow_dispatch:
     inputs:
-      cluster:
-        description: "Target Cluster"
-        type: string
-        required: true
       namespace:
         description: "Target Namespace"
         type: string
@@ -15,21 +11,6 @@ on:
         description: "Chart Version"
         type: string
         required: true
-      color:
-        description: "Ingest Blue/Green"
-        type: choice
-        options:
-        - blue
-        - green
-        required: true
-      delete:
-        description: "Delete target namespace"
-        type: boolean
-        required: false
-      reset:
-        description: "Reset data in target namespace"
-        type: boolean
-        required: false
 
 jobs:
   list-values:
@@ -38,103 +19,10 @@ jobs:
     - name: values
       run: |
         echo namespace ${{ github.event.inputs.namespace }}
-        echo cluster ${{ github.event.inputs.cluster }}
-        echo delete ${{ github.event.inputs.delete }}
         echo version ${{ github.event.inputs.version }}
 
-  delete:
-    # start after a successful build or destroy is checked on a dispatch
-    if: github.event.inputs.delete == 'true'
-    runs-on: self-hosted
-    steps:
-    - name: Start with clean workspace
-      run: sudo find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
-
-    - name: Checkout
-      uses: actions/checkout@v2
-
-    - name: Delete namespace
-      uses: ./.github/actions/helm
-      with:
-        action: rancher-namespace-delete
-        namespace: ${{ github.event.inputs.namespace }}
-        rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
-        rancher_url: ${{ secrets.RANCHER_URL }}
-        rancher_token: ${{ secrets.RANCHER_TOKEN }}
-
-  reset:
-    if: github.event.inputs.reset == 'true'
-    runs-on: self-hosted
-    strategy:
-      matrix:
-        chart:
-        - consensus-node-1
-        - consensus-node-2
-        - consensus-node-3
-        - consensus-node-4
-        - consensus-node-5
-        - fog-ingest-blue
-        - fog-ingest-green
-        - fog-recovery-postgresql
-        - fog-services
-    steps:
-    - name: Clean up Workspace
-      run: |
-        find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
-
-    - name: Checkout
-      uses: actions/checkout@v2
-
-    # We don't want to just delete the namespace on every run we need to preserve letsEncrypt certificates due to rate limits.
-    # We can delete app charts, postgres and dangling PVCs
-    - name: Delete release
-      uses: ./.github/actions/helm
-      with:
-        action: rancher-delete-release
-        namespace: ${{ github.event.inputs.namespace }}
-        release_name: ${{ matrix.chart }}
-        rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
-        rancher_url: ${{ secrets.RANCHER_URL }}
-        rancher_token: ${{ secrets.RANCHER_TOKEN }}
-
-  reset-storage:
-    if: success() || failure()
-    needs:
-    - reset
-    runs-on: self-hosted
-    steps:
-    - name: Error if reset failure
-      env:
-        STATUS: ${{ needs.reset.result }}
-      run: |
-        if [ "${STATUS}" == "failure" ]; then exit 1; fi
-
-    - name: Start with clean workspace
-      run: sudo find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
-
-    - name: Checkout
-      uses: actions/checkout@v2
-
-    # We don't want to just delete the namespace on every run we need to preserve letsEncrypt certificates due to rate limits.
-    # We can delete app charts, postgres and dangling PVCs
-    - name: Delete release
-      uses: ./.github/actions/helm
-      with:
-        action: rancher-delete-pvcs
-        namespace: ${{ github.event.inputs.namespace }}
-        rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
-        rancher_url: ${{ secrets.RANCHER_URL }}
-        rancher_token: ${{ secrets.RANCHER_TOKEN }}
-
   setup-environment:
-    needs:
-    - delete
-    - reset-storage
     runs-on: self-hosted
-    if: |
-      always() &&
-      (needs.reset-storage.result == 'success' || needs.reset-storage.result == 'skipped') &&
-      (needs.delete.result == 'success' || needs.delete.result == 'skipped')
     steps:
     - name: Start with clean workspace
       run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
@@ -187,9 +75,6 @@ jobs:
   consensus-deploy:
     needs:
     - setup-environment
-    if: |
-      always() &&
-      needs.setup-environment.result == 'success'
     runs-on: self-hosted
     strategy:
       matrix:
@@ -225,9 +110,6 @@ jobs:
   postgresql-deploy:
     needs:
     - setup-environment
-    if: |
-      always() &&
-      needs.setup-environment.result == 'success'
     runs-on: self-hosted
     steps:
     - name: Start with clean workspace
@@ -258,10 +140,6 @@ jobs:
     needs:
     - postgresql-deploy
     - consensus-deploy
-    if: |
-      always() &&
-      needs.postgresql-deploy.result == 'success' &&
-      needs.consensus-deploy.result == 'success'
     runs-on: self-hosted
     steps:
     - name: Start with clean workspace
@@ -270,7 +148,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Deploy fog-ingest
+    - name: Deploy fog-ingest-blue
       uses: ./.github/actions/helm
       with:
         action: rancher-helm-deploy
@@ -280,7 +158,7 @@ jobs:
         chart_wait_timeout: 5m
         chart_set: |
           --set image.org=jgreat
-        release_name: fog-ingest-${{ github.event.inputs.color }}
+        release_name: fog-ingest-blue
         namespace: ${{ github.event.inputs.namespace }}
         rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
         rancher_url: ${{ secrets.RANCHER_URL }}
@@ -289,9 +167,6 @@ jobs:
   fog-recovery-migrate-db:
     needs:
     - fog-ingest-deploy
-    if: |
-      always() &&
-      needs.fog-ingest-deploy.result == 'success'
     runs-on: self-hosted
     steps:
     - name: Start with clean workspace
@@ -304,7 +179,7 @@ jobs:
       uses: ./.github/actions/helm
       with:
         action: fog-recovery-migrate
-        ingest_color: ${{ github.event.inputs.color }}
+        ingest_color: blue
         namespace: ${{ github.event.inputs.namespace }}
         rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
         rancher_url: ${{ secrets.RANCHER_URL }}
@@ -313,9 +188,6 @@ jobs:
   fog-ingest-activate:
     needs:
     - fog-recovery-migrate-db
-    if: |
-      always() &&
-      needs.fog-recovery-migrate-db.result == 'success'
     runs-on: self-hosted
     steps:
     - name: Start with clean workspace
@@ -328,7 +200,7 @@ jobs:
       uses: ./.github/actions/helm
       with:
         action: fog-ingest-activate
-        ingest_color: ${{ github.event.inputs.color }}
+        ingest_color: blue
         namespace: ${{ github.event.inputs.namespace }}
         rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
         rancher_url: ${{ secrets.RANCHER_URL }}
@@ -337,9 +209,6 @@ jobs:
   fog-services-deploy:
     needs:
     - fog-recovery-migrate-db
-    if: |
-      always() &&
-      needs.fog-recovery-migrate-db.result == 'success'
     runs-on: self-hosted
     steps:
     - name: Start with clean workspace
