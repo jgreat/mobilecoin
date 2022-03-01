@@ -377,7 +377,7 @@ jobs:
   blue-test:
     runs-on: self-hosted
     needs:
-    - blue-test
+    - blue-deploy
     steps:
     - name: Start with clean workspace
       run: sudo find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
