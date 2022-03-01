@@ -22,6 +22,34 @@ on:
   # pull_request: {}
 
 jobs:
+  dev-reset:
+    runs-on: self-hosted
+    steps:
+    - name: Start with clean workspace
+      run: sudo find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Generate version metadata
+      id: meta
+      run: |
+        .internal-ci/util/metadata.sh
+
+    - name: Mobilecoin Development Deploy (Dispatch)
+      uses: aurelien-baudet/workflow-dispatch@v2.1.1
+      with:
+        workflow: mobilecoin-dev-reset
+        token: ${{ secrets.ACTIONS_TOKEN }}
+        wait-for-completion: true
+        wait-for-completion-timeout: 30m
+        wait-for-completion-interval: 30s
+        display-workflow-run-url-interval: 30s
+        inputs: |
+          {
+            "namespace": "${{ steps.meta.outputs.branch }}"
+          }
+
   build-cargo-hardware:
     runs-on: self-hosted
     container:
@@ -321,34 +349,6 @@ jobs:
         chart_app_version: ${{ steps.meta.outputs.tag }}
         chart_version: ${{ steps.meta.outputs.tag }}
         chart_path: .internal-ci/helm/${{ matrix.chart }}
-
-  dev-reset:
-    runs-on: self-hosted
-    steps:
-    - name: Start with clean workspace
-      run: sudo find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
-
-    - name: Checkout
-      uses: actions/checkout@v2
-
-    - name: Generate version metadata
-      id: meta
-      run: |
-        .internal-ci/util/metadata.sh
-
-    - name: Mobilecoin Development Deploy (Dispatch)
-      uses: aurelien-baudet/workflow-dispatch@v2.1.1
-      with:
-        workflow: mobilecoin-dev-reset
-        token: ${{ secrets.ACTIONS_TOKEN }}
-        wait-for-completion: true
-        wait-for-completion-timeout: 30m
-        wait-for-completion-interval: 30s
-        display-workflow-run-url-interval: 30s
-        inputs: |
-          {
-            "namespace": "${{ steps.meta.outputs.branch }}"
-          }
 
   blue-deploy:
     runs-on: self-hosted

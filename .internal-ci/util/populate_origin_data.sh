@@ -6,15 +6,16 @@
 # TODO: Restore ledger/data.mdb for persistent builds.
 
 set -e
+set -x
 
 is_set()
 {
-  var_name="${1}"
+    var_name="${1}"
 
-  if [ -z "${!var_name}" ]; then
-    echo "${var_name} is not set."
-    exit 1
-  fi
+    if [ -z "${!var_name}" ]; then
+        echo "${var_name} is not set."
+        exit 1
+    fi
 }
 
 is_set FOG_AUTHORITY_ROOT_CA_CERT_PATH
