@@ -285,7 +285,7 @@ then
             done
 
             echo "-- No Active Primary ingest found. Activating ingest 0."
-            command="fog_ingest_client --uri 'insecure-fog-ingest:${instance}-0.${instance}//:3226' activate 2>/dev/null | jq -r ."
+            command="fog_ingest_client --uri 'insecure-fog-ingest://${instance}-0.${instance}:3226' activate"
             kubectl exec -n "${INPUT_NAMESPACE}" "${toolbox}" -- /bin/bash -c "${command}"
             ;;
         *)

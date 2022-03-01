@@ -104,7 +104,7 @@ jobs:
       env:
         NAMESPACE: ${{ github.event.inputs.namespace }}
       run: |
-        ./build_artifacts/fog-distribution \
+        ./build_artifacts/test_client \
           --key-dir ./sample_data/keys \
           --consensus mc://node1.${NAMESPACE}.development.mobilecoin.com/ \
           --consensus mc://node2.${NAMESPACE}.development.mobilecoin.com/ \
