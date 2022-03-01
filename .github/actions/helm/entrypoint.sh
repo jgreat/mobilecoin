@@ -151,7 +151,7 @@ then
             kubectl get ns "${INPUT_NAMESPACE}" || echo_exit "Namespace doesn't exist"
 
             echo "-- Get release list"
-            releases=$(helm list -q -n "${INPUT_NAMESPACE}")
+            releases=$(helm list -a -q -n "${INPUT_NAMESPACE}")
             for r in ${releases}
             do 
                 if [ "${r}" == "${INPUT_RELEASE_NAME}" ]
