@@ -25,7 +25,7 @@ fogReport:
   replicaCount: 2
   image:
     org: ''
-    repository: fogreport
+    name: fogreport
     pullPolicy: Always
   
   rust:
@@ -80,7 +80,7 @@ fogView:
   replicaCount: 2
   image:
     org: ''
-    repository: fogview
+    name: fogview
     pullPolicy: Always
 
   rust:
@@ -126,7 +126,7 @@ fogLedger:
   replicaCount: 2
   image:
     org: ''
-    repository: fog-ledger
+    name: fog-ledger
     pullPolicy: Always
 
   rust:
@@ -183,7 +183,7 @@ grpcGateway:
   replicas: 2
   image:
     org: ''
-    repository: go-grpc-gateway
+    name: go-grpc-gateway
     pullPolicy: Always
   ingress:
     annotations:
