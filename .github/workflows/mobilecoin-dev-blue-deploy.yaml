@@ -235,7 +235,7 @@ jobs:
 
   fog-services-deploy:
     needs:
-    - fog-recovery-migrate-db
+    - fog-ingest-activate
     runs-on: self-hosted
     steps:
     - name: Start with clean workspace

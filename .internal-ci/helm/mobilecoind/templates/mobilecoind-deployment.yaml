@@ -69,4 +69,4 @@ spec:
           - configMap:
               name: {{ include "mobilecoind.fullname" . }}-supervisor-daemon-config
           - configMap:
-              name: supervisor-mobilecoind
+              name: supervisord-mobilecoind
