@@ -30,6 +30,7 @@ jobs:
         - fog-ingest-green
         - fog-recovery-postgresql
         - fog-services
+        - mobilecoind
     steps:
     - name: Clean up Workspace
       run: |

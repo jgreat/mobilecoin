@@ -235,7 +235,7 @@ jobs:
         - fogreport
         - fogview
         - fog-ledger
-        # - mobilecoind
+        - mobilecoind
         # - watcher
         # - fog-test-client
     steps:
@@ -323,7 +323,7 @@ jobs:
         - fog-services-config
         - consensus-node
         - consensus-node-config
-        # - mobilecoind
+        - mobilecoind
         - mc-core-common-config
         - mc-core-dev-env-setup
     steps:

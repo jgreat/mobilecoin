@@ -1,0 +1,4 @@
+fullnameOverride: ''
+
+# Fully qualified domain name for the mobilecoind ingress.
+hostname: ''

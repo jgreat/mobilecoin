@@ -1,0 +1,17 @@
+apiVersion: v2
+name: mobilecoind
+description: MobileCoin mobilecoind service
+type: application
+version: 0.0.0
+appVersion: 0.0.0
+dependencies:
+- name: mc-core-common-config
+  repository: file://../mc-core-common-config
+  version: 0.0.0
+  condition: mcCoreCommonConfig.enabled
+  alias: mcCoreCommonConfig
+- name: mobilecoind-config
+  repository: file://../mobilecoind-config
+  version: 0.0.0
+  condition: mobilecoindConfig.enabled
+  alias: mobilecoindConfig

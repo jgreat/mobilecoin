@@ -45,3 +45,8 @@ dependencies:
   repository: file://../fog-services-config
   version: 0.0.0
   condition: fogServicesConfig.enabled
+- name: mobilecoind-config
+  alias: mobilecoindConfig
+  repository: file://../mobilecoind-config
+  version: 0.0.0
+  condition: mobilecoindConfig.enabled
