@@ -136,6 +136,17 @@ jobs:
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
 
+  mobilecoind-deploy:
+    needs:
+    - setup-environment
+    runs-on: self-hosted
+    steps:
+    - name: Start with clean workspace
+      run: sudo find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
     - name: Deploy Consensus nodes
       uses: ./.github/actions/helm
       with:
@@ -151,17 +162,6 @@ jobs:
         rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
-
-  mobilecoind-deploy:
-    needs:
-    - setup-environment
-    runs-on: self-hosted
-    steps:
-    - name: Start with clean workspace
-      run: sudo find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
-
-    - name: Checkout
-      uses: actions/checkout@v2
 
   fog-ingest-deploy:
     needs:
