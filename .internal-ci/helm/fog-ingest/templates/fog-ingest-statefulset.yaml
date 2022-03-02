@@ -167,7 +167,7 @@ spec:
           - configMap:
               name: {{ include "fogIngest.fullname" . }}-supervisord-daemon
           - configMap:
-              name: supervisord-mobilecoind
+              name: fog-supervisord-mobilecoind
           - configMap:
               name: {{ include "fogIngest.fullname" . }}-supervisord-fog-ingest
           - configMap:

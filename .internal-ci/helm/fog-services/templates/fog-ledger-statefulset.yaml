@@ -131,7 +131,7 @@ spec:
           - configMap:
               name: {{ include "fogServices.fullname" . }}-supervisord-daemon
           - configMap:
-              name: supervisord-mobilecoind
+              name: fog-supervisord-mobilecoind
           - configMap:
               name: {{ include "fogServices.fullname" . }}-supervisord-fog-ledger
           - configMap:
