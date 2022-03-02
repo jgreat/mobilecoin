@@ -105,7 +105,7 @@ jobs:
         NAMESPACE: ${{ github.event.inputs.namespace }}
       run: |
         ./build_artifacts/test_client \
-          --key-dir ./sample_data/keys \
+          --key-dir ./sample_data/fog_keys \
           --consensus mc://node1.${NAMESPACE}.development.mobilecoin.com/ \
           --consensus mc://node2.${NAMESPACE}.development.mobilecoin.com/ \
           --consensus mc://node3.${NAMESPACE}.development.mobilecoin.com/ \
@@ -115,3 +115,39 @@ jobs:
           --transfer-amount 20 \
           --fog-view fog-view://fog.${NAMESPACE}.development.mobilecoin.com:443 \
           --fog-ledger fog-ledger://fog.${NAMESPACE}.development.mobilecoin.com:443
+
+  mobilecoind-integration:
+    runs-on: self-hosted
+    container:
+      image: python:3
+    needs:
+    - distribute-fog-accounts
+    steps:
+    - name: Start with clean workspace
+      run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Cache sample_data
+      if: steps.artifact_cache.outputs.cache-hit == 'true'
+      id: sample_data_cache
+      uses: actions/cache@v2
+      with:
+        path: |
+          sample_data
+        key: sample-data-build-cargo-hardware-${{ github.ref_name }}-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml', '**/populate_origin_data.sh') }}
+
+    - name: Check cache successful
+      env:
+        BIN_CACHE: ${{ steps.artifact_cache.outputs.cache-hit }}
+        SAMPLE_DATA_CACHE: ${{ steps.sample_data.outputs.cache-hit }}
+      run: |
+        if [ "BIN_CACHE" == "false" ]; then echo "Binary cache not found. Start over from build."; exit 1; fi
+        if [ "SAMPLE_DATA_CACHE" == "false" ]; then echo "Sample data cache not found. Start over from build."; exit 1; fi
+
+    - name: Run wallet integration (mobilecoind) tests
+      env:
+        MOBILECOIND_HOST: mobilecoind.${{ github.event.inputs.namespace }}.development.mobilecoin.com
+      run: |
+        .internal-ci/util/mobilecoind_integration_test.sh
