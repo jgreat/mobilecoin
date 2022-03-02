@@ -16,6 +16,7 @@ data:
       --quorum-set {{ include "mcCoreCommonConfig.mobilecoindQuorum" . | squote }}
       --ledger-db /fog-data/ledger
       --watcher-db /fog-data/watcher
+      --listen-uri insecure-mobilecoind://0.0.0.0:3229/
 
     stdout_logfile=/dev/fd/1
     stdout_logfile_maxbytes=0
