@@ -38,14 +38,14 @@ spec:
         livenessProbe:
           exec:
             command:
-            - "/bin/grpc_health_probe"
+            - "/usr/local/bin/grpc_health_probe"
             - "-addr=:3229"
           failureThreshold: 3
           periodSeconds: 30
         readinessProbe:
           exec:
             command:
-            - "/bin/grpc_health_probe"
+            - "/usr/local/bin/grpc_health_probe"
             - "-addr=:3229"
           failureThreshold: 4
           periodSeconds: 30
