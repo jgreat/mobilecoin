@@ -279,8 +279,7 @@ then
 
                 if [ "${mode}" == "Active" ]
                 then
-                    echo "-- Active ingest found, no action needed."
-                    exit 0
+                    echo_exit "-- Active ingest found, no action needed."
                 fi
             done
 
