@@ -136,6 +136,33 @@ jobs:
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
 
+    - name: Deploy Consensus nodes
+      uses: ./.github/actions/helm
+      with:
+        action: rancher-helm-deploy
+        chart_repo: https://s3.us-east-2.amazonaws.com/charts.mobilecoin.com/
+        chart_name: mobilecoind
+        chart_version: ${{ github.event.inputs.version }}
+        chart_set: |
+          --set image.org=jgreat
+        chart_wait_timeout: 5m
+        release_name: mobilecoind
+        namespace: ${{ github.event.inputs.namespace }}
+        rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
+        rancher_url: ${{ secrets.RANCHER_URL }}
+        rancher_token: ${{ secrets.RANCHER_TOKEN }}
+
+  mobilecoind-deploy:
+    needs:
+    - setup-environment
+    runs-on: self-hosted
+    steps:
+    - name: Start with clean workspace
+      run: sudo find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
   fog-ingest-deploy:
     needs:
     - postgresql-deploy
