@@ -138,7 +138,7 @@ jobs:
 
   mobilecoind-deploy:
     needs:
-    - setup-environment
+    - consensus-deploy
     runs-on: self-hosted
     steps:
     - name: Start with clean workspace

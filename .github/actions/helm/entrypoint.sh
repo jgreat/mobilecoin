@@ -38,9 +38,11 @@ rancher_get_kubeconfig()
     auth_header="Authorization: Bearer ${INPUT_RANCHER_TOKEN}"
     kubeconfig_url=$(curl --retry 5 -sSLf -H "${auth_header}" "${INPUT_RANCHER_URL}/v3/clusters/?name=${INPUT_RANCHER_CLUSTER}" | jq -r .data[0].actions.generateKubeconfig)
 
-    echo "-- Write kubeconfig to default location"
-    mkdir -p ~/.kube
-    curl --retry 5 -sSLf -H "${auth_header}" -X POST "${kubeconfig_url}" | jq -r .config > ~/.kube/config
+    echo "-- Write kubeconfig to  location"
+    mkdir -p /opt/.kube
+    export KUBECONFIG="/opt/.kube/config"
+    alias k="kubectl --cache-dir /opt/.kube/cache"
+    curl --retry 5 -sSLf -H "${auth_header}" -X POST "${kubeconfig_url}" | jq -r .config > /opt/.kube/config
 }
 
 echo "Installed Plugins"
@@ -106,7 +108,7 @@ then
             is_set INPUT_NAMESPACE
 
             echo "-- Deleting ${INPUT_NAMESPACE} namespace from ${INPUT_RANCHER_CLUSTER}"
-            kubectl delete ns "${INPUT_NAMESPACE}" --now --wait --request-timeout=5m --ignore-not-found
+            k delete ns "${INPUT_NAMESPACE}" --now --wait --request-timeout=5m --ignore-not-found
             ;;
 
         rancher-namespace-create)
@@ -117,7 +119,7 @@ then
 
             echo "-- Create namespace ${INPUT_NAMESPACE}"
             # Don't sweat it if the namespace already exists.
-            kubectl create ns "${INPUT_NAMESPACE}" || echo "Namespace already exists"
+            k create ns "${INPUT_NAMESPACE}" || echo "Namespace already exists"
 
             auth_header="Authorization: Bearer ${INPUT_RANCHER_TOKEN}"
 
@@ -148,7 +150,7 @@ then
             is_set INPUT_NAMESPACE
             is_set INPUT_RELEASE_NAME
 
-            kubectl get ns "${INPUT_NAMESPACE}" || echo_exit "Namespace doesn't exist"
+            k get ns "${INPUT_NAMESPACE}" || echo_exit "Namespace doesn't exist"
 
             echo "-- Get release list"
             releases=$(helm list -a -q -n "${INPUT_NAMESPACE}")
@@ -165,11 +167,11 @@ then
             rancher_get_kubeconfig
             is_set INPUT_NAMESPACE
 
-            pvcs=$(kubectl get pvc -n "${INPUT_NAMESPACE}" -o=jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}')
+            pvcs=$(k get pvc -n "${INPUT_NAMESPACE}" -o=jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}')
             for p in $pvcs
             do
                 echo "-- Delete PVC ${p}"
-                kubectl delete pvc "${p}" -n "${INPUT_NAMESPACE}" --now --wait --request-timeout=5m --ignore-not-found
+                k delete pvc "${p}" -n "${INPUT_NAMESPACE}" --now --wait --request-timeout=5m --ignore-not-found
             done
             ;;
         rancher-helm-deploy)
@@ -213,10 +215,10 @@ then
             peers=("${instance}-0.${instance}" "${instance}-1.${instance}")
 
             echo "-- Get toolbox pod"
-            toolbox=$(kubectl get pods -n "${INPUT_NAMESPACE}" -l "app.kubernetes.io/instance=${instance}" -l app=toolbox -o=name)
+            toolbox=$(k get pods -n "${INPUT_NAMESPACE}" -l "app.kubernetes.io/instance=${instance}" -l app=toolbox -o=name)
 
             command="fog-sql-recovery-db-migrations"
-            kubectl exec -n "${INPUT_NAMESPACE}" "${toolbox}" -- /bin/bash -c "${command}"
+            k exec -n "${INPUT_NAMESPACE}" "${toolbox}" -- /bin/bash -c "${command}"
             ;;
         fog-ingest-activate)
             rancher_get_kubeconfig
@@ -240,10 +242,10 @@ then
             echo "-- Flipside Peers: ${flipside} ${flipside_peers[*]}"
 
             echo "-- Get toolbox pod"
-            toolbox=$(kubectl get pods -n "${INPUT_NAMESPACE}" -l "app.kubernetes.io/instance=${instance}" -l app=toolbox -o=name)
+            toolbox=$(k get pods -n "${INPUT_NAMESPACE}" -l "app.kubernetes.io/instance=${instance}" -l app=toolbox -o=name)
 
             echo "-- Check for flipside ingest"
-            flipside_pods=$(kubectl get pods -n "${INPUT_NAMESPACE}" -l "app.kubernetes.io/instance=${flipside_instance}" -l app=fog-ingest -o=name)
+            flipside_pods=$(k get pods -n "${INPUT_NAMESPACE}" -l "app.kubernetes.io/instance=${flipside_instance}" -l app=fog-ingest -o=name)
 
             if [ -n "${flipside_pods}" ]
             then
@@ -252,13 +254,13 @@ then
                 for p in "${flipside_peers[@]}"
                 do
                     command="fog_ingest_client --uri 'insecure-fog-ingest://${p}:3226' get-status 2>/dev/null | jq -r .mode"
-                    mode=$(kubectl exec -n "${INPUT_NAMESPACE}" "${toolbox}" -- /bin/bash -c "${command}")
+                    mode=$(k exec -n "${INPUT_NAMESPACE}" "${toolbox}" -- /bin/bash -c "${command}")
 
                     if [ "${mode}" == "Active" ]
                     then
                         echo "-- ${p} Active ingest found, retiring."
                         command="fog_ingest_client --uri 'insecure-fog-ingest://${p}:3226' retire 2>/dev/null | jq -r ."
-                        mode=$(kubectl exec -n "${INPUT_NAMESPACE}" "${toolbox}" -- /bin/bash -c "${command}")
+                        mode=$(k exec -n "${INPUT_NAMESPACE}" "${toolbox}" -- /bin/bash -c "${command}")
                         active_found="yes"
                     fi
                 done
@@ -275,7 +277,7 @@ then
             for p in "${peers[@]}"
             do
                 command="fog_ingest_client --uri 'insecure-fog-ingest://${p}:3226' get-status 2>/dev/null | jq -r .mode"
-                mode=$(kubectl exec -n "${INPUT_NAMESPACE}" "${toolbox}" -- /bin/bash -c "${command}")
+                mode=$(k exec -n "${INPUT_NAMESPACE}" "${toolbox}" -- /bin/bash -c "${command}")
 
                 if [ "${mode}" == "Active" ]
                 then
@@ -285,7 +287,7 @@ then
 
             echo "-- No Active Primary ingest found. Activating ingest 0."
             command="fog_ingest_client --uri 'insecure-fog-ingest://${instance}-0.${instance}:3226' activate"
-            kubectl exec -n "${INPUT_NAMESPACE}" "${toolbox}" -- /bin/bash -c "${command}"
+            k exec -n "${INPUT_NAMESPACE}" "${toolbox}" -- /bin/bash -c "${command}"
             ;;
         *)
             error_exit "Command ${INPUT_ACTION} not recognized"

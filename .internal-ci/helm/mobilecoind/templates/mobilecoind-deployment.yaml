@@ -55,13 +55,13 @@ spec:
         - name: "RUST_LOG"
           value: "info,rustls=warn,hyper=warn,tokio_reactor=warn,mio=warn,want=warn,reqwest=warn,rusoto_core=error,rusoto_signature=error,h2=error,rocket=warn,<unknown>=warn"
         volumeMounts:
-        - name: mobilecoind-data
-          mountPath: /mobilecoin
+        - name: data
+          mountPath: /data
         - name: supervisor-conf
           mountPath: /etc/supervisor/conf.d
           readOnly: true
       volumes:
-      - name: mobilecoind-data
+      - name: data
         emptyDir: {}
       - name: supervisor-conf
         projected:
@@ -69,4 +69,4 @@ spec:
           - configMap:
               name: {{ include "mobilecoind.fullname" . }}-supervisor-daemon-config
           - configMap:
-              name: supervisord-mobilecoind
+              name: mobilecoind-supervisord-mobilecoind
