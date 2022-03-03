@@ -4,6 +4,8 @@ set -e
 
 mkdir -p .tmp/strategies/keys
 
+ls -al sample_data/keys/
+
 for i in {0..4}
 do
     cp "sample_data/keys/*_${i}.*" .tmp/strategies/keys
