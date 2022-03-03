@@ -5,6 +5,8 @@ set -o pipefail
 shopt -s expand_aliases
 
 export KUBECONFIG="/opt/.kube/config"
+mkdir -p /opt/.kube/cache
+touch "${KUBECONFIG}"
 alias k="kubectl --cache-dir /opt/.kube/cache"
 
 error_exit()
@@ -43,12 +45,9 @@ rancher_get_kubeconfig()
     kubeconfig_url=$(curl --retry 5 -sSLf -H "${auth_header}" "${INPUT_RANCHER_URL}/v3/clusters/?name=${INPUT_RANCHER_CLUSTER}" | jq -r .data[0].actions.generateKubeconfig)
 
     echo "-- Write kubeconfig"
-    mkdir -p /opt/.kube/cache
-    curl --retry 5 -sSLf -H "${auth_header}" -X POST "${kubeconfig_url}" | jq -r .config > /opt/.kube/config
+    curl --retry 5 -sSLf -H "${auth_header}" -X POST "${kubeconfig_url}" | jq -r .config > "${KUBECONFIG}"
+    chmod 600 "${KUBECONFIG}"
 }
-
-echo "Installed Plugins"
-helm plugin list
 
 if [ -n "${INPUT_ACTION}" ]
 then

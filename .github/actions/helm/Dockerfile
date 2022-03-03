@@ -1,4 +1,4 @@
-FROM alpine/helm:latest
+FROM alpine/helm:3.8.0
 
 ENV HELM_CONFIG_HOME=/opt/helm
 ENV HELM_REGISTRY_CONFIG=/opt/helm/registry.json
