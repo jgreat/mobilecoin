@@ -22,298 +22,298 @@ on:
   # pull_request: {}
 
 jobs:
-  dev-reset:
-    runs-on: self-hosted
-    steps:
-    - name: Start with clean workspace
-      run: sudo find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
+  # dev-reset:
+  #   runs-on: self-hosted
+  #   steps:
+  #   - name: Start with clean workspace
+  #     run: sudo find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
 
-    - name: Checkout
-      uses: actions/checkout@v2
+  #   - name: Checkout
+  #     uses: actions/checkout@v2
 
-    - name: Generate version metadata
-      id: meta
-      run: |
-        .internal-ci/util/metadata.sh
+  #   - name: Generate version metadata
+  #     id: meta
+  #     run: |
+  #       .internal-ci/util/metadata.sh
 
-    - name: Mobilecoin Development Deploy (Dispatch)
-      uses: aurelien-baudet/workflow-dispatch@v2.1.1
-      with:
-        workflow: mobilecoin-dev-reset
-        token: ${{ secrets.ACTIONS_TOKEN }}
-        wait-for-completion: true
-        wait-for-completion-timeout: 10m
-        wait-for-completion-interval: 10s
-        display-workflow-run-url-interval: 10s
-        inputs: |
-          {
-            "namespace": "${{ steps.meta.outputs.branch }}"
-          }
+  #   - name: Mobilecoin Development Deploy (Dispatch)
+  #     uses: aurelien-baudet/workflow-dispatch@v2.1.1
+  #     with:
+  #       workflow: mobilecoin-dev-reset
+  #       token: ${{ secrets.ACTIONS_TOKEN }}
+  #       wait-for-completion: true
+  #       wait-for-completion-timeout: 10m
+  #       wait-for-completion-interval: 10s
+  #       display-workflow-run-url-interval: 10s
+  #       inputs: |
+  #         {
+  #           "namespace": "${{ steps.meta.outputs.branch }}"
+  #         }
 
-  build-cargo-hardware:
-    runs-on: self-hosted
-    container:
-      image: mobilecoin/rust-sgx-base@sha256:efe2873257fa08a8468d704dcd9bc1b6c2e9ce5a08378d57bb1073b2f50416a7
-    steps:
-    - name: Start with clean workspace
-      run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
+  # build-cargo-hardware:
+  #   runs-on: self-hosted
+  #   container:
+  #     image: mobilecoin/rust-sgx-base@sha256:efe2873257fa08a8468d704dcd9bc1b6c2e9ce5a08378d57bb1073b2f50416a7
+  #   steps:
+  #   - name: Start with clean workspace
+  #     run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
 
-    - name: Checkout
-      uses: actions/checkout@v2
+  #   - name: Checkout
+  #     uses: actions/checkout@v2
 
-    - name: Cache rust build binaries
-      id: artifact_cache
-      uses: actions/cache@v2
-      with:
-        path: |
-          build_artifacts
-        # Key is a hash of all the .rs, .proto and Cargo.toml files.
-        # if code changes, invalidate cache and rebuild
-        key: ${{ runner.os }}-build-cargo-hardware-build-artifacts-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml') }}
+  #   - name: Cache rust build binaries
+  #     id: artifact_cache
+  #     uses: actions/cache@v2
+  #     with:
+  #       path: |
+  #         build_artifacts
+  #       # Key is a hash of all the .rs, .proto and Cargo.toml files.
+  #       # if code changes, invalidate cache and rebuild
+  #       key: ${{ runner.os }}-build-cargo-hardware-build-artifacts-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml') }}
 
-    - name: Cache cargo packages
-      # We don't need cargo packages if we already have binaries.
-      if: steps.artifact_cache.outputs.cache-hit != 'true'
-      uses: actions/cache@v2
-      with:
-        # rust-sgx-base changes RUSTUP_HOME and CARGO_HOME to workaround GHA overriding HOME
-        # Key is a hash of all the Cargo.lock files. If lock files change, invalidate cache so build pulls fresh packages.
-        path: |
-          /opt/cargo/git
-          /opt/cargo/registry/index
-          /opt/cargo/registry/cache
-        key: ${{ runner.os }}-build-cargo-hardware-cargo-${{ hashFiles('**/Cargo.lock') }}
+  #   - name: Cache cargo packages
+  #     # We don't need cargo packages if we already have binaries.
+  #     if: steps.artifact_cache.outputs.cache-hit != 'true'
+  #     uses: actions/cache@v2
+  #     with:
+  #       # rust-sgx-base changes RUSTUP_HOME and CARGO_HOME to workaround GHA overriding HOME
+  #       # Key is a hash of all the Cargo.lock files. If lock files change, invalidate cache so build pulls fresh packages.
+  #       path: |
+  #         /opt/cargo/git
+  #         /opt/cargo/registry/index
+  #         /opt/cargo/registry/cache
+  #       key: ${{ runner.os }}-build-cargo-hardware-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-    - name: Write environment values
-      env:
-        ENCLAVE_SIGNING_KEY: ${{ secrets.ENCLAVE_SIGNING_KEY }}
-      run: |
-        mkdir -p .tmp
-        echo "${ENCLAVE_SIGNING_KEY}" > "${ENCLAVE_SIGNING_KEY_PATH}"
+  #   - name: Write environment values
+  #     env:
+  #       ENCLAVE_SIGNING_KEY: ${{ secrets.ENCLAVE_SIGNING_KEY }}
+  #     run: |
+  #       mkdir -p .tmp
+  #       echo "${ENCLAVE_SIGNING_KEY}" > "${ENCLAVE_SIGNING_KEY_PATH}"
 
-    - name: Build Rust
-      # Only build if we don't have a cached set of binaries.
-      if: steps.artifact_cache.outputs.cache-hit != 'true'
-      env:
-        IAS_MODE: DEV
-        SGX_MODE: HW
-        RUST_BACKTRACE: full
-        MOB_RELEASE: 1
-      run: |
-        cargo build --release \
-          -p mc-consensus-service \
-          -p mc-admin-http-gateway \
-          -p mc-util-generate-sample-ledger \
-          -p mc-util-grpc-admin-tool \
-          -p mc-util-keyfile \
-          -p mc-ledger-distribution \
-          -p mc-ledger-migration \
-          -p mc-ledger-from-archive \
-          -p mc-mobilecoind \
-          -p mc-watcher \
-          -p mc-fog-ingest-server \
-          -p mc-fog-ingest-client \
-          -p mc-fog-view-server \
-          -p mc-fog-report-server \
-          -p mc-fog-sql-recovery-db \
-          -p mc-fog-ledger-server \
-          -p mc-fog-test-client \
-          -p mc-fog-distribution \
-          -p mc-util-grpc-token-generator
+  #   - name: Build Rust
+  #     # Only build if we don't have a cached set of binaries.
+  #     if: steps.artifact_cache.outputs.cache-hit != 'true'
+  #     env:
+  #       IAS_MODE: DEV
+  #       SGX_MODE: HW
+  #       RUST_BACKTRACE: full
+  #       MOB_RELEASE: 1
+  #     run: |
+  #       cargo build --release \
+  #         -p mc-consensus-service \
+  #         -p mc-admin-http-gateway \
+  #         -p mc-util-generate-sample-ledger \
+  #         -p mc-util-grpc-admin-tool \
+  #         -p mc-util-keyfile \
+  #         -p mc-ledger-distribution \
+  #         -p mc-ledger-migration \
+  #         -p mc-ledger-from-archive \
+  #         -p mc-mobilecoind \
+  #         -p mc-watcher \
+  #         -p mc-fog-ingest-server \
+  #         -p mc-fog-ingest-client \
+  #         -p mc-fog-view-server \
+  #         -p mc-fog-report-server \
+  #         -p mc-fog-sql-recovery-db \
+  #         -p mc-fog-ledger-server \
+  #         -p mc-fog-test-client \
+  #         -p mc-fog-distribution \
+  #         -p mc-util-grpc-token-generator
 
-    - name: Copy artifacts to cache
-      # Only copy if we don't have a cached set of binaries.
-      if: steps.artifact_cache.outputs.cache-hit != 'true'
-      run: |
-        mkdir -p build_artifacts
-        find target/release -maxdepth 1 -executable -type f -exec cp "{}" build_artifacts/ \;
-        find target/release -maxdepth 1 -name "*.signed.so" -exec cp "{}" build_artifacts/ \;
+  #   - name: Copy artifacts to cache
+  #     # Only copy if we don't have a cached set of binaries.
+  #     if: steps.artifact_cache.outputs.cache-hit != 'true'
+  #     run: |
+  #       mkdir -p build_artifacts
+  #       find target/release -maxdepth 1 -executable -type f -exec cp "{}" build_artifacts/ \;
+  #       find target/release -maxdepth 1 -name "*.signed.so" -exec cp "{}" build_artifacts/ \;
 
-    - name: check artifacts
-      run: |
-        ls -alR build_artifacts
+  #   - name: check artifacts
+  #     run: |
+  #       ls -alR build_artifacts
 
-  build-go-projects:
-    runs-on: self-hosted
-    container:
-      image: golang:1.16.4
-    steps:
-    - name: Start with clean workspace
-      run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
+  # build-go-projects:
+  #   runs-on: self-hosted
+  #   container:
+  #     image: golang:1.16.4
+  #   steps:
+  #   - name: Start with clean workspace
+  #     run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
 
-    - name: Checkout
-      uses: actions/checkout@v2
+  #   - name: Checkout
+  #     uses: actions/checkout@v2
 
-    - name: Cache go build binaries
-      id: go_artifact_cache
-      uses: actions/cache@v2
-      with:
-        path: |
-          go_build_artifacts
-        # Key is a hash of all the .rs, .proto and Cargo.toml files.
-        # if code changes, invalidate cache and rebuild
-        key: ${{ runner.os }}-go-build-artifacts-${{ hashFiles('go-grpc-gateway/**/*.go', 'go-grpc-gateway/go.*', '**/*.proto') }}
+  #   - name: Cache go build binaries
+  #     id: go_artifact_cache
+  #     uses: actions/cache@v2
+  #     with:
+  #       path: |
+  #         go_build_artifacts
+  #       # Key is a hash of all the .rs, .proto and Cargo.toml files.
+  #       # if code changes, invalidate cache and rebuild
+  #       key: ${{ runner.os }}-go-build-artifacts-${{ hashFiles('go-grpc-gateway/**/*.go', 'go-grpc-gateway/go.*', '**/*.proto') }}
 
-    - name: Add protobuf-compiler
-      if: steps.go_artifact_cache.outputs.cache-hit != 'true'
-      run: |
-        apt update
-        apt install -y protobuf-compiler
+  #   - name: Add protobuf-compiler
+  #     if: steps.go_artifact_cache.outputs.cache-hit != 'true'
+  #     run: |
+  #       apt update
+  #       apt install -y protobuf-compiler
 
-    - name: Build go-grpc-gateway
-      if: steps.go_artifact_cache.outputs.cache-hit != 'true'
-      run: |
-        cd go-grpc-gateway
-        ./install_tools.sh
-        ./build.sh
-        mkdir -p ../go_build_artifacts
-        cp grpc-proxy ../go_build_artifacts/
+  #   - name: Build go-grpc-gateway
+  #     if: steps.go_artifact_cache.outputs.cache-hit != 'true'
+  #     run: |
+  #       cd go-grpc-gateway
+  #       ./install_tools.sh
+  #       ./build.sh
+  #       mkdir -p ../go_build_artifacts
+  #       cp grpc-proxy ../go_build_artifacts/
 
-  create-sample-data:
-    runs-on: self-hosted
-    needs:
-    - build-cargo-hardware
-    steps:
-    - name: Start with clean workspace
-      run: sudo find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
+  # create-sample-data:
+  #   runs-on: self-hosted
+  #   needs:
+  #   - build-cargo-hardware
+  #   steps:
+  #   - name: Start with clean workspace
+  #     run: sudo find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
 
-    - name: Checkout
-      uses: actions/checkout@v2
+  #   - name: Checkout
+  #     uses: actions/checkout@v2
 
-    - name: Cache rust build binaries
-      id: artifact_cache
-      uses: actions/cache@v2
-      with:
-        path: |
-          build_artifacts
-        key: ${{ runner.os }}-build-cargo-hardware-build-artifacts-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml') }}
+  #   - name: Cache rust build binaries
+  #     id: artifact_cache
+  #     uses: actions/cache@v2
+  #     with:
+  #       path: |
+  #         build_artifacts
+  #       key: ${{ runner.os }}-build-cargo-hardware-build-artifacts-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml') }}
 
-    - name: Cache sample_data
-      id: sample_data_cache
-      uses: actions/cache@v2
-      with:
-        path: |
-          sample_data
-        key: sample-data-build-cargo-hardware-${{ github.ref_name }}-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml', '**/populate_origin_data.sh') }}
+  #   - name: Cache sample_data
+  #     id: sample_data_cache
+  #     uses: actions/cache@v2
+  #     with:
+  #       path: |
+  #         sample_data
+  #       key: sample-data-build-cargo-hardware-${{ github.ref_name }}-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml', '**/populate_origin_data.sh') }}
 
-    - name: Generate version metadata
-      id: meta
-      run: |
-        .internal-ci/util/metadata.sh
+  #   - name: Generate version metadata
+  #     id: meta
+  #     run: |
+  #       .internal-ci/util/metadata.sh
 
-    - name: Write environment values
-      env:
-        FOG_AUTHORITY_ROOT_CA_CERT: ${{ secrets.FOG_AUTHORITY_ROOT_CA_CERT }}
-      run: |
-        mkdir -p .tmp
-        echo "${FOG_AUTHORITY_ROOT_CA_CERT}" > "${FOG_AUTHORITY_ROOT_CA_CERT_PATH}"
+  #   - name: Write environment values
+  #     env:
+  #       FOG_AUTHORITY_ROOT_CA_CERT: ${{ secrets.FOG_AUTHORITY_ROOT_CA_CERT }}
+  #     run: |
+  #       mkdir -p .tmp
+  #       echo "${FOG_AUTHORITY_ROOT_CA_CERT}" > "${FOG_AUTHORITY_ROOT_CA_CERT_PATH}"
 
-    - name: Populate origin data
-      if: steps.sample_data_cache.outputs.cache-hit != 'true'
-      env:
-        BIN_PATH: build_artifacts
-        FOG_REPORT_URL: fog://fog.${{ steps.meta.outputs.branch }}.development.mobilecoin.com
-      run: |
-        .internal-ci/util/populate_origin_data.sh
+  #   - name: Populate origin data
+  #     if: steps.sample_data_cache.outputs.cache-hit != 'true'
+  #     env:
+  #       BIN_PATH: build_artifacts
+  #       FOG_REPORT_URL: fog://fog.${{ steps.meta.outputs.branch }}.development.mobilecoin.com
+  #     run: |
+  #       .internal-ci/util/populate_origin_data.sh
 
-    - name: check sample_data
-      run: |
-        ls -alR sample_data
+  #   - name: check sample_data
+  #     run: |
+  #       ls -alR sample_data
 
-  docker:
-    runs-on: self-hosted
-    needs:
-    - create-sample-data
-    - build-go-projects
-    strategy:
-      max-parallel: 5
-      matrix:
-        image:
-        - go-grpc-gateway
-        - node_hw
-        - fogingest
-        - bootstrap-tools
-        - fogreport
-        - fogview
-        - fog-ledger
-        - mobilecoind
-        # - watcher
-        # - fog-test-client
-    steps:
-    - name: Start with clean workspace
-      run: sudo find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
+  # docker:
+  #   runs-on: self-hosted
+  #   needs:
+  #   - create-sample-data
+  #   - build-go-projects
+  #   strategy:
+  #     max-parallel: 5
+  #     matrix:
+  #       image:
+  #       - go-grpc-gateway
+  #       - node_hw
+  #       - fogingest
+  #       - bootstrap-tools
+  #       - fogreport
+  #       - fogview
+  #       - fog-ledger
+  #       - mobilecoind
+  #       # - watcher
+  #       # - fog-test-client
+  #   steps:
+  #   - name: Start with clean workspace
+  #     run: sudo find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
 
-    - name: Checkout
-      uses: actions/checkout@v2
+  #   - name: Checkout
+  #     uses: actions/checkout@v2
 
-    - name: Cache rust build binaries
-      id: artifact_cache
-      uses: actions/cache@v2
-      with:
-        path: |
-          build_artifacts
-        key: ${{ runner.os }}-build-cargo-hardware-build-artifacts-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml') }}
+  #   - name: Cache rust build binaries
+  #     id: artifact_cache
+  #     uses: actions/cache@v2
+  #     with:
+  #       path: |
+  #         build_artifacts
+  #       key: ${{ runner.os }}-build-cargo-hardware-build-artifacts-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml') }}
 
-    - name: Cache go build binaries
-      id: go_artifact_cache
-      uses: actions/cache@v2
-      with:
-        path: |
-          go_build_artifacts
-        # Key is a hash of all the .rs, .proto and Cargo.toml files.
-        # if code changes, invalidate cache and rebuild
-        key: ${{ runner.os }}-go-build-artifacts-${{ hashFiles('go-grpc-gateway/**/*.go', 'go-grpc-gateway/go.*', '**/*.proto') }}
+  #   - name: Cache go build binaries
+  #     id: go_artifact_cache
+  #     uses: actions/cache@v2
+  #     with:
+  #       path: |
+  #         go_build_artifacts
+  #       # Key is a hash of all the .rs, .proto and Cargo.toml files.
+  #       # if code changes, invalidate cache and rebuild
+  #       key: ${{ runner.os }}-go-build-artifacts-${{ hashFiles('go-grpc-gateway/**/*.go', 'go-grpc-gateway/go.*', '**/*.proto') }}
 
-    - name: Cache sample_data
-      id: sample_data_cache
-      uses: actions/cache@v2
-      with:
-        path: |
-          sample_data
-        key: sample-data-build-cargo-hardware-${{ github.ref_name }}-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml', '**/populate_origin_data.sh') }}
+  #   - name: Cache sample_data
+  #     id: sample_data_cache
+  #     uses: actions/cache@v2
+  #     with:
+  #       path: |
+  #         sample_data
+  #       key: sample-data-build-cargo-hardware-${{ github.ref_name }}-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml', '**/populate_origin_data.sh') }}
 
-    - name: Generate version metadata
-      id: meta
-      run: |
-        .internal-ci/util/metadata.sh
+  #   - name: Generate version metadata
+  #     id: meta
+  #     run: |
+  #       .internal-ci/util/metadata.sh
 
-    - name: Generate Docker Tags
-      id: docker_meta
-      uses: docker/metadata-action@v3
-      with:
-        images: ${{ env.DOCKER_ORG }}/${{ matrix.image }}
-        tags: |
-          type=raw,value=${{ steps.meta.outputs.tag }}
+  #   - name: Generate Docker Tags
+  #     id: docker_meta
+  #     uses: docker/metadata-action@v3
+  #     with:
+  #       images: ${{ env.DOCKER_ORG }}/${{ matrix.image }}
+  #       tags: |
+  #         type=raw,value=${{ steps.meta.outputs.tag }}
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
+  #   - name: Set up Docker Buildx
+  #     uses: docker/setup-buildx-action@v1
 
-    - name: Login to DockerHub
-      uses: docker/login-action@v1
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
+  #   - name: Login to DockerHub
+  #     uses: docker/login-action@v1
+  #     with:
+  #       username: ${{ secrets.DOCKERHUB_USERNAME }}
+  #       password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Publish to DockerHub
-      id: docker_publish_dockerhub
-      uses: docker/build-push-action@v2
-      with:
-        build-args: |
-          REPO_ORG=${{ env.DOCKER_ORG }}
-          RUST_BIN_PATH=build_artifacts
-          GO_BIN_PATH=go_build_artifacts
-        cache-from: type=registry,ref=${{ env.DOCKER_ORG }}/${{ matrix.image }}:buildcache-${{ github.ref_name }}
-        cache-to: type=registry,ref=${{ env.DOCKER_ORG }}/${{ matrix.image }}:buildcache-${{ github.ref_name }}
-        context: .
-        file: .internal-ci/docker/Dockerfile.${{ matrix.image }}
-        labels: ${{ steps.docker_meta.outputs.labels }}
-        push: true
-        tags: ${{ steps.docker_meta.outputs.tags }}
+  #   - name: Publish to DockerHub
+  #     id: docker_publish_dockerhub
+  #     uses: docker/build-push-action@v2
+  #     with:
+  #       build-args: |
+  #         REPO_ORG=${{ env.DOCKER_ORG }}
+  #         RUST_BIN_PATH=build_artifacts
+  #         GO_BIN_PATH=go_build_artifacts
+  #       cache-from: type=registry,ref=${{ env.DOCKER_ORG }}/${{ matrix.image }}:buildcache-${{ github.ref_name }}
+  #       cache-to: type=registry,ref=${{ env.DOCKER_ORG }}/${{ matrix.image }}:buildcache-${{ github.ref_name }}
+  #       context: .
+  #       file: .internal-ci/docker/Dockerfile.${{ matrix.image }}
+  #       labels: ${{ steps.docker_meta.outputs.labels }}
+  #       push: true
+  #       tags: ${{ steps.docker_meta.outputs.tags }}
 
   charts:
     runs-on: self-hosted
-    needs:
-    - docker
+    # needs:
+    # - docker
     strategy:
       # Updating the chart index can only be done by one process at a time.
       max-parallel: 1
@@ -351,67 +351,67 @@ jobs:
         chart_version: ${{ steps.meta.outputs.tag }}
         chart_path: .internal-ci/helm/${{ matrix.chart }}
 
-  blue-deploy:
-    runs-on: self-hosted
-    needs:
-    - charts
-    - dev-reset
-    steps:
-    - name: Start with clean workspace
-      run: sudo find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
+  # blue-deploy:
+  #   runs-on: self-hosted
+  #   needs:
+  #   - charts
+  #   - dev-reset
+  #   steps:
+  #   - name: Start with clean workspace
+  #     run: sudo find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
 
-    - name: Checkout
-      uses: actions/checkout@v2
+  #   - name: Checkout
+  #     uses: actions/checkout@v2
 
-    - name: Generate version metadata
-      id: meta
-      run: |
-        .internal-ci/util/metadata.sh
+  #   - name: Generate version metadata
+  #     id: meta
+  #     run: |
+  #       .internal-ci/util/metadata.sh
 
-    - name: Mobilecoin Development Deploy (Dispatch)
-      uses: aurelien-baudet/workflow-dispatch@v2.1.1
-      with:
-        workflow: mobilecoin-dev-blue-deploy
-        token: ${{ secrets.ACTIONS_TOKEN }}
-        wait-for-completion: true
-        wait-for-completion-timeout: 30m
-        wait-for-completion-interval: 30s
-        display-workflow-run-url-interval: 30s
-        inputs: |
-          {
-            "namespace": "${{ steps.meta.outputs.branch }}",
-            "version": "${{ steps.meta.outputs.tag }}"
-          }
+  #   - name: Mobilecoin Development Deploy (Dispatch)
+  #     uses: aurelien-baudet/workflow-dispatch@v2.1.1
+  #     with:
+  #       workflow: mobilecoin-dev-blue-deploy
+  #       token: ${{ secrets.ACTIONS_TOKEN }}
+  #       wait-for-completion: true
+  #       wait-for-completion-timeout: 30m
+  #       wait-for-completion-interval: 30s
+  #       display-workflow-run-url-interval: 30s
+  #       inputs: |
+  #         {
+  #           "namespace": "${{ steps.meta.outputs.branch }}",
+  #           "version": "${{ steps.meta.outputs.tag }}"
+  #         }
 
-  blue-test:
-    runs-on: self-hosted
-    needs:
-    - blue-deploy
-    steps:
-    - name: Start with clean workspace
-      run: sudo find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
+  # blue-test:
+  #   runs-on: self-hosted
+  #   needs:
+  #   - blue-deploy
+  #   steps:
+  #   - name: Start with clean workspace
+  #     run: sudo find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
     
-    - name: Checkout
-      uses: actions/checkout@v2
+  #   - name: Checkout
+  #     uses: actions/checkout@v2
 
-    - name: Generate version metadata
-      id: meta
-      run: |
-        .internal-ci/util/metadata.sh
+  #   - name: Generate version metadata
+  #     id: meta
+  #     run: |
+  #       .internal-ci/util/metadata.sh
 
-    - name: Run MobileCoin core tests
-      uses: aurelien-baudet/workflow-dispatch@v2.1.1
-      with:
-        workflow: mobilecoin-test
-        token: ${{ secrets.ACTIONS_TOKEN }}
-        wait-for-completion: true
-        wait-for-completion-timeout: 30m
-        wait-for-completion-interval: 30s
-        display-workflow-run-url-interval: 30s
-        inputs: |
-          {
-            "namespace": "${{ steps.meta.outputs.branch }}"
-          }
+  #   - name: Run MobileCoin core tests
+  #     uses: aurelien-baudet/workflow-dispatch@v2.1.1
+  #     with:
+  #       workflow: mobilecoin-test
+  #       token: ${{ secrets.ACTIONS_TOKEN }}
+  #       wait-for-completion: true
+  #       wait-for-completion-timeout: 30m
+  #       wait-for-completion-interval: 30s
+  #       display-workflow-run-url-interval: 30s
+  #       inputs: |
+  #         {
+  #           "namespace": "${{ steps.meta.outputs.branch }}"
+  #         }
 
 # ${{ steps.meta.outputs.tag }}
 # run test

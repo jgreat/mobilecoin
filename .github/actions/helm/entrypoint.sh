@@ -7,6 +7,7 @@ shopt -s expand_aliases
 export KUBECONFIG="/opt/.kube/config"
 mkdir -p /opt/.kube/cache
 touch "${KUBECONFIG}"
+chmod 600 "${KUBECONFIG}"
 alias k="kubectl --cache-dir /opt/.kube/cache"
 
 error_exit()
@@ -161,8 +162,10 @@ then
                 then
                     echo "-- Deleting release ${INPUT_RELEASE_NAME}"
                     helm delete "${INPUT_RELEASE_NAME}" -n "${INPUT_NAMESPACE}" --wait --timeout="${INPUT_CHART_WAIT_TIMEOUT}"
+                    exit 0
                 fi
             done
+            echo "-- Release ${INPUT_RELEASE_NAME} not found."
             ;;
         rancher-delete-pvcs)
             rancher_get_kubeconfig
