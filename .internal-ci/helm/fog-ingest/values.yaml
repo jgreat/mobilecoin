@@ -105,5 +105,5 @@ toolbox:
   affinity: {}
 
 jaegerTracing:
-  enabled: enabled
+  enabled: true
   collector: 'dns:///jaeger-collector:14250'

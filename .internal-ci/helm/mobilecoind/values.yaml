@@ -58,11 +58,11 @@ mobilecoind:
     - |
       set -x
       if [ -f /mobilecoin/ledger/data.mdb ]; then
-        /usr/bin/mc-ledger-migration --ledger-db /mobilecoin/ledger
+        /usr/bin/mc-ledger-migration --ledger-db /data/ledger
       fi
     volumeMounts:
-    - name: mobilecoind-data
-      mountPath: /mobilecoin
+    - name: data
+      mountPath: /data
 
   nodeSelector: {}
 
