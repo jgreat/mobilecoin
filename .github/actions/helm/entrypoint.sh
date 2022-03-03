@@ -2,9 +2,10 @@
 
 set -o errexit
 set -o pipefail
+set -o expand_aliases
 
 export KUBECONFIG="/opt/.kube/config"
-k="kubectl --cache-dir /opt/.kube/cache"
+alias k="kubectl --cache-dir /opt/.kube/cache"
 
 error_exit()
 {
@@ -41,8 +42,8 @@ rancher_get_kubeconfig()
     auth_header="Authorization: Bearer ${INPUT_RANCHER_TOKEN}"
     kubeconfig_url=$(curl --retry 5 -sSLf -H "${auth_header}" "${INPUT_RANCHER_URL}/v3/clusters/?name=${INPUT_RANCHER_CLUSTER}" | jq -r .data[0].actions.generateKubeconfig)
 
-    echo "-- Write kubeconfig to  location"
-    mkdir -p /opt/.kube
+    echo "-- Write kubeconfig"
+    mkdir -p /opt/.kube/cache
     curl --retry 5 -sSLf -H "${auth_header}" -X POST "${kubeconfig_url}" | jq -r .config > /opt/.kube/config
 }
 
