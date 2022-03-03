@@ -140,7 +140,7 @@ jobs:
       (needs.distribute-fog-accounts.result == 'success' || needs.distribute-fog-accounts.result == 'skipped')
     runs-on: self-hosted
     container:
-      image: python:3
+      image: python:3.7
     needs:
     - distribute-fog-accounts
     steps:
