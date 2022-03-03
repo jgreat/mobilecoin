@@ -162,6 +162,7 @@ jobs:
       env:
         SAMPLE_DATA_CACHE: ${{ steps.sample_data.outputs.cache-hit }}
       run: |
+        /bin/bash -c
         if [ "${SAMPLE_DATA_CACHE}" == "false" ]
         then
           echo "Sample data cache not found. Start over from build."; exit 1
