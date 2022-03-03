@@ -11,6 +11,10 @@ on:
         description: "Chart Version"
         type: string
         required: true
+      commit_message:
+        description: "Commit Message"
+        type: string
+        required: false
 
 jobs:
   list-values:

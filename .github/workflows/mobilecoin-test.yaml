@@ -7,6 +7,10 @@ on:
         description: "Target Namespace"
         type: string
         required: true
+      commit_message:
+        description: "Commit Message"
+        type: string
+        required: false
 
 jobs:
   list-values:
@@ -17,128 +21,128 @@ jobs:
         echo namespace ${{ github.event.inputs.namespace }}
         cat ${GITHUB_EVENT_PATH}
 
-  # distribute-fog-accounts:
-  #   if: "! contains(toJSON(github.event.commits.*.message), '[skip-test-distribute-fog-accounts]')"
-  #   runs-on: self-hosted
-  #   steps:
-  #   - name: Start with clean workspace
-  #     run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
+  distribute-fog-accounts:
+    if: "! contains(github.event.inputs.commit_message, '[skip-test-distribute-fog-accounts]')"
+    runs-on: self-hosted
+    steps:
+    - name: Start with clean workspace
+      run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
 
-  #   - name: Checkout
-  #     uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v2
     
-  #   - name: Cache rust build binaries
-  #     id: artifact_cache
-  #     uses: actions/cache@v2
-  #     with:
-  #       path: |
-  #         build_artifacts
-  #       # Key is a hash of all the .rs, .proto and Cargo.toml files.
-  #       # if code changes, invalidate cache and rebuild
-  #       key: ${{ runner.os }}-build-cargo-hardware-build-artifacts-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml') }}
+    - name: Cache rust build binaries
+      id: artifact_cache
+      uses: actions/cache@v2
+      with:
+        path: |
+          build_artifacts
+        # Key is a hash of all the .rs, .proto and Cargo.toml files.
+        # if code changes, invalidate cache and rebuild
+        key: ${{ runner.os }}-build-cargo-hardware-build-artifacts-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml') }}
     
-  #   - name: Cache sample_data
-  #     if: steps.artifact_cache.outputs.cache-hit == 'true'
-  #     id: sample_data_cache
-  #     uses: actions/cache@v2
-  #     with:
-  #       path: |
-  #         sample_data
-  #       key: sample-data-build-cargo-hardware-${{ github.ref_name }}-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml', '**/populate_origin_data.sh') }}
+    - name: Cache sample_data
+      if: steps.artifact_cache.outputs.cache-hit == 'true'
+      id: sample_data_cache
+      uses: actions/cache@v2
+      with:
+        path: |
+          sample_data
+        key: sample-data-build-cargo-hardware-${{ github.ref_name }}-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml', '**/populate_origin_data.sh') }}
 
-  #   - name: Check cache successful
-  #     env:
-  #       BIN_CACHE: "${{ steps.artifact_cache.outputs.cache-hit }}"
-  #       SAMPLE_DATA_CACHE: "${{ steps.sample_data_cache.outputs.cache-hit }}"
-  #     run: |
-  #       if [ "BIN_CACHE" == "false" ]; then echo "Binary cache not found. Start over from build."; exit 1; fi
-  #       if [ "SAMPLE_DATA_CACHE" == "false" ]; then echo "Sample data cache not found. Start over from build."; exit 1; fi
+    - name: Check cache successful
+      env:
+        BIN_CACHE: "${{ steps.artifact_cache.outputs.cache-hit }}"
+        SAMPLE_DATA_CACHE: "${{ steps.sample_data_cache.outputs.cache-hit }}"
+      run: |
+        if [ "BIN_CACHE" == "false" ]; then echo "Binary cache not found. Start over from build."; exit 1; fi
+        if [ "SAMPLE_DATA_CACHE" == "false" ]; then echo "Sample data cache not found. Start over from build."; exit 1; fi
 
-  #   - name: Distribute coins to fog accounts
-  #     env:
-  #       NAMESPACE: ${{ github.event.inputs.namespace }}
-  #     run: |
-  #       ./build_artifacts/fog-distribution --sample-data-dir ./sample_data \
-  #         --peer mc://node1.${NAMESPACE}.development.mobilecoin.com:443 \
-  #         --peer mc://node2.${NAMESPACE}.development.mobilecoin.com:443 \
-  #         --peer mc://node3.${NAMESPACE}.development.mobilecoin.com:443 \
-  #         --num-tx-to-send 20
+    - name: Distribute coins to fog accounts
+      env:
+        NAMESPACE: ${{ github.event.inputs.namespace }}
+      run: |
+        ./build_artifacts/fog-distribution --sample-data-dir ./sample_data \
+          --peer mc://node1.${NAMESPACE}.development.mobilecoin.com:443 \
+          --peer mc://node2.${NAMESPACE}.development.mobilecoin.com:443 \
+          --peer mc://node3.${NAMESPACE}.development.mobilecoin.com:443 \
+          --num-tx-to-send 20
 
-  # fog-test-client:
-  #   if: |
-  #     always() &&
-  #     ! contains(toJSON(github.event.commits.*.message), '[skip-test-fog-test-client]') &&
-  #     (needs.distribute-fog-accounts.result == 'success' || needs.distribute-fog-accounts.result == 'skipped')
-  #   runs-on: self-hosted
-  #   needs:
-  #   - distribute-fog-accounts
-  #   steps:
-  #   - name: Start with clean workspace
-  #     run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
+  fog-test-client:
+    if: |
+      always() &&
+      ! contains(github.event.inputs.commit_message, '[skip-test-fog-test-client]') &&
+      (needs.distribute-fog-accounts.result == 'success' || needs.distribute-fog-accounts.result == 'skipped')
+    runs-on: self-hosted
+    needs:
+    - distribute-fog-accounts
+    steps:
+    - name: Start with clean workspace
+      run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
 
-  #   - name: Checkout
-  #     uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v2
     
-  #   - name: Cache rust build binaries
-  #     id: artifact_cache
-  #     uses: actions/cache@v2
-  #     with:
-  #       path: |
-  #         build_artifacts
-  #       # Key is a hash of all the .rs, .proto and Cargo.toml files.
-  #       # if code changes, invalidate cache and rebuild
-  #       key: ${{ runner.os }}-build-cargo-hardware-build-artifacts-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml') }}
+    - name: Cache rust build binaries
+      id: artifact_cache
+      uses: actions/cache@v2
+      with:
+        path: |
+          build_artifacts
+        # Key is a hash of all the .rs, .proto and Cargo.toml files.
+        # if code changes, invalidate cache and rebuild
+        key: ${{ runner.os }}-build-cargo-hardware-build-artifacts-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml') }}
     
-  #   - name: Cache sample_data
-  #     if: steps.artifact_cache.outputs.cache-hit == 'true'
-  #     id: sample_data_cache
-  #     uses: actions/cache@v2
-  #     with:
-  #       path: |
-  #         sample_data
-  #       key: sample-data-build-cargo-hardware-${{ github.ref_name }}-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml', '**/populate_origin_data.sh') }}
+    - name: Cache sample_data
+      if: steps.artifact_cache.outputs.cache-hit == 'true'
+      id: sample_data_cache
+      uses: actions/cache@v2
+      with:
+        path: |
+          sample_data
+        key: sample-data-build-cargo-hardware-${{ github.ref_name }}-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml', '**/populate_origin_data.sh') }}
 
-  #   - name: Check cache successful
-  #     env:
-  #       BIN_CACHE: ${{ steps.artifact_cache.outputs.cache-hit }}
-  #       SAMPLE_DATA_CACHE: ${{ steps.sample_data.outputs.cache-hit }}
-  #     run: |
-  #       if [ "${BIN_CACHE}" == "false" ]
-  #       then
-  #         echo "Binary cache not found. Start over from build."; exit 1
-  #       fi
+    - name: Check cache successful
+      env:
+        BIN_CACHE: ${{ steps.artifact_cache.outputs.cache-hit }}
+        SAMPLE_DATA_CACHE: ${{ steps.sample_data.outputs.cache-hit }}
+      run: |
+        if [ "${BIN_CACHE}" == "false" ]
+        then
+          echo "Binary cache not found. Start over from build."; exit 1
+        fi
 
-  #       if [ "${SAMPLE_DATA_CACHE}" == "false" ]
-  #       then
-  #         echo "Sample data cache not found. Start over from build."; exit 1
-  #       fi
+        if [ "${SAMPLE_DATA_CACHE}" == "false" ]
+        then
+          echo "Sample data cache not found. Start over from build."; exit 1
+        fi
 
-  #   - name: Run fog-test-client
-  #     env:
-  #       NAMESPACE: ${{ github.event.inputs.namespace }}
-  #     run: |
-  #       ./build_artifacts/test_client \
-  #         --key-dir ./sample_data/fog_keys \
-  #         --consensus mc://node1.${NAMESPACE}.development.mobilecoin.com/ \
-  #         --consensus mc://node2.${NAMESPACE}.development.mobilecoin.com/ \
-  #         --consensus mc://node3.${NAMESPACE}.development.mobilecoin.com/ \
-  #         --num-clients 6 \
-  #         --num-transactions 32 \
-  #         --consensus-wait 300 \
-  #         --transfer-amount 20 \
-  #         --fog-view fog-view://fog.${NAMESPACE}.development.mobilecoin.com:443 \
-  #         --fog-ledger fog-ledger://fog.${NAMESPACE}.development.mobilecoin.com:443
+    - name: Run fog-test-client
+      env:
+        NAMESPACE: ${{ github.event.inputs.namespace }}
+      run: |
+        ./build_artifacts/test_client \
+          --key-dir ./sample_data/fog_keys \
+          --consensus mc://node1.${NAMESPACE}.development.mobilecoin.com/ \
+          --consensus mc://node2.${NAMESPACE}.development.mobilecoin.com/ \
+          --consensus mc://node3.${NAMESPACE}.development.mobilecoin.com/ \
+          --num-clients 6 \
+          --num-transactions 32 \
+          --consensus-wait 300 \
+          --transfer-amount 20 \
+          --fog-view fog-view://fog.${NAMESPACE}.development.mobilecoin.com:443 \
+          --fog-ledger fog-ledger://fog.${NAMESPACE}.development.mobilecoin.com:443
 
   mobilecoind-integration:
-    # if: |
-    #   always() &&
-    #   ! contains(toJSON(github.event.commits.*.message), '[skip-test-mobilecoind-integration]') &&
-    #   (needs.distribute-fog-accounts.result == 'success' || needs.distribute-fog-accounts.result == 'skipped')
+    if: |
+      always() &&
+      ! contains(github.event.inputs.commit_message, '[skip-test-mobilecoind-integration]') &&
+      (needs.distribute-fog-accounts.result == 'success' || needs.distribute-fog-accounts.result == 'skipped')
     runs-on: self-hosted
     container:
       image: python:3
-    # needs:
-    # - distribute-fog-accounts
+    needs:
+    - distribute-fog-accounts
     steps:
     - name: Start with clean workspace
       run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;

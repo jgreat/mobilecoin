@@ -23,7 +23,7 @@ on:
 
 jobs:
   dev-reset:
-    if: "! contains(toJSON(github.event.commits.*.message), '[skip-reset]')"
+    if: "! contains(github.event.head_commit.message, '[skip-reset]')"
     runs-on: self-hosted
     steps:
     - name: Start with clean workspace
@@ -52,7 +52,7 @@ jobs:
           }
 
   build-cargo-hardware:
-    if: "! contains(toJSON(github.event.commits.*.message), '[skip-build]')"
+    if: "! contains(github.event.head_commit.message, '[skip-build]')"
     runs-on: self-hosted
     container:
       image: mobilecoin/rust-sgx-base@sha256:efe2873257fa08a8468d704dcd9bc1b6c2e9ce5a08378d57bb1073b2f50416a7
@@ -136,7 +136,7 @@ jobs:
         ls -alR build_artifacts
 
   build-go-projects:
-    if: "! contains(toJSON(github.event.commits.*.message), '[skip-build]')"
+    if: "! contains(github.event.head_commit.message, '[skip-build]')"
     runs-on: self-hosted
     container:
       image: golang:1.16.4
@@ -175,7 +175,7 @@ jobs:
   create-sample-data:
     if: |
       always() &&
-      ! contains(toJSON(github.event.commits.*.message), '[skip-sample-data]') &&
+      ! contains(github.event.head_commit.message, '[skip-sample-data]') &&
       (needs.build-cargo-hardware.result == 'success' || needs.build-cargo-hardware.result == 'skipped')
     runs-on: self-hosted
     needs:
@@ -230,7 +230,7 @@ jobs:
   docker:
     if: |
       always() &&
-      ! contains(toJSON(github.event.commits.*.message), '[skip-docker]') &&
+      ! contains(github.event.head_commit.message, '[skip-docker]') &&
       (needs.create-sample-data.result == 'success' || needs.create-sample-data.result == 'skipped') &&
       (needs.build-go-projects.result == 'success' || needs.build-go-projects.result == 'skipped')
     runs-on: self-hosted
@@ -327,7 +327,7 @@ jobs:
   charts:
     if: |
       always() &&
-      ! contains(toJSON(github.event.commits.*.message), '[skip-charts]') &&
+      ! contains(github.event.head_commit.message, '[skip-charts]') &&
       (needs.docker.result == 'success' || needs.docker.result == 'skipped')
     runs-on: self-hosted
     needs:
@@ -372,7 +372,7 @@ jobs:
   blue-deploy:
     if: |
       always() &&
-      ! contains(toJSON(github.event.commits.*.message), '[skip-blue-deploy]') &&
+      ! contains(github.event.head_commit.message, '[skip-blue-deploy]') &&
       (needs.charts.result == 'success' || needs.charts.result == 'skipped') &&
       (needs.dev-reset.result == 'success' || needs.dev-reset.result == 'skipped')
     runs-on: self-hosted
@@ -403,13 +403,14 @@ jobs:
         inputs: |
           {
             "namespace": "${{ steps.meta.outputs.branch }}",
-            "version": "${{ steps.meta.outputs.tag }}"
+            "version": "${{ steps.meta.outputs.tag }}",
+            "commit_message": "${{ github.event.head_commit.message }}"
           }
 
   blue-test:
     if: |
       always() &&
-      ! contains(toJSON(github.event.commits.*.message), '[skip-blue-test]') &&
+      ! contains(github.event.head_commit.message, '[skip-blue-test]') &&
       (needs.blue-deploy.result == 'success' || needs.blue-deploy.result == 'skipped')
     runs-on: self-hosted
     needs:
@@ -438,6 +439,7 @@ jobs:
         inputs: |
           {
             "namespace": "${{ steps.meta.outputs.branch }}"
+            "commit_message": "${{ github.event.head_commit.message }}"
           }
 
 # ${{ steps.meta.outputs.tag }}
