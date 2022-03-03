@@ -42,6 +42,12 @@ fi
 
 sha=${GITHUB_SHA:0:8}
 
+# Get commit flags
+if [ -f "${GITHUB_EVENT_PATH}" ]
+then
+    jq . < "${GITHUB_EVENT_PATH}"
+fi
+
 echo "::set-output name=version::${version}"
 echo "::set-output name=branch::${branch}"
 echo "::set-output name=sha::${sha}"

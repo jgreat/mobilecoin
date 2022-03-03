@@ -72,3 +72,23 @@ jobs:
         rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
+
+  reset-s3:
+    needs:
+    - reset
+    runs-on: self-hosted
+    container:
+      image: amazon/aws-cli:latest
+    steps:
+    - name: Clear out s3 bucket objects
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.LEDGER_AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.LEDGER_AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: us-west-1
+        NAMESPACE: ${{ github.event.inputs.namespace }}
+      run: |
+        aws s3 rm --only-show-errors --recursive s3://mobilecoin.chain/node1.${NAMESPACE}.development.mobilecoin.com
+        aws s3 rm --only-show-errors --recursive s3://mobilecoin.chain/node2.${NAMESPACE}.development.mobilecoin.com
+        aws s3 rm --only-show-errors --recursive s3://mobilecoin.chain/node3.${NAMESPACE}.development.mobilecoin.com
+        aws s3 rm --only-show-errors --recursive s3://mobilecoin.chain/node4.${NAMESPACE}.development.mobilecoin.com
+        aws s3 rm --only-show-errors --recursive s3://mobilecoin.chain/node5.${NAMESPACE}.development.mobilecoin.com

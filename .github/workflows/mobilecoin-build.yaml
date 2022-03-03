@@ -23,6 +23,7 @@ on:
 
 jobs:
   dev-reset:
+    if: "! contains(toJSON(github.event.commits.*.message), '[skip-reset]')"
     runs-on: self-hosted
     steps:
     - name: Start with clean workspace
@@ -51,6 +52,7 @@ jobs:
           }
 
   build-cargo-hardware:
+    if: "! contains(toJSON(github.event.commits.*.message), '[skip-build]')"
     runs-on: self-hosted
     container:
       image: mobilecoin/rust-sgx-base@sha256:efe2873257fa08a8468d704dcd9bc1b6c2e9ce5a08378d57bb1073b2f50416a7
@@ -134,6 +136,7 @@ jobs:
         ls -alR build_artifacts
 
   build-go-projects:
+    if: "! contains(toJSON(github.event.commits.*.message), '[skip-build]')"
     runs-on: self-hosted
     container:
       image: golang:1.16.4
@@ -170,6 +173,7 @@ jobs:
         cp grpc-proxy ../go_build_artifacts/
 
   create-sample-data:
+    if: "! contains(toJSON(github.event.commits.*.message), '[skip-sample-data]')"
     runs-on: self-hosted
     needs:
     - build-cargo-hardware
@@ -221,6 +225,7 @@ jobs:
         ls -alR sample_data
 
   docker:
+    if: "! contains(toJSON(github.event.commits.*.message), '[skip-docker]')"
     runs-on: self-hosted
     needs:
     - create-sample-data
@@ -313,6 +318,7 @@ jobs:
         tags: ${{ steps.docker_meta.outputs.tags }}
 
   charts:
+    if: "! contains(toJSON(github.event.commits.*.message), '[skip-charts]')"
     runs-on: self-hosted
     needs:
     - docker
@@ -354,6 +360,7 @@ jobs:
         chart_path: .internal-ci/helm/${{ matrix.chart }}
 
   blue-deploy:
+    if: "! contains(toJSON(github.event.commits.*.message), '[skip-blue-deploy]')"
     runs-on: self-hosted
     needs:
     - charts
@@ -386,6 +393,7 @@ jobs:
           }
 
   blue-test:
+    if: "! contains(toJSON(github.event.commits.*.message), '[skip-blue-deploy]')"
     runs-on: self-hosted
     needs:
     - blue-deploy
