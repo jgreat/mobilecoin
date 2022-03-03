@@ -2,7 +2,7 @@
 
 set -o errexit
 set -o pipefail
-set -o expand_aliases
+shopt -s expand_aliases
 
 export KUBECONFIG="/opt/.kube/config"
 alias k="kubectl --cache-dir /opt/.kube/cache"
