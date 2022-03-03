@@ -35,6 +35,15 @@ spec:
         ports:
         - name: mobilecoind-rpc
           containerPort: 3229
+        # Hold liveness and readiness until this probe passes.
+        startupProbe:
+          exec:
+            command:
+            - "/usr/local/bin/grpc_health_probe"
+            - "-addr=:3229"
+          failureThreshold: 30
+          periodSeconds: 10
+        # Will wait for startup probe to succeed. When this passes k8s won't kill the service.
         livenessProbe:
           exec:
             command:
@@ -42,6 +51,7 @@ spec:
             - "-addr=:3229"
           failureThreshold: 3
           periodSeconds: 30
+        # Will wait for startup probe to succeed. When this passes services/ingress will pass traffic
         readinessProbe:
           exec:
             command:
