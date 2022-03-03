@@ -110,7 +110,7 @@ then
             is_set INPUT_NAMESPACE
 
             echo "-- Deleting ${INPUT_NAMESPACE} namespace from ${INPUT_RANCHER_CLUSTER}"
-            "${k}" delete ns "${INPUT_NAMESPACE}" --now --wait --request-timeout=5m --ignore-not-found
+            k delete ns "${INPUT_NAMESPACE}" --now --wait --request-timeout=5m --ignore-not-found
             ;;
 
         rancher-namespace-create)
@@ -121,7 +121,7 @@ then
 
             echo "-- Create namespace ${INPUT_NAMESPACE}"
             # Don't sweat it if the namespace already exists.
-            "${k}" create ns "${INPUT_NAMESPACE}" || echo "Namespace already exists"
+            k create ns "${INPUT_NAMESPACE}" || echo "Namespace already exists"
 
             auth_header="Authorization: Bearer ${INPUT_RANCHER_TOKEN}"
 
@@ -152,7 +152,7 @@ then
             is_set INPUT_NAMESPACE
             is_set INPUT_RELEASE_NAME
 
-            "${k}" get ns "${INPUT_NAMESPACE}" || echo_exit "Namespace doesn't exist"
+            k get ns "${INPUT_NAMESPACE}" || echo_exit "Namespace doesn't exist"
 
             echo "-- Get release list"
             releases=$(helm list -a -q -n "${INPUT_NAMESPACE}")
@@ -173,7 +173,7 @@ then
             for p in $pvcs
             do
                 echo "-- Delete PVC ${p}"
-                "${k}" delete pvc "${p}" -n "${INPUT_NAMESPACE}" --now --wait --request-timeout=5m --ignore-not-found
+                k delete pvc "${p}" -n "${INPUT_NAMESPACE}" --now --wait --request-timeout=5m --ignore-not-found
             done
             ;;
         rancher-helm-deploy)
@@ -220,7 +220,7 @@ then
             toolbox=$(k get pods -n "${INPUT_NAMESPACE}" -l "app.kubernetes.io/instance=${instance}" -l app=toolbox -o=name)
 
             command="fog-sql-recovery-db-migrations"
-            "${k}" exec -n "${INPUT_NAMESPACE}" "${toolbox}" -- /bin/bash -c "${command}"
+            k exec -n "${INPUT_NAMESPACE}" "${toolbox}" -- /bin/bash -c "${command}"
             ;;
         fog-ingest-activate)
             rancher_get_kubeconfig
@@ -289,7 +289,7 @@ then
 
             echo "-- No Active Primary ingest found. Activating ingest 0."
             command="fog_ingest_client --uri 'insecure-fog-ingest://${instance}-0.${instance}:3226' activate"
-            "${k}" exec -n "${INPUT_NAMESPACE}" "${toolbox}" -- /bin/bash -c "${command}"
+            k exec -n "${INPUT_NAMESPACE}" "${toolbox}" -- /bin/bash -c "${command}"
             ;;
         *)
             error_exit "Command ${INPUT_ACTION} not recognized"
