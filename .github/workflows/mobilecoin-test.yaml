@@ -130,15 +130,15 @@ jobs:
   #         --fog-ledger fog-ledger://fog.${NAMESPACE}.development.mobilecoin.com:443
 
   mobilecoind-integration:
-    if: |
-      always() &&
-      ! contains(toJSON(github.event.commits.*.message), '[skip-test-mobilecoind-integration]') &&
-      (needs.distribute-fog-accounts.result == 'success' || needs.distribute-fog-accounts.result == 'skipped')
+    # if: |
+    #   always() &&
+    #   ! contains(toJSON(github.event.commits.*.message), '[skip-test-mobilecoind-integration]') &&
+    #   (needs.distribute-fog-accounts.result == 'success' || needs.distribute-fog-accounts.result == 'skipped')
     runs-on: self-hosted
     container:
       image: python:3
-    needs:
-    - distribute-fog-accounts
+    # needs:
+    # - distribute-fog-accounts
     steps:
     - name: Start with clean workspace
       run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
