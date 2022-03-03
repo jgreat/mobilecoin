@@ -1,6 +1,7 @@
 #!/bin/bash
 
-tmp
+set -e
+
 mkdir -p .tmp/strategies/keys
 
 for i in {0..4}
