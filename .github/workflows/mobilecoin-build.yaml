@@ -226,7 +226,7 @@ jobs:
     - create-sample-data
     - build-go-projects
     strategy:
-      max-parallel: 5
+      max-parallel: 4
       matrix:
         image:
         - go-grpc-gateway
