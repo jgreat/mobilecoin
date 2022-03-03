@@ -40,15 +40,21 @@ else
     echo "Clean up branch. Remove feature|deploy|release prefix and replace ._/ with - '${branch}'"
 fi
 
-sha=${GITHUB_SHA:0:8}
+sha="${GITHUB_SHA:0:8}"
+tag="${version}-${branch}.${GITHUB_RUN_NUMBER}.sha-${sha}"
 
 # Get commit flags
 if [ -f "${GITHUB_EVENT_PATH}" ]
 then
-    jq . < "${GITHUB_EVENT_PATH}"
+    # override tag if commit message has [tag="tag"]
+    msg=$(jq -r '.head_commit.message' < "${GITHUB_EVENT_PATH}")
+    if [[ "${msg}" =~ /\[tag=.*\]/ ]]
+    then
+        tag=$(echo "${msg}" | sed -r 's/.*\[use=(.*)\].*/\1/')
+    fi
 fi
 
 echo "::set-output name=version::${version}"
 echo "::set-output name=branch::${branch}"
 echo "::set-output name=sha::${sha}"
-echo "::set-output name=tag::${version}-${branch}.${GITHUB_RUN_NUMBER}.sha-${sha}"
+echo "::set-output name=tag::${tag}"

@@ -173,7 +173,10 @@ jobs:
         cp grpc-proxy ../go_build_artifacts/
 
   create-sample-data:
-    if: "! contains(toJSON(github.event.commits.*.message), '[skip-sample-data]')"
+    if: |
+      always() &&
+      ! contains(toJSON(github.event.commits.*.message), '[skip-sample-data]') &&
+      (needs.build-cargo-hardware.result == 'success' || needs.build-cargo-hardware.result == 'skipped')
     runs-on: self-hosted
     needs:
     - build-cargo-hardware
@@ -225,7 +228,11 @@ jobs:
         ls -alR sample_data
 
   docker:
-    if: "! contains(toJSON(github.event.commits.*.message), '[skip-docker]')"
+    if: |
+      always() &&
+      ! contains(toJSON(github.event.commits.*.message), '[skip-docker]') &&
+      (needs.create-sample-data.result == 'success' || needs.create-sample-data.result == 'skipped') &&
+      (needs.build-go-projects.result == 'success' || needs.build-go-projects.result == 'skipped')
     runs-on: self-hosted
     needs:
     - create-sample-data
@@ -318,7 +325,10 @@ jobs:
         tags: ${{ steps.docker_meta.outputs.tags }}
 
   charts:
-    if: "! contains(toJSON(github.event.commits.*.message), '[skip-charts]')"
+    if: |
+      always() &&
+      ! contains(toJSON(github.event.commits.*.message), '[skip-charts]') &&
+      (needs.docker.result == 'success' || needs.docker.result == 'skipped')
     runs-on: self-hosted
     needs:
     - docker
@@ -360,7 +370,11 @@ jobs:
         chart_path: .internal-ci/helm/${{ matrix.chart }}
 
   blue-deploy:
-    if: "! contains(toJSON(github.event.commits.*.message), '[skip-blue-deploy]')"
+    if: |
+      always() &&
+      ! contains(toJSON(github.event.commits.*.message), '[skip-blue-deploy]') &&
+      (needs.charts.result == 'success' || needs.charts.result == 'skipped') &&
+      (needs.dev-reset.result == 'success' || needs.dev-reset.result == 'skipped')
     runs-on: self-hosted
     needs:
     - charts
@@ -393,7 +407,10 @@ jobs:
           }
 
   blue-test:
-    if: "! contains(toJSON(github.event.commits.*.message), '[skip-blue-deploy]')"
+    if: |
+      always() &&
+      ! contains(toJSON(github.event.commits.*.message), '[skip-blue-deploy]') &&
+      (needs.blue-deploy.result == 'success' || needs.blue-deploy.result == 'skipped')
     runs-on: self-hosted
     needs:
     - blue-deploy
