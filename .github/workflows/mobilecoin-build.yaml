@@ -409,7 +409,7 @@ jobs:
   blue-test:
     if: |
       always() &&
-      ! contains(toJSON(github.event.commits.*.message), '[skip-blue-deploy]') &&
+      ! contains(toJSON(github.event.commits.*.message), '[skip-blue-test]') &&
       (needs.blue-deploy.result == 'success' || needs.blue-deploy.result == 'skipped')
     runs-on: self-hosted
     needs:
