@@ -438,7 +438,7 @@ jobs:
         display-workflow-run-url-interval: 30s
         inputs: |
           {
-            "namespace": "${{ steps.meta.outputs.branch }}"
+            "namespace": "${{ steps.meta.outputs.branch }}",
             "commit_message": "${{ github.event.head_commit.message }}"
           }
 
