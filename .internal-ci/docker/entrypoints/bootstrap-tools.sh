@@ -2,7 +2,7 @@
 # Entrypoint script to set up testing environment in bootstrap(toolbox) container.
 
 mkdir -p /tmp/sample-data
-ln -s /var/lib/mobilecoin/origin_data/ledger /tmp/sample-data/ledger
+ln -s /var/lib/mobilecoin/origin_data /tmp/sample-data/ledger
 
 if [ -f "/sample-data/keys.tar.gz" ]
 then

@@ -21,8 +21,8 @@ spec:
       containers:
       - image: '{{ .Values.toolbox.image.org | default .Values.image.org }}/{{ .Values.toolbox.image.name }}:{{ .Values.image.tag | default .Chart.AppVersion }}'
         name: toolbox
-        command:
-          - /bin/cat
+        args:
+        - /bin/cat
         tty: true
         env:
         - name: FOGDB_HOST
@@ -53,14 +53,14 @@ spec:
         - name: DATABASE_URL
           value: 'postgres://$(FOGDB_USER):$(FOGDB_PASSWORD)@$(FOGDB_HOST)/$(FOGDB_DATABASE)$(FOGDB_SSL_OPTIONS)'
         volumeMounts:
-        - name: sample-keys
-          mountPath: /sample-keys
+        - name: sample-data
+          mountPath: /sample-data
       nodeSelector:
         {{- toYaml .Values.toolbox.nodeSelector | nindent 8 }}
       tolerations:
         {{- toYaml .Values.toolbox.tolerations | nindent 8 }}
       volumes:
-      - name: sample-keys
+      - name: sample-data
         projected:
           sources:
           - secret:

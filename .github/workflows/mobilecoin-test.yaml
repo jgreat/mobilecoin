@@ -30,33 +30,6 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@v2
-    
-    - name: Cache rust build binaries
-      id: artifact_cache
-      uses: actions/cache@v2
-      with:
-        path: |
-          build_artifacts
-        # Key is a hash of all the .rs, .proto and Cargo.toml files.
-        # if code changes, invalidate cache and rebuild
-        key: ${{ runner.os }}-build-cargo-hardware-build-artifacts-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml') }}
-    
-    - name: Cache sample_data
-      if: steps.artifact_cache.outputs.cache-hit == 'true'
-      id: sample_data_cache
-      uses: actions/cache@v2
-      with:
-        path: |
-          sample_data
-        key: sample-data-build-cargo-hardware-${{ github.ref_name }}-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml', '**/populate_origin_data.sh') }}
-
-    - name: Check cache successful
-      env:
-        BIN_CACHE: "${{ steps.artifact_cache.outputs.cache-hit }}"
-        SAMPLE_DATA_CACHE: "${{ steps.sample_data_cache.outputs.cache-hit }}"
-      run: |
-        if [ "BIN_CACHE" == "false" ]; then echo "Binary cache not found. Start over from build."; exit 1; fi
-        if [ "SAMPLE_DATA_CACHE" == "false" ]; then echo "Sample data cache not found. Start over from build."; exit 1; fi
 
     - name: Distribute coins to fog accounts
       env:
@@ -83,40 +56,6 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     
-    - name: Cache rust build binaries
-      id: artifact_cache
-      uses: actions/cache@v2
-      with:
-        path: |
-          build_artifacts
-        # Key is a hash of all the .rs, .proto and Cargo.toml files.
-        # if code changes, invalidate cache and rebuild
-        key: ${{ runner.os }}-build-cargo-hardware-build-artifacts-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml') }}
-    
-    - name: Cache sample_data
-      if: steps.artifact_cache.outputs.cache-hit == 'true'
-      id: sample_data_cache
-      uses: actions/cache@v2
-      with:
-        path: |
-          sample_data
-        key: sample-data-build-cargo-hardware-${{ github.ref_name }}-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml', '**/populate_origin_data.sh') }}
-
-    - name: Check cache successful
-      env:
-        BIN_CACHE: ${{ steps.artifact_cache.outputs.cache-hit }}
-        SAMPLE_DATA_CACHE: ${{ steps.sample_data.outputs.cache-hit }}
-      run: |
-        if [ "${BIN_CACHE}" == "false" ]
-        then
-          echo "Binary cache not found. Start over from build."; exit 1
-        fi
-
-        if [ "${SAMPLE_DATA_CACHE}" == "false" ]
-        then
-          echo "Sample data cache not found. Start over from build."; exit 1
-        fi
-
     - name: Run fog-test-client
       env:
         NAMESPACE: ${{ github.event.inputs.namespace }}
@@ -149,24 +88,6 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@v2
-
-    - name: Cache sample_data
-      id: sample_data_cache
-      uses: actions/cache@v2
-      with:
-        path: |
-          sample_data
-        key: sample-data-build-cargo-hardware-${{ github.ref_name }}-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml', '**/populate_origin_data.sh') }}
-
-    - name: Check cache successful
-      shell: bash
-      env:
-        SAMPLE_DATA_CACHE: ${{ steps.sample_data.outputs.cache-hit }}
-      run: |
-        if [ "${SAMPLE_DATA_CACHE}" == "false" ]
-        then
-          echo "Sample data cache not found. Start over from build."; exit 1
-        fi
 
     - name: Run wallet integration (mobilecoind) tests
       env:

@@ -71,7 +71,7 @@ jobs:
           build_artifacts
         # Key is a hash of all the .rs, .proto and Cargo.toml files.
         # if code changes, invalidate cache and rebuild
-        key: ${{ runner.os }}-build-cargo-hardware-build-artifacts-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml') }}
+        key: ${{ runner.os }}-build-cargo-hardware-build-artifacts-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml') }}-${{ secret.CACHE_BUSTER }}
 
     - name: Cache cargo packages
       # We don't need cargo packages if we already have binaries.
@@ -84,7 +84,7 @@ jobs:
           /opt/cargo/git
           /opt/cargo/registry/index
           /opt/cargo/registry/cache
-        key: ${{ runner.os }}-build-cargo-hardware-cargo-${{ hashFiles('**/Cargo.lock') }}
+        key: ${{ runner.os }}-build-cargo-hardware-cargo-${{ hashFiles('**/Cargo.lock') }}-${{ secret.CACHE_BUSTER }}
 
     - name: Write environment values
       env:
@@ -155,7 +155,7 @@ jobs:
           go_build_artifacts
         # Key is a hash of all the .rs, .proto and Cargo.toml files.
         # if code changes, invalidate cache and rebuild
-        key: ${{ runner.os }}-go-build-artifacts-${{ hashFiles('go-grpc-gateway/**/*.go', 'go-grpc-gateway/go.*', '**/*.proto') }}
+        key: ${{ runner.os }}-go-build-artifacts-${{ hashFiles('go-grpc-gateway/**/*.go', 'go-grpc-gateway/go.*', '**/*.proto') }}-${{ secret.CACHE_BUSTER }}
 
     - name: Add protobuf-compiler
       if: steps.go_artifact_cache.outputs.cache-hit != 'true'
@@ -193,7 +193,7 @@ jobs:
       with:
         path: |
           build_artifacts
-        key: ${{ runner.os }}-build-cargo-hardware-build-artifacts-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml') }}
+        key: ${{ runner.os }}-build-cargo-hardware-build-artifacts-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml') }}-${{ secret.CACHE_BUSTER }}
 
     - name: Cache sample_data
       id: sample_data_cache
@@ -201,7 +201,7 @@ jobs:
       with:
         path: |
           sample_data
-        key: sample-data-build-cargo-hardware-${{ github.ref_name }}-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml', '**/populate_origin_data.sh') }}
+        key: sample-data-build-cargo-hardware-${{ github.ref_name }}-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml', '**/populate_origin_data.sh') }}-${{ secret.CACHE_BUSTER }}
 
     - name: Generate version metadata
       id: meta
@@ -264,7 +264,7 @@ jobs:
       with:
         path: |
           build_artifacts
-        key: ${{ runner.os }}-build-cargo-hardware-build-artifacts-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml') }}
+        key: ${{ runner.os }}-build-cargo-hardware-build-artifacts-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml') }}-${{ secret.CACHE_BUSTER }}
 
     - name: Cache go build binaries
       id: go_artifact_cache
@@ -274,7 +274,7 @@ jobs:
           go_build_artifacts
         # Key is a hash of all the .rs, .proto and Cargo.toml files.
         # if code changes, invalidate cache and rebuild
-        key: ${{ runner.os }}-go-build-artifacts-${{ hashFiles('go-grpc-gateway/**/*.go', 'go-grpc-gateway/go.*', '**/*.proto') }}
+        key: ${{ runner.os }}-go-build-artifacts-${{ hashFiles('go-grpc-gateway/**/*.go', 'go-grpc-gateway/go.*', '**/*.proto') }}-${{ secret.CACHE_BUSTER }}
 
     - name: Cache sample_data
       id: sample_data_cache
@@ -282,7 +282,7 @@ jobs:
       with:
         path: |
           sample_data
-        key: sample-data-build-cargo-hardware-${{ github.ref_name }}-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml', '**/populate_origin_data.sh') }}
+        key: sample-data-build-cargo-hardware-${{ github.ref_name }}-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml', '**/populate_origin_data.sh') }}-${{ secret.CACHE_BUSTER }}
 
     - name: Generate version metadata
       id: meta
