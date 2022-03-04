@@ -7,11 +7,7 @@ env:
   FOG_AUTHORITY_ROOT_CA_CERT_PATH: .tmp/fog_authority_root_ca_cert.pem
 
   # Enclave signing cert paths
-  ENCLAVE_SIGNING_KEY_PATH: .tmp/enclave_signing.pem
-  CONSENSUS_ENCLAVE_PRIVKEY: .tmp/enclave_signing.pem
-  LEDGER_ENCLAVE_PRIVKEY: .tmp/enclave_signing.pem
-  VIEW_ENCLAVE_PRIVKEY: .tmp/enclave_signing.pem
-  INGEST_ENCLAVE_PRIVKEY: .tmp/enclave_signing.pem
+
 
 on:
   push:
@@ -88,6 +84,7 @@ jobs:
 
     - name: Write environment values
       env:
+        ENCLAVE_SIGNING_KEY_PATH: ${{ github.workspace }}/.tmp/enclave_signing.pem
         ENCLAVE_SIGNING_KEY: ${{ secrets.ENCLAVE_SIGNING_KEY }}
       run: |
         mkdir -p .tmp
@@ -101,6 +98,10 @@ jobs:
         SGX_MODE: HW
         RUST_BACKTRACE: full
         MOB_RELEASE: 1
+        CONSENSUS_ENCLAVE_PRIVKEY: ${{ github.workspace }}/.tmp/enclave_signing.pem
+        LEDGER_ENCLAVE_PRIVKEY: ${{ github.workspace }}/.tmp/enclave_signing.pem
+        VIEW_ENCLAVE_PRIVKEY: ${{ github.workspace }}/.tmp/enclave_signing.pem
+        INGEST_ENCLAVE_PRIVKEY: ${{ github.workspace }}/.tmp/enclave_signing.pem
       run: |
         cargo build --release \
           -p mc-consensus-service \
