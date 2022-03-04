@@ -2,6 +2,8 @@
 
 set -e
 
+export GRPC_DEFAULT_SSL_ROOTS_FILE_PATH="/etc/ssl/certs/ca-certificates.crt"
+
 mkdir -p .tmp/strategies/keys
 
 for i in {0..4}
