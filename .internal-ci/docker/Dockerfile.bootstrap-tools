@@ -15,7 +15,7 @@ RUN apt-get update && \
         gettext \
         libssl1.1 \
         jq \
-        vim
+        vim \
     rm -rf /var/cache/apt && \
     rm -rf /var/lib/apt/lists/*
 
