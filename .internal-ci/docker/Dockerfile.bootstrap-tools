@@ -19,6 +19,10 @@ RUN apt-get update \
  && rm -rf /var/cache/apt \
  && rm -rf /var/lib/apt/lists/*
 
+# Populate origin data
+ARG ORIGIN_DATA_DIR=sample_data
+COPY ${ORIGIN_DATA_DIR}/ledger /var/lib/mobilecoin/origin_data
+
 ARG RUST_BIN_PATH=target/release
 COPY ${RUST_BIN_PATH}/fog-sql-recovery-db-migrations /usr/local/bin/
 COPY ${RUST_BIN_PATH}/generate-sample-ledger /usr/local/bin/
@@ -26,3 +30,7 @@ COPY ${RUST_BIN_PATH}/sample-keys /usr/local/bin/
 COPY ${RUST_BIN_PATH}/fog-distribution /usr/local/bin/
 COPY ${RUST_BIN_PATH}/test_client /usr/local/bin/
 COPY ${RUST_BIN_PATH}/fog_ingest_client /usr/local/bin/
+COPY .internal-ci/util/* /usr/local/bin/
+
+COPY .internal-ci/docker/entrypoints/bootstrap-tools.sh /usr/local/bin/entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
