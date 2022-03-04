@@ -105,7 +105,7 @@ then
             helm s3 push --relative --force ".tmp/charts/${chart_name}-${INPUT_CHART_VERSION}.tgz" repo
             ;;
 
-        rancher-namespace-delete)
+        namespace-delete)
             rancher_get_kubeconfig
             is_set INPUT_NAMESPACE
 
@@ -113,7 +113,7 @@ then
             k delete ns "${INPUT_NAMESPACE}" --now --wait --request-timeout=5m --ignore-not-found
             ;;
 
-        rancher-namespace-create)
+        namespace-create)
             # Create a namespace in the default project so we get all the default configs and secrets
             rancher_get_kubeconfig
             is_set INPUT_NAMESPACE
@@ -146,7 +146,7 @@ then
                 -X POST "${namespaces_url}/${INPUT_NAMESPACE}?action=move" \
                 -d "{\"projectId\":\"${default_project_id}\"}"
             ;;
-        rancher-delete-release)
+        delete-release)
             # Delete a helm release
             rancher_get_kubeconfig
             is_set INPUT_NAMESPACE
@@ -167,7 +167,7 @@ then
             done
             echo "-- Release ${INPUT_RELEASE_NAME} not found."
             ;;
-        rancher-delete-pvcs)
+        delete-pvcs)
             rancher_get_kubeconfig
             is_set INPUT_NAMESPACE
 
@@ -178,7 +178,7 @@ then
                 k delete pvc "${p}" -n "${INPUT_NAMESPACE}" --now --wait --request-timeout=5m --ignore-not-found
             done
             ;;
-        rancher-helm-deploy)
+        helm-deploy)
             rancher_get_kubeconfig
             is_set INPUT_NAMESPACE
             is_set INPUT_RELEASE_NAME
@@ -292,6 +292,32 @@ then
             echo "-- No Active Primary ingest found. Activating ingest 0."
             command="fog_ingest_client --uri 'insecure-fog-ingest://${instance}-0.${instance}:3226' activate"
             k exec -n "${INPUT_NAMESPACE}" "${toolbox}" -- /bin/bash -c "${command}"
+            ;;
+        sample-keys-create-secrets)
+            rancher_get_kubeconfig
+            is_set INPUT_NAMESPACE
+
+            if [ ! -f "${GITHUB_WORKSPACE}/sample_data" ]
+            then
+                echo_exit "sample_data not found"
+            fi
+
+            mkdir -p "${GITHUB_WORKSPACE}/.tmp"
+            pushd "${GITHUB_WORKSPACE}/sample_data" || exit 1
+
+            echo "-- Create sample-keys secret"
+            tar czf "${GITHUB_WORKSPACE}/.tmp/keys.tar.gz" ./keys
+
+            k create secret generic sample-keys -n "${INPUT_NAMESPACE}" \
+              --from-file="${GITHUB_WORKSPACE}/.tmp/keys.tar.gz"
+
+            echo "-- Create sample-keys-fog secret"
+            tar czf "${GITHUB_WORKSPACE}/.tmp/fog_keys.tar.gz" ./keys
+
+            k create secret generic sample-keys-fog -n "${INPUT_NAMESPACE}" \
+              --from-file="${GITHUB_WORKSPACE}/.tmp/fog_keys.tar.gz"
+            
+            popd || exit 1
             ;;
         *)
             error_exit "Command ${INPUT_ACTION} not recognized"

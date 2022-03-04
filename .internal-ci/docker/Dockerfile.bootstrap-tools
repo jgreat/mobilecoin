@@ -13,10 +13,9 @@ RUN apt-get update && \
     apt-get install -y \
         ca-certificates \
         gettext \
-        libpq-dev \
         libssl1.1 \
         jq \
-        wget && \
+        vim
     rm -rf /var/cache/apt && \
     rm -rf /var/lib/apt/lists/*
 
@@ -25,4 +24,5 @@ COPY ${RUST_BIN_PATH}/fog-sql-recovery-db-migrations /usr/local/bin/
 COPY ${RUST_BIN_PATH}/generate-sample-ledger /usr/local/bin/
 COPY ${RUST_BIN_PATH}/sample-keys /usr/local/bin/
 COPY ${RUST_BIN_PATH}/fog-distribution /usr/local/bin/
+COPY ${RUST_BIN_PATH}/test_client /usr/local/bin/
 COPY ${RUST_BIN_PATH}/fog_ingest_client /usr/local/bin/

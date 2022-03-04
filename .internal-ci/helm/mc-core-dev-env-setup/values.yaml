@@ -6,8 +6,8 @@ global:
       allowAnyFee: 'false'
 
     ledgerDistribution:
-      awsRegion: us-west-1
-      s3Bucket: mobilecoin.chain
+      awsRegion: eu-central-1
+      s3Bucket: mobilecoin.eu.development.chain
       startFrom: last
 
     networkConfig:

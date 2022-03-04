@@ -30,7 +30,7 @@ jobs:
     - name: Delete namespace
       uses: ./.github/actions/helm
       with:
-        action: rancher-namespace-delete
+        action: namespace-delete
         namespace: ${{ github.event.inputs.namespace }}
         rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
         rancher_url: ${{ secrets.RANCHER_URL }}

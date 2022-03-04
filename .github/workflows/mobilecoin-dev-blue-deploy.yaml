@@ -37,7 +37,7 @@ jobs:
     - name: Create namespace
       uses: ./.github/actions/helm
       with:
-        action: rancher-namespace-create
+        action: namespace-create
         namespace: ${{ github.event.inputs.namespace }}
         rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
         rancher_url: ${{ secrets.RANCHER_URL }}
@@ -65,7 +65,7 @@ jobs:
     - name: Deploy environment setup
       uses: ./.github/actions/helm
       with:
-        action: rancher-helm-deploy
+        action: helm-deploy
         chart_repo: https://s3.us-east-2.amazonaws.com/charts.mobilecoin.com/
         chart_name: mc-core-dev-env-setup
         chart_version: ${{ github.event.inputs.version }}
@@ -98,7 +98,7 @@ jobs:
     - name: Deploy Consensus nodes
       uses: ./.github/actions/helm
       with:
-        action: rancher-helm-deploy
+        action: helm-deploy
         chart_repo: https://s3.us-east-2.amazonaws.com/charts.mobilecoin.com/
         chart_name: consensus-node
         chart_version: ${{ github.event.inputs.version }}
@@ -125,7 +125,7 @@ jobs:
     - name: Deploy PostgreSQL instance
       uses: ./.github/actions/helm
       with:
-        action: rancher-helm-deploy
+        action: helm-deploy
         chart_repo: https://charts.bitnami.com/bitnami
         chart_name: postgresql
         chart_version: 11.1.1
@@ -154,7 +154,7 @@ jobs:
     - name: Deploy Consensus nodes
       uses: ./.github/actions/helm
       with:
-        action: rancher-helm-deploy
+        action: helm-deploy
         chart_repo: https://s3.us-east-2.amazonaws.com/charts.mobilecoin.com/
         chart_name: mobilecoind
         chart_version: ${{ github.event.inputs.version }}
@@ -162,6 +162,42 @@ jobs:
           --set image.org=jgreat
         chart_wait_timeout: 5m
         release_name: mobilecoind
+        namespace: ${{ github.event.inputs.namespace }}
+        rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
+        rancher_url: ${{ secrets.RANCHER_URL }}
+        rancher_token: ${{ secrets.RANCHER_TOKEN }}
+
+  sample-keys-deploy:
+    runs-on: self-hosted
+    steps:
+    - name: Start with clean workspace
+      run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Cache sample_data
+      id: sample_data_cache
+      uses: actions/cache@v2
+      with:
+        path: |
+          sample_data
+        key: sample-data-build-cargo-hardware-${{ github.ref_name }}-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml', '**/populate_origin_data.sh') }}
+
+    - name: Check cache successful
+      shell: bash
+      env:
+        SAMPLE_DATA_CACHE: ${{ steps.sample_data.outputs.cache-hit }}
+      run: |
+        if [ "${SAMPLE_DATA_CACHE}" == "false" ]
+        then
+          echo "Sample data cache not found. Start over from build."; exit 1
+        fi
+
+    - name: Create sample-keys secrets
+      uses: ./.github/actions/helm
+      with:
+        action: sample-keys-create-secrets
         namespace: ${{ github.event.inputs.namespace }}
         rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
         rancher_url: ${{ secrets.RANCHER_URL }}
@@ -182,7 +218,7 @@ jobs:
     - name: Deploy fog-ingest-blue
       uses: ./.github/actions/helm
       with:
-        action: rancher-helm-deploy
+        action: helm-deploy
         chart_repo: https://s3.us-east-2.amazonaws.com/charts.mobilecoin.com/
         chart_name: fog-ingest
         chart_version: ${{ github.event.inputs.version }}
@@ -251,7 +287,7 @@ jobs:
     - name: Deploy fog-services
       uses: ./.github/actions/helm
       with:
-        action: rancher-helm-deploy
+        action: helm-deploy
         chart_repo: https://s3.us-east-2.amazonaws.com/charts.mobilecoin.com/
         chart_name: fog-services
         chart_version: ${{ github.event.inputs.version }}
