@@ -8,16 +8,16 @@ SHELL ["/bin/bash", "-c"]
 
 # Install any updates
 #
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y \
+RUN apt-get update \
+ && apt-get upgrade -y \
+ && apt-get install -y \
         ca-certificates \
         gettext \
         libssl1.1 \
         jq \
         vim \
-    rm -rf /var/cache/apt && \
-    rm -rf /var/lib/apt/lists/*
+ && rm -rf /var/cache/apt \
+ && rm -rf /var/lib/apt/lists/*
 
 ARG RUST_BIN_PATH=target/release
 COPY ${RUST_BIN_PATH}/fog-sql-recovery-db-migrations /usr/local/bin/
