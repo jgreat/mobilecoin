@@ -4,7 +4,7 @@ env:
   DOCKER_ORG: jgreat
 
   # Fog authority certificate path
-  FOG_AUTHORITY_ROOT_CA_CERT_PATH: .tmp/fog_authority_root_ca_cert.pem
+  
 
   # Enclave signing cert paths
 
@@ -87,7 +87,7 @@ jobs:
         ENCLAVE_SIGNING_KEY_PATH: ${{ github.workspace }}/.tmp/enclave_signing.pem
         ENCLAVE_SIGNING_KEY: ${{ secrets.ENCLAVE_SIGNING_KEY }}
       run: |
-        mkdir -p .tmp
+        mkdir -p ${GITHUB_WORKSPACE}/.tmp
         echo "${ENCLAVE_SIGNING_KEY}" > "${ENCLAVE_SIGNING_KEY_PATH}"
 
     - name: Build Rust
@@ -214,10 +214,10 @@ jobs:
         FOG_AUTHORITY_ROOT_CA_CERT: ${{ secrets.FOG_AUTHORITY_ROOT_CA_CERT }}
       run: |
         mkdir -p .tmp
-        echo "${FOG_AUTHORITY_ROOT_CA_CERT}" > "${FOG_AUTHORITY_ROOT_CA_CERT_PATH}"
+        echo "${FOG_AUTHORITY_ROOT_CA_CERT}" > .tmp/fog_authority_root_ca_cert.pem
 
     - name: Populate origin data
-      if: steps.sample_data_cache.outputs.cache-hit != 'true'
+      # if: steps.sample_data_cache.outputs.cache-hit != 'true'
       env:
         BIN_PATH: build_artifacts
         FOG_REPORT_URL: fog://fog.${{ steps.meta.outputs.branch }}.development.mobilecoin.com
