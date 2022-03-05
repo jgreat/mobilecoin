@@ -320,7 +320,7 @@ then
               -n "${INPUT_NAMESPACE}" --from-file="${GITHUB_WORKSPACE}/.tmp/keys.tar.gz"
             
             echo "-- Create sample-keys-fog secret"
-            tar czf "${GITHUB_WORKSPACE}/.tmp/fog_keys.tar.gz" ./keys
+            tar czf "${GITHUB_WORKSPACE}/.tmp/fog_keys.tar.gz" ./fog_keys
 
             k delete secret sample-keys-fog -n "${INPUT_NAMESPACE}" --now --wait --request-timeout=5m --ignore-not-found
 
