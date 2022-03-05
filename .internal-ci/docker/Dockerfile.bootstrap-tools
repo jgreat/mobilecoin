@@ -23,7 +23,7 @@ RUN apt-get update \
  && rm -rf /var/cache/apt \
  && rm -rf /var/lib/apt/lists/*
 
-# update pip because python (┛ಠ_ಠ)┛彡┻━┻
+# update pip
 RUN pip3 install --upgrade pip
 
 # Populate origin data

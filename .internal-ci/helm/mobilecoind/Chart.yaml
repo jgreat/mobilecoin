@@ -10,8 +10,3 @@ dependencies:
   version: 0.0.0
   condition: mcCoreCommonConfig.enabled
   alias: mcCoreCommonConfig
-- name: mobilecoind-config
-  repository: file://../mobilecoind-config
-  version: 0.0.0
-  condition: mobilecoindConfig.enabled
-  alias: mobilecoindConfig

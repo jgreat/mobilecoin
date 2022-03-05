@@ -99,7 +99,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Test - fog-test-client
+    - name: Test - mobilecoind (Wallet Integration)
       uses: ./.github/actions/helm
       with:
         action: toolbox-exec
