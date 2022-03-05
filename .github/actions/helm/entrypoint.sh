@@ -319,6 +319,9 @@ then
             
             popd || exit 1
             ;;
+        toolbox-exec)
+            
+            ;;
         *)
             error_exit "Command ${INPUT_ACTION} not recognized"
             ;;
