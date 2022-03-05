@@ -62,10 +62,10 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Delete sample-data secret
+    - name: Delete sample-keys secrets
       uses: ./.github/actions/helm
       with:
-        action: sample-data-delete-secrets
+        action: sample-keys-delete-secrets
         namespace: ${{ github.event.inputs.namespace }}
         rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
         rancher_url: ${{ secrets.RANCHER_URL }}

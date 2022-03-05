@@ -32,7 +32,7 @@ BIN_PATH=${BIN_PATH:-"target/release"}
 REAL_BIN_PATH=$(realpath "${BIN_PATH}")
 REAL_CA_PATH=$(realpath "${FOG_AUTHORITY_ROOT_CA_CERT_PATH}")
 
-pushd sample_data || exit 1
+pushd sample_data > /dev/null || exit 1
 
 echo "-- Generate initial keys"
 "${REAL_BIN_PATH}/sample-keys" --num 1000 \
@@ -52,4 +52,4 @@ echo "-- Generate keys for fog-distribution"
 
 rm -f ./ledger/lock.mdb
 
-popd || exit 1
+popd > /dev/null || exit 1
