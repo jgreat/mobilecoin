@@ -308,18 +308,20 @@ then
             echo "-- Create sample-keys secret"
             tar czf "${GITHUB_WORKSPACE}/.tmp/keys.tar.gz" ./keys
 
-            k create secret generic sample-keys -n "${INPUT_NAMESPACE}" \
+            k create secret generic sample-keys \
+              -n "${INPUT_NAMESPACE}" -o yaml --dry-run=client --save-config=false --append-hash=false \
               --from-file="${GITHUB_WORKSPACE}/.tmp/keys.tar.gz" -o yaml > "${GITHUB_WORKSPACE}/.tmp/sample-keys-secret.yaml"
             
-            k apply -n "${INPUT_NAMESPACE}" -f "${GITHUB_WORKSPACE}/.tmp/sample-keys-secret.yaml"
+            k apply -n "${INPUT_NAMESPACE}" --overwrite=true -f "${GITHUB_WORKSPACE}/.tmp/sample-keys-secret.yaml"
 
             echo "-- Create sample-keys-fog secret"
             tar czf "${GITHUB_WORKSPACE}/.tmp/fog_keys.tar.gz" ./keys
 
-            k create secret generic sample-keys-fog -n "${INPUT_NAMESPACE}" \
-              --from-file="${GITHUB_WORKSPACE}/.tmp/fog_keys.tar.gz" -o yaml > "${GITHUB_WORKSPACE}/.tmp/sample-keys-fog-secret.yaml"
+            k create secret generic sample-keys-fog \
+              -n "${INPUT_NAMESPACE}" -o yaml --dry-run=client --save-config=false --append-hash=false \
+              --from-file="${GITHUB_WORKSPACE}/.tmp/fog_keys.tar.gz" > "${GITHUB_WORKSPACE}/.tmp/sample-keys-fog-secret.yaml"
             
-            k apply -n "${INPUT_NAMESPACE}" -f "${GITHUB_WORKSPACE}/.tmp/sample-keys-fog-secret.yaml"
+            k apply -n "${INPUT_NAMESPACE}" --overwrite=true -f "${GITHUB_WORKSPACE}/.tmp/sample-keys-fog-secret.yaml"
 
             popd || exit 1
             ;;
