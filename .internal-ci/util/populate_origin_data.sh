@@ -20,6 +20,10 @@ is_set()
 is_set FOG_AUTHORITY_ROOT_CA_CERT_PATH
 is_set FOG_REPORT_URL
 
+echo "-- fog-root-ca-path: ${FOG_AUTHORITY_ROOT_CA_CERT_PATH}"
+sha256sum "${FOG_AUTHORITY_ROOT_CA_CERT_PATH}"
+echo "-- fog-report-url: ${FOG_REPORT_URL}"
+
 mkdir -p sample_data/ledger
 mkdir -p sample_data/keys
 mkdir -p sample_data/fog_keys
