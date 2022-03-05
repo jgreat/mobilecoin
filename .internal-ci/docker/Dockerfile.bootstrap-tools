@@ -1,5 +1,5 @@
 #
-# This builds a slim runtime container for bootstrapping ledger and account data
+# This builds a runtime container for bootstrapping ledger, account data and running tests.
 #
 ARG REPO_ORG=mobilecoin
 FROM ${REPO_ORG}/runtime-base:latest
@@ -16,6 +16,7 @@ RUN apt-get update \
         libssl1.1 \
         jq \
         vim \
+        python3-pip \
  && rm -rf /var/cache/apt \
  && rm -rf /var/lib/apt/lists/*
 
@@ -35,9 +36,12 @@ COPY ${RUST_BIN_PATH}/fog_ingest_client /usr/local/bin/
 COPY api/proto/* /proto/api/
 COPY mobilecoind/api/proto/* /proto/mobilecoind/
 COPY consensus/api/proto/* /proto/consensus
-
-COPY mobilecoind/strategies /test/mobilecoind/strategies
 COPY .internal-ci/test/* /test/bin/
+COPY mobilecoind/strategies /test/mobilecoind/strategies
 
+# Install mobilecoind integration test requirements - better on a bigger build VM
+RUN pip3 install -r /test/mobilecoind/strategies/requirements.txt
+
+# Entrypoint
 COPY .internal-ci/docker/entrypoints/bootstrap-tools.sh /usr/local/bin/entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
