@@ -229,8 +229,8 @@ jobs:
     if: |
       always() &&
       ! contains(github.event.head_commit.message, '[skip-docker]') &&
-      needs.create-sample-data.result == 'success' &&
-      needs.build-go-projects.result == 'success'
+      (needs.create-sample-data.result == 'success' || needs.create-sample-data.result == 'skipped') &&
+      (needs.build-go-projects.result == 'success' || needs.build-go-projects.result == 'skipped')
     runs-on: self-hosted
     needs:
     - create-sample-data
@@ -369,7 +369,7 @@ jobs:
     if: |
       always() &&
       ! contains(github.event.head_commit.message, '[skip-blue-deploy]') &&
-      (needs.charts.result == 'success'|| needs.charts.result == 'skipped') &&
+      needs.charts.result == 'success' &&
       (needs.dev-reset.result == 'success' || needs.dev-reset.result == 'skipped')
     runs-on: self-hosted
     needs:
