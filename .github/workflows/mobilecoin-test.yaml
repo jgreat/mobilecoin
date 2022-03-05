@@ -21,8 +21,8 @@ jobs:
         echo namespace ${{ github.event.inputs.namespace }}
         cat ${GITHUB_EVENT_PATH}
 
-  distribute-fog-accounts:
-    if: "! contains(github.event.inputs.commit_message, '[skip-test-distribute-fog-accounts]')"
+  fog-distribution:
+    if: "! contains(github.event.inputs.commit_message, '[skip-test-fog-distribution]')"
     runs-on: self-hosted
     steps:
     - name: Start with clean workspace
@@ -31,63 +31,35 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Distribute coins to fog accounts
-      env:
-        NAMESPACE: ${{ github.event.inputs.namespace }}
-      run: |
-        ./build_artifacts/fog-distribution --sample-data-dir ./sample_data \
-          --peer mc://node1.${NAMESPACE}.development.mobilecoin.com:443 \
-          --peer mc://node2.${NAMESPACE}.development.mobilecoin.com:443 \
-          --peer mc://node3.${NAMESPACE}.development.mobilecoin.com:443 \
-          --num-tx-to-send 20
+    - name: Test - fog-distribution
+      uses: ./.github/actions/helm
+      with:
+        action: toolbox-exec
+        ingest_color: blue
+        namespace: ${{ github.event.inputs.namespace }}
+        rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
+        rancher_url: ${{ secrets.RANCHER_URL }}
+        rancher_token: ${{ secrets.RANCHER_TOKEN }}
+        command: |
+          fog-distribution --sample-data-dir /tmp/sample-data \
+            --peer mc://node1.${{ github.event.inputs.namespace }}.development.mobilecoin.com:443 \
+            --peer mc://node2.${{ github.event.inputs.namespace }}.development.mobilecoin.com:443 \
+            --peer mc://node3.${{ github.event.inputs.namespace }}.development.mobilecoin.com:443 \
+            --num-tx-to-send 20
 
 # fog-distribution --sample-data-dir /tmp/sample-data --num-tx-to-send 20 \
 #   --peer mc://node1.release-1-2-0-ci-2.development.mobilecoin.com:443 \
 #   --peer mc://node2.release-1-2-0-ci-2.development.mobilecoin.com:443 \
 #   --peer mc://node3.release-1-2-0-ci-2.development.mobilecoin.com:443
 
-
   fog-test-client:
     if: |
       always() &&
       ! contains(github.event.inputs.commit_message, '[skip-test-fog-test-client]') &&
-      (needs.distribute-fog-accounts.result == 'success' || needs.distribute-fog-accounts.result == 'skipped')
+      (needs.fog-distribution.result == 'success' || needs.fog-distribution.result == 'skipped')
     runs-on: self-hosted
     needs:
-    - distribute-fog-accounts
-    steps:
-    - name: Start with clean workspace
-      run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
-
-    - name: Checkout
-      uses: actions/checkout@v2
-    
-    - name: Run fog-test-client
-      env:
-        NAMESPACE: ${{ github.event.inputs.namespace }}
-      run: |
-        ./build_artifacts/test_client \
-          --key-dir ./sample_data/fog_keys \
-          --consensus mc://node1.${NAMESPACE}.development.mobilecoin.com/ \
-          --consensus mc://node2.${NAMESPACE}.development.mobilecoin.com/ \
-          --consensus mc://node3.${NAMESPACE}.development.mobilecoin.com/ \
-          --num-clients 6 \
-          --num-transactions 32 \
-          --consensus-wait 300 \
-          --transfer-amount 20 \
-          --fog-view fog-view://fog.${NAMESPACE}.development.mobilecoin.com:443 \
-          --fog-ledger fog-ledger://fog.${NAMESPACE}.development.mobilecoin.com:443
-
-  mobilecoind-integration:
-    if: |
-      always() &&
-      ! contains(github.event.inputs.commit_message, '[skip-test-mobilecoind-integration]') &&
-      (needs.distribute-fog-accounts.result == 'success' || needs.distribute-fog-accounts.result == 'skipped')
-    runs-on: self-hosted
-    container:
-      image: python:3.7
-    needs:
-    - distribute-fog-accounts
+    - fog-distribution
     steps:
     - name: Start with clean workspace
       run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
@@ -95,8 +67,59 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Run wallet integration (mobilecoind) tests
-      env:
-        MOBILECOIND_HOST: mobilecoind.${{ github.event.inputs.namespace }}.development.mobilecoin.com
-      run: |
-        .internal-ci/util/mobilecoind_integration_test.sh
+    - name: Test - fog-test-client
+      uses: ./.github/actions/helm
+      with:
+        action: toolbox-exec
+        ingest_color: blue
+        namespace: ${{ github.event.inputs.namespace }}
+        rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
+        rancher_url: ${{ secrets.RANCHER_URL }}
+        rancher_token: ${{ secrets.RANCHER_TOKEN }}
+        command: |
+          test_client \
+            --key-dir /tmp/sample-data/fog_keys \
+            --consensus mc://node1.${{ github.event.inputs.namespace }}.development.mobilecoin.com/ \
+            --consensus mc://node2.${{ github.event.inputs.namespace }}.development.mobilecoin.com/ \
+            --consensus mc://node3.${{ github.event.inputs.namespace }}.development.mobilecoin.com/ \
+            --num-clients 6 \
+            --num-transactions 32 \
+            --consensus-wait 300 \
+            --transfer-amount 20 \
+            --fog-view fog-view://fog.${{ github.event.inputs.namespace }}.development.mobilecoin.com:443 \
+            --fog-ledger fog-ledger://fog.${{ github.event.inputs.namespace }}.development.mobilecoin.com:443
+
+# test_client \
+#   --key-dir /tmp/sample-data/fog_keys \
+#   --consensus mc://node1.release-1-2-0-ci-2.development.mobilecoin.com/ \
+#   --consensus mc://node2.release-1-2-0-ci-2.development.mobilecoin.com/ \
+#   --consensus mc://node3.release-1-2-0-ci-2.development.mobilecoin.com/ \
+#   --num-clients 6 \
+#   --num-transactions 32 \
+#   --consensus-wait 300 \
+#   --transfer-amount 20 \
+#   --fog-view fog-view://fog.release-1-2-0-ci-2.development.mobilecoin.com:443 \
+#   --fog-ledger fog-ledger://fog.release-1-2-0-ci-2.development.mobilecoin.com:443
+
+  # mobilecoind-integration:
+  #   if: |
+  #     always() &&
+  #     ! contains(github.event.inputs.commit_message, '[skip-test-mobilecoind-integration]') &&
+  #     (needs.distribute-fog-accounts.result == 'success' || needs.distribute-fog-accounts.result == 'skipped')
+  #   runs-on: self-hosted
+  #   container:
+  #     image: python:3.7
+  #   needs:
+  #   - distribute-fog-accounts
+  #   steps:
+  #   - name: Start with clean workspace
+  #     run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
+
+  #   - name: Checkout
+  #     uses: actions/checkout@v2
+
+  #   - name: Run wallet integration (mobilecoind) tests
+  #     env:
+  #       MOBILECOIND_HOST: mobilecoind.${{ github.event.inputs.namespace }}.development.mobilecoin.com
+  #     run: |
+  #       .internal-ci/util/mobilecoind_integration_test.sh

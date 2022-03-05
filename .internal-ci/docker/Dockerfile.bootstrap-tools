@@ -30,7 +30,14 @@ COPY ${RUST_BIN_PATH}/sample-keys /usr/local/bin/
 COPY ${RUST_BIN_PATH}/fog-distribution /usr/local/bin/
 COPY ${RUST_BIN_PATH}/test_client /usr/local/bin/
 COPY ${RUST_BIN_PATH}/fog_ingest_client /usr/local/bin/
-COPY .internal-ci/util/* /usr/local/bin/
+
+# Copy test files, proto and scripts
+COPY api/proto/* /proto/api/
+COPY mobilecoind/api/proto/* /proto/mobilecoind/
+COPY consensus/api/proto/* /proto/consensus
+
+COPY mobilecoind/strategies /test/mobilecoind/strategies
+COPY .internal-ci/test/* /test/bin/
 
 COPY .internal-ci/docker/entrypoints/bootstrap-tools.sh /usr/local/bin/entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
