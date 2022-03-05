@@ -221,6 +221,7 @@ jobs:
       env:
         BIN_PATH: build_artifacts
         FOG_REPORT_URL: fog://fog.${{ steps.meta.outputs.branch }}.development.mobilecoin.com
+        FOG_AUTHORITY_ROOT_CA_CERT_PATH: .tmp/fog_authority_root_ca_cert.pem
       run: |
         .internal-ci/util/populate_origin_data.sh
 
