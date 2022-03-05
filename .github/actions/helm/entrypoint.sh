@@ -342,9 +342,9 @@ then
 
             echo "-- Toolbox: ${toolbox}"
             echo "-- execute command:"
-            echo "   ${command}"
+            echo "   ${INPUT_COMMAND}"
             echo ""
-            k exec -n "${INPUT_NAMESPACE}" "${toolbox}" -- /bin/bash -c "${command}"
+            k exec -n "${INPUT_NAMESPACE}" "${toolbox}" -- /bin/bash -c "${INPUT_COMMAND}"
             ;;
         *)
             error_exit "Command ${INPUT_ACTION} not recognized"
