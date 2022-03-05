@@ -182,14 +182,14 @@ jobs:
       with:
         path: |
           sample_data
-        key: sample-data-build-cargo-hardware-${{ github.ref_name }}-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml', '**/populate_origin_data.sh') }}-${{ secrets.CACHE_BUSTER }}
+        key: sample-data-${{ github.ref_name }}-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml', '**/populate_origin_data.sh') }}-${{ secrets.CACHE_BUSTER }}
 
     - name: Check cache successful
       shell: bash
       env:
-        SAMPLE_DATA_CACHE: ${{ steps.sample_data.outputs.cache-hit }}
+        SAMPLE_DATA_CACHE: ${{ steps.sample_data_cache.outputs.cache-hit }}
       run: |
-        if [ "${SAMPLE_DATA_CACHE}" == "false" ]
+        if [ "${SAMPLE_DATA_CACHE}" != "true" ]
         then
           echo "Sample data cache not found. Start over from build."; exit 1
         fi

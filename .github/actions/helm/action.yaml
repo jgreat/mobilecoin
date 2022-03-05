@@ -60,7 +60,7 @@ inputs:
   ingest_color:
     description: "Ingest blue or green"
     required: false
-  commands:
+  command:
     description: "shell commands to run"
     required: false
 runs:

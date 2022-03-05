@@ -34,13 +34,16 @@ REAL_CA_PATH=$(realpath "${FOG_AUTHORITY_ROOT_CA_CERT_PATH}")
 
 pushd sample_data || exit 1
 
-# Generate initial keys and initial ledger
+echo "-- Generate initial keys"
 "${REAL_BIN_PATH}/sample-keys" --num 1000 \
     --seed aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 
+echo ""
+echo "-- Initialize ledger"
 "${REAL_BIN_PATH}/generate-sample-ledger" --txs 100
 
-# Generate keys for fog-distribution
+echo ""
+echo "-- Generate keys for fog-distribution"
 "${REAL_BIN_PATH}/sample-keys" --num 500 \
     --seed bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb \
     --fog-report-url "${FOG_REPORT_URL}" \

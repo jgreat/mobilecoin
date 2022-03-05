@@ -297,9 +297,9 @@ then
             rancher_get_kubeconfig
             is_set INPUT_NAMESPACE
 
-            if [ ! -f "${GITHUB_WORKSPACE}/sample_data" ]
+            if [ ! -f "${GITHUB_WORKSPACE}/sample_data/keys/account_keys_0.json" ]
             then
-                echo_exit "sample_data not found"
+                error_exit "sample_data not found"
             fi
 
             mkdir -p "${GITHUB_WORKSPACE}/.tmp"
@@ -309,18 +309,42 @@ then
             tar czf "${GITHUB_WORKSPACE}/.tmp/keys.tar.gz" ./keys
 
             k create secret generic sample-keys -n "${INPUT_NAMESPACE}" \
-              --from-file="${GITHUB_WORKSPACE}/.tmp/keys.tar.gz"
+              --from-file="${GITHUB_WORKSPACE}/.tmp/keys.tar.gz" -o yaml > "${GITHUB_WORKSPACE}/.tmp/sample-keys-secret.yaml"
+            
+            k apply -n "${INPUT_NAMESPACE}" -f "${GITHUB_WORKSPACE}/.tmp/sample-keys-secret.yaml"
 
             echo "-- Create sample-keys-fog secret"
             tar czf "${GITHUB_WORKSPACE}/.tmp/fog_keys.tar.gz" ./keys
 
             k create secret generic sample-keys-fog -n "${INPUT_NAMESPACE}" \
-              --from-file="${GITHUB_WORKSPACE}/.tmp/fog_keys.tar.gz"
+              --from-file="${GITHUB_WORKSPACE}/.tmp/fog_keys.tar.gz" -o yaml > "${GITHUB_WORKSPACE}/.tmp/sample-keys-fog-secret.yaml"
             
+            k apply -n "${INPUT_NAMESPACE}" -f "${GITHUB_WORKSPACE}/.tmp/sample-keys-fog-secret.yaml"
+
             popd || exit 1
             ;;
+        sample-keys-delete-secrets)
+            rancher_get_kubeconfig
+            is_set INPUT_NAMESPACE
+
+            k delete secret sample-keys -n "${INPUT_NAMESPACE}" --now --wait --request-timeout=5m --ignore-not-found
+            k delete secret sample-keys-fog -n "${INPUT_NAMESPACE}" --now --wait --request-timeout=5m --ignore-not-found
+            ;;
         toolbox-exec)
-            
+            rancher_get_kubeconfig
+            is_set INPUT_NAMESPACE
+            is_set INPUT_COMMAND
+            is_set INPUT_INGEST_COLOR
+
+            echo "-- Get toolbox pod"
+            instance="fog-ingest-${INPUT_INGEST_COLOR}"
+            toolbox=$(k get pods -n "${INPUT_NAMESPACE}" -l "app.kubernetes.io/instance=${instance}" -l app=toolbox -o=name)
+
+            echo "-- Toolbox: ${toolbox}"
+            echo "-- execute command:"
+            echo "   ${command}"
+            echo ""
+            k exec -n "${INPUT_NAMESPACE}" "${toolbox}" -- /bin/bash -c "${command}"
             ;;
         *)
             error_exit "Command ${INPUT_ACTION} not recognized"

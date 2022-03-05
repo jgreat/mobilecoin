@@ -198,7 +198,7 @@ jobs:
       with:
         path: |
           sample_data
-        key: sample-data-build-cargo-hardware-${{ github.ref_name }}-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml', '**/populate_origin_data.sh') }}-${{ secrets.CACHE_BUSTER }}
+        key: sample-data-${{ github.ref_name }}-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml', '**/populate_origin_data.sh') }}-${{ secrets.CACHE_BUSTER }}
 
     - name: Generate version metadata
       id: meta
@@ -280,7 +280,7 @@ jobs:
       with:
         path: |
           sample_data
-        key: sample-data-build-cargo-hardware-${{ github.ref_name }}-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml', '**/populate_origin_data.sh') }}-${{ secrets.CACHE_BUSTER }}
+        key: sample-data-${{ github.ref_name }}-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml', '**/populate_origin_data.sh') }}-${{ secrets.CACHE_BUSTER }}
 
     - name: Generate version metadata
       id: meta

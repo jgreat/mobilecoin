@@ -51,6 +51,26 @@ jobs:
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
 
+  reset-sample-data:
+    needs:
+    - reset
+    runs-on: self-hosted
+    steps:
+    - name: Start with clean workspace
+      run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Delete sample-data secret
+      uses: ./.github/actions/helm
+      with:
+        action: sample-data-delete-secrets
+        namespace: ${{ github.event.inputs.namespace }}
+        rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
+        rancher_url: ${{ secrets.RANCHER_URL }}
+        rancher_token: ${{ secrets.RANCHER_TOKEN }}
+
   reset-storage:
     needs:
     - reset
