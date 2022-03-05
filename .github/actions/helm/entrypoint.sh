@@ -146,6 +146,7 @@ then
                 -X POST "${namespaces_url}/${INPUT_NAMESPACE}?action=move" \
                 -d "{\"projectId\":\"${default_project_id}\"}"
             ;;
+
         delete-release)
             # Delete a helm release
             rancher_get_kubeconfig
@@ -167,6 +168,7 @@ then
             done
             echo "-- Release ${INPUT_RELEASE_NAME} not found."
             ;;
+
         delete-pvcs)
             rancher_get_kubeconfig
             is_set INPUT_NAMESPACE
@@ -178,6 +180,7 @@ then
                 k delete pvc "${p}" -n "${INPUT_NAMESPACE}" --now --wait --request-timeout=5m --ignore-not-found
             done
             ;;
+
         helm-deploy)
             rancher_get_kubeconfig
             is_set INPUT_NAMESPACE
@@ -210,6 +213,7 @@ then
                 --version "${INPUT_CHART_VERSION}" ${sets}
             fi
             ;;
+
         fog-recovery-migrate)
             rancher_get_kubeconfig
             is_set INPUT_NAMESPACE
@@ -224,6 +228,7 @@ then
             command="fog-sql-recovery-db-migrations"
             k exec -n "${INPUT_NAMESPACE}" "${toolbox}" -- /bin/bash -c "${command}"
             ;;
+
         fog-ingest-activate)
             rancher_get_kubeconfig
             is_set INPUT_NAMESPACE
@@ -293,6 +298,7 @@ then
             command="fog_ingest_client --uri 'insecure-fog-ingest://${instance}-0.${instance}:3226' activate"
             k exec -n "${INPUT_NAMESPACE}" "${toolbox}" -- /bin/bash -c "${command}"
             ;;
+
         sample-keys-create-secrets)
             rancher_get_kubeconfig
             is_set INPUT_NAMESPACE
@@ -308,30 +314,22 @@ then
             echo "-- Create sample-keys secret"
             tar czf "${GITHUB_WORKSPACE}/.tmp/keys.tar.gz" ./keys
 
-            k create secret generic sample-keys \
-              -n "${INPUT_NAMESPACE}" -o yaml --dry-run=client --save-config=false --append-hash=false \
-              --from-file="${GITHUB_WORKSPACE}/.tmp/keys.tar.gz" -o yaml > "${GITHUB_WORKSPACE}/.tmp/sample-keys-secret.yaml"
-            
-            k apply -n "${INPUT_NAMESPACE}" --overwrite=true -f "${GITHUB_WORKSPACE}/.tmp/sample-keys-secret.yaml"
+            k delete secret sample-keys -n "${INPUT_NAMESPACE}" --now --wait --request-timeout=5m --ignore-not-found
 
+            k create secret generic sample-keys \
+              -n "${INPUT_NAMESPACE}" --from-file="${GITHUB_WORKSPACE}/.tmp/keys.tar.gz"
+            
             echo "-- Create sample-keys-fog secret"
             tar czf "${GITHUB_WORKSPACE}/.tmp/fog_keys.tar.gz" ./keys
 
+            k delete secret sample-keys-fog -n "${INPUT_NAMESPACE}" --now --wait --request-timeout=5m --ignore-not-found
+
             k create secret generic sample-keys-fog \
-              -n "${INPUT_NAMESPACE}" -o yaml --dry-run=client --save-config=false --append-hash=false \
-              --from-file="${GITHUB_WORKSPACE}/.tmp/fog_keys.tar.gz" > "${GITHUB_WORKSPACE}/.tmp/sample-keys-fog-secret.yaml"
-            
-            k apply -n "${INPUT_NAMESPACE}" --overwrite=true -f "${GITHUB_WORKSPACE}/.tmp/sample-keys-fog-secret.yaml"
+              -n "${INPUT_NAMESPACE}" --from-file="${GITHUB_WORKSPACE}/.tmp/fog_keys.tar.gz"
 
             popd || exit 1
             ;;
-        sample-keys-delete-secrets)
-            rancher_get_kubeconfig
-            is_set INPUT_NAMESPACE
 
-            k delete secret sample-keys -n "${INPUT_NAMESPACE}" --now --wait --request-timeout=5m --ignore-not-found
-            k delete secret sample-keys-fog -n "${INPUT_NAMESPACE}" --now --wait --request-timeout=5m --ignore-not-found
-            ;;
         toolbox-exec)
             rancher_get_kubeconfig
             is_set INPUT_NAMESPACE
