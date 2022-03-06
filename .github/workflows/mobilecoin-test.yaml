@@ -41,7 +41,7 @@ jobs:
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
         command: |
-          /test/bin/fog-distribution.sh
+          /test/bin/fog-distribution-test.sh
 
   fog-test-client:
     if: |
@@ -105,4 +105,4 @@ jobs:
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
         command: |
-          /test/bin/mobilecoind_integration_test.sh
+          /test/bin/mobilecoind-integration-test.sh
