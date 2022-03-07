@@ -42,14 +42,14 @@ jobs:
             "namespace": "${{ steps.meta.outputs.branch }}"
           }
 
-  a-previous-release-deploy:
+  previous-release-deploy:
     if: |
       always() &&
       ! contains(github.event.head_commit.message, '[skip-previous-release-deploy]') &&
-      (needs.dev-reset.result == 'success' || needs.dev-reset.result == 'skipped')
+      (needs.a-dev-reset.result == 'success' || needs.a-dev-reset.result == 'skipped')
     runs-on: self-hosted
     needs:
-    - dev-reset
+    - a-dev-reset
     steps:
     - name: Start with clean workspace
       run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
@@ -79,7 +79,7 @@ jobs:
             "ingest_color": "blue"
           }
 
-  a-previous-release-test:
+  previous-release-test:
     if: |
       always() &&
       ! contains(github.event.head_commit.message, '[skip-previous-release-test]') &&
@@ -110,7 +110,8 @@ jobs:
         display-workflow-run-url-interval: 30s
         inputs: |
           {
-            "namespace": "${{ steps.meta.outputs.branch }}"
+            "namespace": "${{ steps.meta.outputs.branch }}",
+            "ingest_color": "blue"
           }
 
   build-cargo-hardware:
@@ -442,7 +443,7 @@ jobs:
       always() &&
       ! contains(github.event.head_commit.message, '[skip-current-release-v1-deploy]') &&
       (needs.charts.result == 'success' || needs.charts.result == 'skipped') &&
-      (needs.a-previous-release-test.result == 'success' || needs.a-previous-release-test.result == 'skipped')
+      (needs.previous-release-test.result == 'success' || needs.previous-release-test.result == 'skipped')
     runs-on: self-hosted
     needs:
     - previous-release-test
