@@ -102,7 +102,7 @@ if __name__ == '__main__':
         resp = stub.GetBalance(
             mobilecoind_api_pb2.GetBalanceRequest(monitor_id=account_data.monitor_id))
         balance = resp.balance
-        logging.info("Starting balance for account", i, ":", resp)
+        logging.info("Starting balance for account", i, ":", resp.balance)
 
         # Note: due to the transaction fee, we can't assume we have enough funds
         # to divide equally among all our friends, so add an extra factor.
