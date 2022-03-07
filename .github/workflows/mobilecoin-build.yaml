@@ -412,7 +412,7 @@ jobs:
       (needs.previous-release-test.result == 'success' || needs.previous-release-test.result == 'skipped')
     runs-on: self-hosted
     needs:
-    - blue-deploy
+    - previous-release-deploy
     steps:
     - name: Start with clean workspace
       run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
