@@ -14,15 +14,15 @@ charts=(consensus-node consensus-node-config fog-ingest fog-ingest-config fog-se
 
 for i in "${images[@]}"
 do
+    docker rm "${i}"
     docker create --name "${i}" "mobilecoin/${i}:${source_tag}"
 done
 
-pushd release/target || exit 1
+pushd target/release || exit 1
 docker cp "bootstrap-tools:/usr/local/bin/fog-sql-recovery-db-migrations" ./
 docker cp "bootstrap-tools:/usr/local/bin/generate-sample-ledger" ./
 docker cp "bootstrap-tools:/usr/local/bin/sample-keys" ./
 docker cp "bootstrap-tools:/usr/local/bin/fog-distribution" ./
-docker cp "bootstrap-tools:/usr/local/bin/test_client" ./
 docker cp "bootstrap-tools:/usr/local/bin/fog_ingest_client" ./
 docker cp "fog-ledger:/usr/bin/libledger-enclave.signed.so" ./
 docker cp "fog-ledger:/usr/bin/ledger_server" ./
@@ -30,7 +30,6 @@ docker cp "fog-ledger:/usr/bin/mobilecoind" ./
 docker cp "fog-ledger:/usr/bin/mc-admin-http-gateway" ./
 docker cp "fog-ledger:/usr/bin/mc-ledger-migration" ./
 docker cp "fog-ledger:/usr/bin/mc-util-grpc-admin-tool" ./
-docker cp "fogingest:libingest-enclave.signed.so" ./
 docker cp "fogingest:/usr/bin/libingest-enclave.signed.so" ./
 docker cp "fogingest:/usr/bin/fog_ingest_server" ./
 docker cp "fogreport:/usr/bin/report_server" ./

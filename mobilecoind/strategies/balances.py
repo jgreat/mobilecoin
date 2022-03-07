@@ -46,14 +46,14 @@ def parse_args() -> argparse.ArgumentParser:
 
 if __name__ == '__main__':
     args = parse_args()
-    print(args)
+    logging.debug(args)
 
     stub = connect(args.mobilecoind_host, args.mobilecoind_port)
     block_count = stub.GetLedgerInfo(Empty()).block_count
     total = 0
     for keyfile in sorted(
             filter(lambda x: x.endswith(".json"), os.listdir(args.key_dir))):
-        print(keyfile)
+        logging.info("%s", keyfile)
 
         account_data = load_key_and_register(
             os.path.join(args.key_dir, keyfile), stub)
@@ -62,14 +62,14 @@ if __name__ == '__main__':
         request = mobilecoind_api_pb2.GetMonitorStatusRequest(monitor_id=account_data.monitor_id)
         monitor_block = stub.GetMonitorStatus(request).status.next_block
         if block_count != monitor_block:
-            print(f"\tAccount not synced.")
+            logging.info("Account not synced")
         else:
             resp = stub.GetBalance(
                 mobilecoind_api_pb2.GetBalanceRequest(monitor_id=account_data.monitor_id))
             balance = resp.balance
             total += balance
-            print(f"\tBalance: {resp.balance:,}")
+            logging.info("Balance: %s", resp.balance)
             # Remove balances of 0 FIXME: MC-367 also from mobilecoind wallet
             if int(balance) == 0 and args.prune:
                 os.remove(os.path.join(args.key_dir, keyfile))
-    print(f"Total balance of key collection: {total:,} PicoMob")
+    logging.info("Total balance of key collection: %s PicoMob", total)

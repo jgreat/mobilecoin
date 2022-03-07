@@ -7,6 +7,7 @@ import time
 import os
 import sys
 import uuid
+import json
 import mobilecoind_api_pb2
 import mobilecoind_api_pb2_grpc
 from collections import namedtuple
@@ -69,7 +70,7 @@ def load_key_and_register(keyfile, stub) -> AccountData:
 
 def register_random_key(stub, outdir) -> AccountData:
     entropy = [randint(0, 255) for i in range(32)]
-    logging.debug("entropy = ", entropy)
+    logging.debug("entropy = %s", entropy)
     data = {"root_entropy": entropy}
     outfile = 'account_keys_{}.json'.format(uuid.uuid4())
     with open(os.path.join(outdir, outfile), 'w') as out:
@@ -78,7 +79,7 @@ def register_random_key(stub, outdir) -> AccountData:
 
 
 def wait_for_accounts_sync(stub, accounts, wait_secs):
-    logging.debug("accounts = ", accounts[0])
+    logging.debug("accounts = %s", accounts[0])
     block_count = stub.GetLedgerInfo(Empty()).block_count
     synced_ids = {a: False for a in accounts}
     while not all(synced_ids.values()):
@@ -124,12 +125,12 @@ def poll_mitosis(starting_balance, account_data, tx_stats, stub):
                     # FIXME: don't know status currently...see below in poll
                     tx_stats[tx_id]['status'] = TransferStatus.success
             except Exception as exc:
-                logging.error(f"Got Balance exception: {repr(exc)}")
+                logging.error("Got Balance exception: %s", repr(exc))
         pending = [k for k in complete if not complete[k]]
-        logging.info("Still pending:", len(pending))
+        logging.info("Still pending: %s", len(pending))
         time.sleep(2)
     logging.info("All accounts transfers complete")
-    logging.info(f"Stats: {tx_stats}")
+    logging.debug(tx_stats)
     return tx_stats
 
 
@@ -137,7 +138,7 @@ def poll(monitor_id, tx_stats, stub):
     complete = {t: False for t in tx_stats.keys()}
     receipts = {t: tx_stats[t] for t in tx_stats.keys()}
     pending = complete.keys()
-    while not all(complete.values()):
+    while not all(complete.values()): 
         for tx_id in pending:
             try:
                 resp = stub.GetTxStatusAsSender(
@@ -146,22 +147,23 @@ def poll(monitor_id, tx_stats, stub):
                         receiver_tx_receipt_list=receipts[tx_id]["receipt"].receiver_tx_receipt_list
                     ))
                 if resp.status == mobilecoind_api_pb2.TxStatus.TombstoneBlockExceeded:
-                    logging.warning("Transfer did not complete in time", tx_id)
+                    logging.warning("Transfer did not complete in time: %s", tx_id)
                     complete[tx_id] = True
                     tx_stats[tx_id]['time_delta'] = time.time(
                     ) - tx_stats[tx_id]['start']
                     tx_stats[tx_id]['status'] = TransferStatus.tombstoned
                 elif resp.status == mobilecoind_api_pb2.TxStatus.Verified:
-                    logging.info("Transfer complete", tx_id)
+                    logging.info("Transfer complete %s", tx_id)
                     complete[tx_id] = True
                     tx_stats[tx_id]['time_delta'] = time.time(
                     ) - tx_stats[tx_id]['start']
                     tx_stats[tx_id]['status'] = TransferStatus.success
                 else:
-                    logging.warning("Transfer status unknown", resp.status)
+                    logging.warning("Transfer status unknown: %s", resp.status)
             except Exception as e:
-                logging.error(f"TransferStatus exception: {repr(e)}")
+                logging.error("TransferStatus exception: %s", repr(e))
         pending = [k for k in complete if not complete[k]]
         time.sleep(0.25)
-    logging.info(f"All accounts transfers complete: Stats:\n {tx_stats}")
+    logging.info("All accounts transfers complete")
+    logging.debug(tx_stats)
     return tx_stats
