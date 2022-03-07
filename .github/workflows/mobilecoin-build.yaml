@@ -370,11 +370,9 @@ jobs:
     if: |
       always() &&
       ! contains(github.event.head_commit.message, '[skip-previous-release-deploy]') &&
-      needs.charts.result == 'success' &&
       (needs.dev-reset.result == 'success' || needs.dev-reset.result == 'skipped')
     runs-on: self-hosted
     needs:
-    - charts
     - dev-reset
     steps:
     - name: Start with clean workspace
@@ -407,8 +405,8 @@ jobs:
   previous-release-test:
     if: |
       always() &&
-      ! contains(github.event.head_commit.message, '[previous-release-test]') &&
-      (needs.previous-release-test.result == 'success' || needs.previous-release-test.result == 'skipped')
+      ! contains(github.event.head_commit.message, '[skip-previous-release-test]') &&
+      (needs.previous-release-deploy.result == 'success' || needs.previous-release-deploy.result == 'skipped')
     runs-on: self-hosted
     needs:
     - previous-release-deploy
