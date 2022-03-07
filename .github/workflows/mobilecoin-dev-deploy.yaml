@@ -1,4 +1,4 @@
-name: mobilecoin-dev-blue-deploy
+name: mobilecoin-dev-deploy
 
 on: 
   workflow_dispatch:
@@ -16,6 +16,10 @@ on:
         type: string
         required: true
         default: docker.io/mobilecoin
+      ingest_color:
+        description: "Fog Ingest blue/green"
+        type: string
+        required: true
 
 jobs:
   list-values:
@@ -226,7 +230,7 @@ jobs:
         chart_wait_timeout: 5m
         chart_set: |
           --set image.org=${{ github.event.inputs.docker_image_org }}
-        release_name: fog-ingest-blue
+        release_name: fog-ingest-${{ github.event.inputs.ingest_color }}
         namespace: ${{ github.event.inputs.namespace }}
         rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
         rancher_url: ${{ secrets.RANCHER_URL }}
@@ -247,7 +251,7 @@ jobs:
       uses: ./.github/actions/helm
       with:
         action: fog-recovery-migrate
-        ingest_color: blue
+        ingest_color: ${{ github.event.inputs.ingest_color }}
         namespace: ${{ github.event.inputs.namespace }}
         rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
         rancher_url: ${{ secrets.RANCHER_URL }}
@@ -268,7 +272,7 @@ jobs:
       uses: ./.github/actions/helm
       with:
         action: fog-ingest-activate
-        ingest_color: blue
+        ingest_color: ${{ github.event.inputs.ingest_color }}
         namespace: ${{ github.event.inputs.namespace }}
         rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
         rancher_url: ${{ secrets.RANCHER_URL }}

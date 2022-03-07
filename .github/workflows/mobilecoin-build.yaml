@@ -42,6 +42,77 @@ jobs:
             "namespace": "${{ steps.meta.outputs.branch }}"
           }
 
+  previous-release-deploy:
+    if: |
+      always() &&
+      ! contains(github.event.head_commit.message, '[skip-previous-release-deploy]') &&
+      (needs.dev-reset.result == 'success' || needs.dev-reset.result == 'skipped')
+    runs-on: self-hosted
+    needs:
+    - dev-reset
+    steps:
+    - name: Start with clean workspace
+      run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Generate version metadata
+      id: meta
+      run: |
+        .internal-ci/util/metadata.sh
+
+    - name: Mobilecoin Development Deploy (Dispatch)
+      uses: aurelien-baudet/workflow-dispatch@v2.1.1
+      with:
+        workflow: mobilecoin-dev-deploy
+        token: ${{ secrets.ACTIONS_TOKEN }}
+        wait-for-completion: true
+        wait-for-completion-timeout: 30m
+        wait-for-completion-interval: 30s
+        display-workflow-run-url-interval: 30s
+        inputs: |
+          {
+            "namespace": "${{ steps.meta.outputs.branch }}",
+            "version": "${{ env.PREVIOUS_RELEASE }}",
+            "docker_image_org": "${{ env.DOCKER_ORG }}",
+            "ingest_color": "blue"
+          }
+
+  previous-release-test:
+    if: |
+      always() &&
+      ! contains(github.event.head_commit.message, '[skip-previous-release-test]') &&
+      (needs.previous-release-deploy.result == 'success' || needs.previous-release-deploy.result == 'skipped')
+    runs-on: self-hosted
+    needs:
+    - previous-release-deploy
+    steps:
+    - name: Start with clean workspace
+      run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
+    
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Generate version metadata
+      id: meta
+      run: |
+        .internal-ci/util/metadata.sh
+
+    - name: Run MobileCoin core tests
+      uses: aurelien-baudet/workflow-dispatch@v2.1.1
+      with:
+        workflow: mobilecoin-test
+        token: ${{ secrets.ACTIONS_TOKEN }}
+        wait-for-completion: true
+        wait-for-completion-timeout: 30m
+        wait-for-completion-interval: 30s
+        display-workflow-run-url-interval: 30s
+        inputs: |
+          {
+            "namespace": "${{ steps.meta.outputs.branch }}"
+          }
+
   build-cargo-hardware:
     if: "! contains(github.event.head_commit.message, '[skip-build]')"
     runs-on: self-hosted
@@ -366,14 +437,16 @@ jobs:
         chart_version: ${{ steps.meta.outputs.tag }}
         chart_path: .internal-ci/helm/${{ matrix.chart }}
 
-  previous-release-deploy:
+  current-release-v1-deploy:
     if: |
       always() &&
-      ! contains(github.event.head_commit.message, '[skip-previous-release-deploy]') &&
-      (needs.dev-reset.result == 'success' || needs.dev-reset.result == 'skipped')
+      ! contains(github.event.head_commit.message, '[skip-current-release-v1-deploy]') &&
+      (needs.charts.result == 'success' || needs.charts.result == 'skipped') &&
+      (needs.previous-release-test.result == 'success' || needs.previous-release-test.result == 'skipped')
     runs-on: self-hosted
     needs:
-    - dev-reset
+    - previous-release-test
+    - charts
     steps:
     - name: Start with clean workspace
       run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
@@ -389,7 +462,7 @@ jobs:
     - name: Mobilecoin Development Deploy (Dispatch)
       uses: aurelien-baudet/workflow-dispatch@v2.1.1
       with:
-        workflow: mobilecoin-dev-blue-deploy
+        workflow: mobilecoin-dev-deploy
         token: ${{ secrets.ACTIONS_TOKEN }}
         wait-for-completion: true
         wait-for-completion-timeout: 30m
@@ -399,13 +472,14 @@ jobs:
           {
             "namespace": "${{ steps.meta.outputs.branch }}",
             "version": "${{ env.PREVIOUS_RELEASE }}",
-            "docker_image_org": "${{ env.DOCKER_ORG }}"
+            "docker_image_org": "${{ env.DOCKER_ORG }}",
+            "ingest_color": "green"
           }
 
-  previous-release-test:
+  current-release-v1-test:
     if: |
       always() &&
-      ! contains(github.event.head_commit.message, '[skip-previous-release-test]') &&
+      ! contains(github.event.head_commit.message, '[skip-current-release-v1-test]') &&
       (needs.previous-release-deploy.result == 'success' || needs.previous-release-deploy.result == 'skipped')
     runs-on: self-hosted
     needs:
@@ -433,7 +507,9 @@ jobs:
         display-workflow-run-url-interval: 30s
         inputs: |
           {
-            "namespace": "${{ steps.meta.outputs.branch }}"
+            "namespace": "${{ steps.meta.outputs.branch }}",
+            "ingest_color": "green",
+            "fog_distribution": "false"
           }
 
 # ${{ steps.meta.outputs.tag }}
