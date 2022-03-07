@@ -401,7 +401,6 @@ jobs:
           {
             "namespace": "${{ steps.meta.outputs.branch }}",
             "version": "${{ env.PREVIOUS_RELEASE }}",
-            "commit_message": "${{ github.event.head_commit.message }}"
             "docker_image_org": "${{ env.DOCKER_ORG }}"
           }
 
