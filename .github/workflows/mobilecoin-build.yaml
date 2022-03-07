@@ -2,6 +2,7 @@ name: mobilecoin-build
 
 env:
   DOCKER_ORG: jgreat
+  PREVIOUS_RELEASE: 1.1.3-dev
 
 on:
   push:
@@ -399,7 +400,7 @@ jobs:
         inputs: |
           {
             "namespace": "${{ steps.meta.outputs.branch }}",
-            "version": "${{ steps.meta.outputs.tag }}",
+            "version": "${{ env.PREVIOUS_RELEASE }}",
             "commit_message": "${{ github.event.head_commit.message }}"
             "docker_image_org": "${{ env.DOCKER_ORG }}"
           }
@@ -407,8 +408,8 @@ jobs:
   previous-release-test:
     if: |
       always() &&
-      ! contains(github.event.head_commit.message, '[skip-blue-test]') &&
-      (needs.blue-deploy.result == 'success' || needs.blue-deploy.result == 'skipped')
+      ! contains(github.event.head_commit.message, '[previous-release-test]') &&
+      (needs.previous-release-test.result == 'success' || needs.previous-release-test.result == 'skipped')
     runs-on: self-hosted
     needs:
     - blue-deploy
