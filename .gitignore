@@ -86,3 +86,6 @@ libmobilecoin/rust-bitcode/*
 .tmp
 **/charts/*.tgz
 **/Chart.lock
+sample_data/
+build_artifacts/
+go_build_artifacts/

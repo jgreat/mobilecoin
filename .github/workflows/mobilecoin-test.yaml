@@ -7,10 +7,21 @@ on:
         description: "Target Namespace"
         type: string
         required: true
-      commit_message:
-        description: "Commit Message"
-        type: string
-        required: false
+      fog_distribution:
+        description: "Run fog-distribution test"
+        type: boolean
+        required: true
+        default: false
+      fog_test_client:
+        description: "Run fog-test-client test"
+        type: boolean
+        required: true
+        default: true
+      mobilecoind_integration:
+        description: "Run mobilecoind-integration test"
+        type: boolean
+        required: true
+        default: true
 
 jobs:
   list-values:
@@ -22,7 +33,7 @@ jobs:
         cat ${GITHUB_EVENT_PATH}
 
   fog-distribution:
-    if: "! contains(github.event.inputs.commit_message, '[skip-test-fog-distribution]')"
+    if: github.event.inputs.fog_distribution
     runs-on: self-hosted
     steps:
     - name: Start with clean workspace
@@ -46,7 +57,7 @@ jobs:
   fog-test-client:
     if: |
       always() &&
-      ! contains(github.event.inputs.commit_message, '[skip-test-fog-test-client]') &&
+      github.event.inputs.fog_test_client &&
       (needs.fog-distribution.result == 'success' || needs.fog-distribution.result == 'skipped')
     runs-on: self-hosted
     needs:
@@ -83,7 +94,7 @@ jobs:
   mobilecoind-integration:
     if: |
       always() &&
-      ! contains(github.event.inputs.commit_message, '[skip-test-mobilecoind-integration]') &&
+      github.event.inputs.mobilecoind_integration &&
       (needs.fog-test-client.result == 'success' || needs.fog-test-client.result == 'skipped')
     runs-on: self-hosted
     needs:

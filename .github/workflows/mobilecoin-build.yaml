@@ -365,10 +365,10 @@ jobs:
         chart_version: ${{ steps.meta.outputs.tag }}
         chart_path: .internal-ci/helm/${{ matrix.chart }}
 
-  blue-deploy:
+  previous-release-deploy:
     if: |
       always() &&
-      ! contains(github.event.head_commit.message, '[skip-blue-deploy]') &&
+      ! contains(github.event.head_commit.message, '[skip-previous-release-deploy]') &&
       needs.charts.result == 'success' &&
       (needs.dev-reset.result == 'success' || needs.dev-reset.result == 'skipped')
     runs-on: self-hosted
@@ -401,9 +401,10 @@ jobs:
             "namespace": "${{ steps.meta.outputs.branch }}",
             "version": "${{ steps.meta.outputs.tag }}",
             "commit_message": "${{ github.event.head_commit.message }}"
+            "docker_image_org": "${{ env.DOCKER_ORG }}"
           }
 
-  blue-test:
+  previous-release-test:
     if: |
       always() &&
       ! contains(github.event.head_commit.message, '[skip-blue-test]') &&
@@ -435,7 +436,9 @@ jobs:
         inputs: |
           {
             "namespace": "${{ steps.meta.outputs.branch }}",
-            "commit_message": "${{ github.event.head_commit.message }}"
+            "fog_distribution": true,
+            "fog_test_client": true,
+            "mobilecoind_integration": true
           }
 
 # ${{ steps.meta.outputs.tag }}

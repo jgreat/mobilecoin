@@ -11,10 +11,11 @@ on:
         description: "Chart Version"
         type: string
         required: true
-      commit_message:
-        description: "Commit Message"
+      docker_image_org:
+        description: "Docker Image Org"
         type: string
-        required: false
+        required: true
+        default: docker.io/mobilecoin
 
 jobs:
   list-values:
@@ -103,7 +104,7 @@ jobs:
         chart_name: consensus-node
         chart_version: ${{ github.event.inputs.version }}
         chart_set: |
-          --set image.org=jgreat
+          --set image.org=${{ github.event.inputs.docker_image_org }}
         chart_wait_timeout: 5m
         release_name: ${{ matrix.release_name }}
         namespace: ${{ github.event.inputs.namespace }}
@@ -159,7 +160,7 @@ jobs:
         chart_name: mobilecoind
         chart_version: ${{ github.event.inputs.version }}
         chart_set: |
-          --set image.org=jgreat
+          --set image.org=${{ github.event.inputs.docker_image_org }}
         chart_wait_timeout: 5m
         release_name: mobilecoind
         namespace: ${{ github.event.inputs.namespace }}
@@ -224,7 +225,7 @@ jobs:
         chart_version: ${{ github.event.inputs.version }}
         chart_wait_timeout: 5m
         chart_set: |
-          --set image.org=jgreat
+          --set image.org=${{ github.event.inputs.docker_image_org }}
         release_name: fog-ingest-blue
         namespace: ${{ github.event.inputs.namespace }}
         rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
@@ -293,7 +294,7 @@ jobs:
         chart_version: ${{ github.event.inputs.version }}
         chart_wait_timeout: 5m
         chart_set: |
-          --set image.org=jgreat
+          --set image.org=${{ github.event.inputs.docker_image_org }}
         release_name: fog-services
         namespace: ${{ github.event.inputs.namespace }}
         rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}

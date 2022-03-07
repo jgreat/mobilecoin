@@ -9,7 +9,6 @@ ARG RUST_BIN_PATH=target/release
 COPY ${RUST_BIN_PATH}/libingest-enclave.signed.so /usr/bin/
 COPY ${RUST_BIN_PATH}/mobilecoind /usr/bin/
 COPY ${RUST_BIN_PATH}/fog_ingest_server /usr/bin/
-COPY ${RUST_BIN_PATH}/report_server /usr/bin/
 COPY ${RUST_BIN_PATH}/mc-admin-http-gateway /usr/bin/
 COPY ${RUST_BIN_PATH}/mc-ledger-migration /usr/bin/
 COPY ${RUST_BIN_PATH}/mc-util-grpc-admin-tool /usr/bin/
