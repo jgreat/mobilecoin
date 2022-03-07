@@ -10,17 +10,17 @@ on:
       fog_distribution:
         description: "Run fog-distribution test"
         type: boolean
-        required: true
-        default: false
+        required: false
+        default: true
       fog_test_client:
         description: "Run fog-test-client test"
         type: boolean
-        required: true
+        required: false
         default: true
       mobilecoind_integration:
         description: "Run mobilecoind-integration test"
         type: boolean
-        required: true
+        required: false
         default: true
 
 jobs:

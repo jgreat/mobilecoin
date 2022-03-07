@@ -433,10 +433,7 @@ jobs:
         display-workflow-run-url-interval: 30s
         inputs: |
           {
-            "namespace": "${{ steps.meta.outputs.branch }}",
-            "fog_distribution": true,
-            "fog_test_client": true,
-            "mobilecoind_integration": true
+            "namespace": "${{ steps.meta.outputs.branch }}"
           }
 
 # ${{ steps.meta.outputs.tag }}
