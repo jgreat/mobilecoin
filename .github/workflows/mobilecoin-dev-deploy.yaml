@@ -23,7 +23,7 @@ on:
 
 jobs:
   list-values:
-    runs-on: self-hosted
+    runs-on: [self-hosted, small]
     steps:
     - name: values
       run: |
@@ -31,7 +31,7 @@ jobs:
         echo version ${{ github.event.inputs.version }}
 
   setup-environment:
-    runs-on: self-hosted
+    runs-on: [self-hosted, small]
     steps:
     - name: Start with clean workspace
       run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
@@ -84,7 +84,7 @@ jobs:
   consensus-deploy:
     needs:
     - setup-environment
-    runs-on: self-hosted
+    runs-on: [self-hosted, small]
     strategy:
       matrix:
         release_name:
@@ -119,7 +119,7 @@ jobs:
   postgresql-deploy:
     needs:
     - setup-environment
-    runs-on: self-hosted
+    runs-on: [self-hosted, small]
     steps:
     - name: Start with clean workspace
       run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
@@ -148,7 +148,7 @@ jobs:
   mobilecoind-deploy:
     needs:
     - consensus-deploy
-    runs-on: self-hosted
+    runs-on: [self-hosted, small]
     steps:
     - name: Start with clean workspace
       run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
@@ -173,7 +173,7 @@ jobs:
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
 
   sample-keys-deploy:
-    runs-on: self-hosted
+    runs-on: [self-hosted, small]
     steps:
     - name: Start with clean workspace
       run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
@@ -212,7 +212,7 @@ jobs:
     needs:
     - postgresql-deploy
     - consensus-deploy
-    runs-on: self-hosted
+    runs-on: [self-hosted, small]
     steps:
     - name: Start with clean workspace
       run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
@@ -239,7 +239,7 @@ jobs:
   fog-recovery-migrate-db:
     needs:
     - fog-ingest-deploy
-    runs-on: self-hosted
+    runs-on: [self-hosted, small]
     steps:
     - name: Start with clean workspace
       run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
@@ -260,7 +260,7 @@ jobs:
   fog-ingest-activate:
     needs:
     - fog-recovery-migrate-db
-    runs-on: self-hosted
+    runs-on: [self-hosted, small]
     steps:
     - name: Start with clean workspace
       run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
@@ -281,7 +281,7 @@ jobs:
   fog-services-deploy:
     needs:
     - fog-ingest-activate
-    runs-on: self-hosted
+    runs-on: [self-hosted, small]
     steps:
     - name: Start with clean workspace
       run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;

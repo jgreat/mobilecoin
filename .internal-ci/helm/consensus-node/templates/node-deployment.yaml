@@ -123,7 +123,7 @@ spec:
               optional: true
         - name: BLOCK_VERSION
           valueFrom:
-            configMapRef:
+            configMapKeyRef:
               name: {{ include "consensusNode.nodeConfig.configMap.name" . }}
               key: blockVersion
         # This file is generated at consensus node startup and should be persistent as long as its on the same node.
