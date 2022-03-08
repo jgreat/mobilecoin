@@ -29,6 +29,8 @@ jobs:
       run: |
         echo namespace ${{ github.event.inputs.namespace }}
         echo version ${{ github.event.inputs.version }}
+        echo docker_image_org ${{ github.event.inputs.docker_image_org }}
+        echo ingest_color ${{ github.event.inputs.ingest_color }}
 
   setup-environment:
     runs-on: [self-hosted, small]

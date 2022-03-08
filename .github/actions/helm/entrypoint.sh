@@ -315,6 +315,22 @@ then
             popd || exit 1
             ;;
 
+        pod-restart)
+            # Scale controller object to 0 then back to original value.
+            rancher_get_kubeconfig
+            is_set INPUT_NAMESPACE
+            is_set INPUT_OBJECT_NAME
+            
+            replicas=$(k get -n "${INPUT_NAMESPACE}" "${INPUT_OBJECT_NAME}" -o=jsonpath='{.spec.replicas}{"\n"}')
+            echo "${INPUT_OBJECT_NAME} original scale: ${replicas}"
+
+            echo "Scale ${INPUT_OBJECT_NAME} to 0"
+            k scale -n "${INPUT_NAMESPACE}" "${INPUT_OBJECT_NAME}" --replicas=0 --timeout=5m
+
+            echo "Scale  ${INPUT_OBJECT_NAME} to ${replicas}"
+            k scale -n "${INPUT_NAMESPACE}" "${INPUT_OBJECT_NAME}" --replicas="${replicas}" --timeout=5m
+            ;;
+
         toolbox-exec)
             rancher_get_kubeconfig
             is_set INPUT_NAMESPACE

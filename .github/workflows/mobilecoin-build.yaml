@@ -512,6 +512,68 @@ jobs:
             "fog_distribution": "false"
           }
 
+  current-release-v2-update:
+    runs-on: [self-hosted, small]
+    needs:
+    - current-release-v1-test
+    steps:
+    - name: Start with clean workspace
+      run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Generate version metadata
+      id: meta
+      run: |
+        .internal-ci/util/metadata.sh
+
+    - name: Update Consensus with block_version v2
+      uses: aurelien-baudet/workflow-dispatch@v2.1.1
+      with:
+        workflow: mobilecoin-dev-update-consensus
+        token: ${{ secrets.ACTIONS_TOKEN }}
+        wait-for-completion: true
+        wait-for-completion-timeout: 30m
+        wait-for-completion-interval: 30s
+        display-workflow-run-url-interval: 30s
+        inputs: |
+          {
+            "namespace": "${{ steps.meta.outputs.branch }}"
+          }
+
+  current-release-v2-test:
+    runs-on: [self-hosted, small]
+    needs:
+    - current-release-v2-update
+    steps:
+    - name: Start with clean workspace
+      run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
+    
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Generate version metadata
+      id: meta
+      run: |
+        .internal-ci/util/metadata.sh
+
+    - name: Run MobileCoin core tests
+      uses: aurelien-baudet/workflow-dispatch@v2.1.1
+      with:
+        workflow: mobilecoin-test
+        token: ${{ secrets.ACTIONS_TOKEN }}
+        wait-for-completion: true
+        wait-for-completion-timeout: 30m
+        wait-for-completion-interval: 30s
+        display-workflow-run-url-interval: 30s
+        inputs: |
+          {
+            "namespace": "${{ steps.meta.outputs.branch }}",
+            "ingest_color": "green",
+            "fog_distribution": "false"
+          }
+
 # ${{ steps.meta.outputs.tag }}
 # run test
 # deploy green
