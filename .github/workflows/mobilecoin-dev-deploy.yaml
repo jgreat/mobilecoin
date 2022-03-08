@@ -250,12 +250,14 @@ jobs:
     - name: Run fog-recovery database migrations
       uses: ./.github/actions/helm
       with:
-        action: fog-recovery-migrate
+        action: toolbox-exec
         ingest_color: ${{ github.event.inputs.ingest_color }}
         namespace: ${{ github.event.inputs.namespace }}
         rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
+        command: |
+          fog-sql-recovery-db-migrations
 
   fog-ingest-activate:
     needs:

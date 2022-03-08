@@ -14,7 +14,7 @@ on:
 
 jobs:
   dev-reset:
-    if: "! contains(github.event.head_commit.message, '[skip-reset]')"
+    # if: "! contains(github.event.head_commit.message, '[skip-reset]')"
     runs-on: [self-hosted, small]
     steps:
     - name: Start with clean workspace
@@ -43,10 +43,10 @@ jobs:
           }
 
   previous-release-deploy:
-    if: |
-      always() &&
-      ! contains(github.event.head_commit.message, '[skip-previous-release-deploy]') &&
-      (needs.dev-reset.result == 'success' || needs.dev-reset.result == 'skipped')
+    # if: |
+    #   always() &&
+    #   ! contains(github.event.head_commit.message, '[skip-previous-release-deploy]') &&
+    #   (needs.dev-reset.result == 'success' || needs.dev-reset.result == 'skipped')
     runs-on: [self-hosted, small]
     needs:
     - dev-reset
@@ -80,10 +80,10 @@ jobs:
           }
 
   previous-release-test:
-    if: |
-      always() &&
-      ! contains(github.event.head_commit.message, '[skip-previous-release-test]') &&
-      (needs.previous-release-deploy.result == 'success' || needs.previous-release-deploy.result == 'skipped')
+    # if: |
+    #   always() &&
+    #   ! contains(github.event.head_commit.message, '[skip-previous-release-test]') &&
+    #   (needs.previous-release-deploy.result == 'success' || needs.previous-release-deploy.result == 'skipped')
     runs-on: [self-hosted, small]
     needs:
     - previous-release-deploy
@@ -115,7 +115,7 @@ jobs:
           }
 
   build-cargo-hardware:
-    if: "! contains(github.event.head_commit.message, '[skip-build]')"
+    # if: "! contains(github.event.head_commit.message, '[skip-build]')"
     runs-on: [self-hosted, large]
     container:
       image: mobilecoin/rust-sgx-base@sha256:efe2873257fa08a8468d704dcd9bc1b6c2e9ce5a08378d57bb1073b2f50416a7
@@ -204,7 +204,7 @@ jobs:
         ls -alR build_artifacts
 
   build-go-projects:
-    if: "! contains(github.event.head_commit.message, '[skip-build]')"
+    # if: "! contains(github.event.head_commit.message, '[skip-build]')"
     runs-on: [self-hosted, large]
     container:
       image: golang:1.16.4
@@ -241,10 +241,10 @@ jobs:
         cp grpc-proxy ../go_build_artifacts/
 
   create-sample-data:
-    if: |
-      always() &&
-      ! contains(github.event.head_commit.message, '[skip-sample-data]') &&
-      (needs.build-cargo-hardware.result == 'success' || needs.build-cargo-hardware.result == 'skipped')
+    # if: |
+    #   always() &&
+    #   ! contains(github.event.head_commit.message, '[skip-sample-data]') &&
+    #   (needs.build-cargo-hardware.result == 'success' || needs.build-cargo-hardware.result == 'skipped')
     runs-on: [self-hosted, large]
     needs:
     - build-cargo-hardware
@@ -299,11 +299,11 @@ jobs:
         ls -alR sample_data
 
   docker:
-    if: |
-      always() &&
-      ! contains(github.event.head_commit.message, '[skip-docker]') &&
-      (needs.create-sample-data.result == 'success' || needs.create-sample-data.result == 'skipped') &&
-      (needs.build-go-projects.result == 'success' || needs.build-go-projects.result == 'skipped')
+    # if: |
+    #   always() &&
+    #   ! contains(github.event.head_commit.message, '[skip-docker]') &&
+    #   (needs.create-sample-data.result == 'success' || needs.create-sample-data.result == 'skipped') &&
+    #   (needs.build-go-projects.result == 'success' || needs.build-go-projects.result == 'skipped')
     runs-on: [self-hosted, small]
     needs:
     - create-sample-data
@@ -393,10 +393,10 @@ jobs:
         tags: ${{ steps.docker_meta.outputs.tags }}
 
   charts:
-    if: |
-      always() &&
-      ! contains(github.event.head_commit.message, '[skip-charts]') &&
-      needs.docker.result == 'success'
+    # if: |
+    #   always() &&
+    #   ! contains(github.event.head_commit.message, '[skip-charts]') &&
+    #   needs.docker.result == 'success'
     runs-on: [self-hosted, small]
     needs:
     - docker
@@ -438,11 +438,11 @@ jobs:
         chart_path: .internal-ci/helm/${{ matrix.chart }}
 
   current-release-v1-deploy:
-    if: |
-      always() &&
-      ! contains(github.event.head_commit.message, '[skip-current-release-v1-deploy]') &&
-      (needs.charts.result == 'success' || needs.charts.result == 'skipped') &&
-      (needs.previous-release-test.result == 'success' || needs.previous-release-test.result == 'skipped')
+    # if: |
+    #   always() &&
+    #   ! contains(github.event.head_commit.message, '[skip-current-release-v1-deploy]') &&
+    #   (needs.charts.result == 'success' || needs.charts.result == 'skipped') &&
+    #   (needs.previous-release-test.result == 'success' || needs.previous-release-test.result == 'skipped')
     runs-on: [self-hosted, small]
     needs:
     - previous-release-test
@@ -477,10 +477,10 @@ jobs:
           }
 
   current-release-v1-test:
-    if: |
-      always() &&
-      ! contains(github.event.head_commit.message, '[skip-current-release-v1-test]') &&
-      (needs.current-release-v1-deploy.result == 'success' || needs.current-release-v1-deploy.result == 'skipped')
+    # if: |
+    #   always() &&
+    #   ! contains(github.event.head_commit.message, '[skip-current-release-v1-test]') &&
+    #   (needs.current-release-v1-deploy.result == 'success' || needs.current-release-v1-deploy.result == 'skipped')
     runs-on: [self-hosted, small]
     needs:
     - current-release-v1-deploy

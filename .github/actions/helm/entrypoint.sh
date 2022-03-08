@@ -214,21 +214,6 @@ then
             fi
             ;;
 
-        fog-recovery-migrate)
-            rancher_get_kubeconfig
-            is_set INPUT_NAMESPACE
-            is_set INPUT_INGEST_COLOR
-
-            instance="fog-ingest-${INPUT_INGEST_COLOR}"
-            peers=("${instance}-0.${instance}" "${instance}-1.${instance}")
-
-            echo "-- Get toolbox pod"
-            toolbox=$(k get pods -n "${INPUT_NAMESPACE}" -l "app.kubernetes.io/instance=${instance}" -l app=toolbox -o=name)
-
-            command="fog-sql-recovery-db-migrations"
-            k exec -n "${INPUT_NAMESPACE}" "${toolbox}" -- /bin/bash -c "${command}"
-            ;;
-
         fog-ingest-activate)
             rancher_get_kubeconfig
             is_set INPUT_NAMESPACE
@@ -338,7 +323,7 @@ then
 
             echo "-- Get toolbox pod"
             instance="fog-ingest-${INPUT_INGEST_COLOR}"
-            toolbox=$(k get pods -n "${INPUT_NAMESPACE}" -l "app.kubernetes.io/instance=${instance}" -l app=toolbox -o=name)
+            toolbox=$(k get pods -n "${INPUT_NAMESPACE}" -l "app.kubernetes.io/instance=${instance},app=toolbox" -o=name)
 
             echo "-- Toolbox: ${toolbox}"
             echo "-- execute command:"

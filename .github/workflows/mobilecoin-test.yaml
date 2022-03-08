@@ -61,8 +61,7 @@ jobs:
   fog-test-client:
     if: |
       always() &&
-      github.event.inputs.fog_test_client &&
-      (needs.fog-distribution.result == 'success' || needs.fog-distribution.result == 'skipped')
+      github.event.inputs.fog_test_client && needs.fog-distribution.result != 'failed'
     runs-on: [self-hosted, small]
     needs:
     - fog-distribution
@@ -98,8 +97,7 @@ jobs:
   mobilecoind-integration:
     if: |
       always() &&
-      github.event.inputs.mobilecoind_integration &&
-      (needs.fog-test-client.result == 'success' || needs.fog-test-client.result == 'skipped')
+      github.event.inputs.mobilecoind_integration && needs.fog-test-client.result != 'failed'
     runs-on: [self-hosted, small]
     needs:
     - fog-test-client
