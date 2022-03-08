@@ -236,10 +236,10 @@ then
             echo "-- Flipside Peers: ${flipside} ${flipside_peers[*]}"
 
             echo "-- Get toolbox pod"
-            toolbox=$(k get pods -n "${INPUT_NAMESPACE}" -l "app.kubernetes.io/instance=${instance}" -l app=toolbox -o=name)
+            toolbox=$(k get pods -n "${INPUT_NAMESPACE}" -l "app.kubernetes.io/instance=${instance},app=toolbox" -o=name)
 
             echo "-- Check for flipside ingest"
-            flipside_pods=$(k get pods -n "${INPUT_NAMESPACE}" -l "app.kubernetes.io/instance=${flipside_instance}" -l app=fog-ingest -o=name)
+            flipside_pods=$(k get pods -n "${INPUT_NAMESPACE}" -l "app.kubernetes.io/instance=${flipside_instance},app=fog-ingest" -o=name)
 
             if [ -n "${flipside_pods}" ]
             then
