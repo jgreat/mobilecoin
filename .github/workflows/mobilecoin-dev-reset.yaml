@@ -10,14 +10,14 @@ on:
 
 jobs:
   list-values:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
     - name: values
       run: |
         echo namespace ${{ github.event.inputs.namespace }}
 
   reset:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     strategy:
       matrix:
         chart:
@@ -54,7 +54,7 @@ jobs:
   reset-storage:
     needs:
     - reset
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
     - name: Start with clean workspace
       run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
@@ -76,7 +76,7 @@ jobs:
   reset-s3:
     needs:
     - reset
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     container:
       image: amazon/aws-cli:latest
     steps:

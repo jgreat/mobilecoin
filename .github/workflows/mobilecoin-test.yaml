@@ -29,7 +29,7 @@ on:
 
 jobs:
   list-values:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
     - name: values
       run: |
@@ -38,7 +38,7 @@ jobs:
 
   fog-distribution:
     if: github.event.inputs.fog_distribution
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
     - name: Start with clean workspace
       run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
@@ -63,7 +63,7 @@ jobs:
       always() &&
       github.event.inputs.fog_test_client &&
       (needs.fog-distribution.result == 'success' || needs.fog-distribution.result == 'skipped')
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs:
     - fog-distribution
     steps:
@@ -100,7 +100,7 @@ jobs:
       always() &&
       github.event.inputs.mobilecoind_integration &&
       (needs.fog-test-client.result == 'success' || needs.fog-test-client.result == 'skipped')
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs:
     - fog-test-client
     steps:
