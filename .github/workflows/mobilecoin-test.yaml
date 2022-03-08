@@ -37,7 +37,7 @@ jobs:
         cat ${GITHUB_EVENT_PATH}
 
   fog-distribution:
-    if: github.event.inputs.fog_distribution == 'true'
+    
     runs-on: [self-hosted, small]
     steps:
     - name: Start with clean workspace
@@ -47,6 +47,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Test - fog-distribution
+      if: github.event.inputs.fog_distribution == 'true'
       uses: ./.github/actions/helm
       with:
         action: toolbox-exec
@@ -59,9 +60,6 @@ jobs:
           /test/bin/fog-distribution-test.sh
 
   fog-test-client:
-    if: |
-      always() &&
-      github.event.inputs.fog_test_client == 'true' && needs.fog-distribution.result != 'failed'
     runs-on: [self-hosted, small]
     needs:
     - fog-distribution
@@ -73,6 +71,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Test - fog-test-client
+      if: github.event.inputs.fog_test_client == 'true'
       uses: ./.github/actions/helm
       with:
         action: toolbox-exec
@@ -95,9 +94,6 @@ jobs:
             --fog-ledger fog-ledger://fog.${{ github.event.inputs.namespace }}.development.mobilecoin.com:443
 
   mobilecoind-integration:
-    if: |
-      always() &&
-      github.event.inputs.mobilecoind_integration == 'true' && needs.fog-test-client.result != 'failed'
     runs-on: [self-hosted, small]
     needs:
     - fog-test-client
@@ -109,6 +105,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Test - mobilecoind (Wallet Integration)
+      if: github.event.inputs.mobilecoind_integration == 'true'
       uses: ./.github/actions/helm
       with:
         action: toolbox-exec

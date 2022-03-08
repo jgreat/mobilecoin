@@ -14,7 +14,6 @@ on:
 
 jobs:
   dev-reset:
-    # if: "! contains(github.event.head_commit.message, '[skip-reset]')"
     runs-on: [self-hosted, small]
     steps:
     - name: Start with clean workspace
@@ -28,7 +27,8 @@ jobs:
       run: |
         .internal-ci/util/metadata.sh
 
-    - name: Mobilecoin Development Deploy (Dispatch)
+    - name: Reset development environment (dispatch)
+      if: ! contains(github.event.head_commit.message, '[skip-dev-reset]')
       uses: aurelien-baudet/workflow-dispatch@v2.1.1
       with:
         workflow: mobilecoin-dev-reset
@@ -43,10 +43,6 @@ jobs:
           }
 
   previous-release-deploy:
-    # if: |
-    #   always() &&
-    #   ! contains(github.event.head_commit.message, '[skip-previous-release-deploy]') &&
-    #   (needs.dev-reset.result == 'success' || needs.dev-reset.result == 'skipped')
     runs-on: [self-hosted, small]
     needs:
     - dev-reset
@@ -62,7 +58,8 @@ jobs:
       run: |
         .internal-ci/util/metadata.sh
 
-    - name: Mobilecoin Development Deploy (Dispatch)
+    - name: Mobilecoin development deploy (dispatch)
+      if: ! contains(github.event.head_commit.message, '[skip-previous-deploy]')
       uses: aurelien-baudet/workflow-dispatch@v2.1.1
       with:
         workflow: mobilecoin-dev-deploy
@@ -80,10 +77,6 @@ jobs:
           }
 
   previous-release-test:
-    # if: |
-    #   always() &&
-    #   ! contains(github.event.head_commit.message, '[skip-previous-release-test]') &&
-    #   (needs.previous-release-deploy.result == 'success' || needs.previous-release-deploy.result == 'skipped')
     runs-on: [self-hosted, small]
     needs:
     - previous-release-deploy
@@ -100,6 +93,7 @@ jobs:
         .internal-ci/util/metadata.sh
 
     - name: Run MobileCoin core tests
+      if: ! contains(github.event.head_commit.message, '[skip-previous-test]')
       uses: aurelien-baudet/workflow-dispatch@v2.1.1
       with:
         workflow: mobilecoin-test
@@ -115,7 +109,6 @@ jobs:
           }
 
   build-cargo-hardware:
-    # if: "! contains(github.event.head_commit.message, '[skip-build]')"
     runs-on: [self-hosted, large]
     container:
       image: mobilecoin/rust-sgx-base@sha256:efe2873257fa08a8468d704dcd9bc1b6c2e9ce5a08378d57bb1073b2f50416a7
@@ -127,6 +120,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Cache rust build binaries
+      if: ! contains(github.event.head_commit.message, '[skip-build]')
       id: artifact_cache
       uses: actions/cache@v2
       with:
@@ -138,7 +132,7 @@ jobs:
 
     - name: Cache cargo packages
       # We don't need cargo packages if we already have binaries.
-      if: steps.artifact_cache.outputs.cache-hit != 'true'
+      if: steps.artifact_cache.outputs.cache-hit == 'false'
       uses: actions/cache@v2
       with:
         # rust-sgx-base changes RUSTUP_HOME and CARGO_HOME to workaround GHA overriding HOME
@@ -159,7 +153,7 @@ jobs:
 
     - name: Build Rust
       # Only build if we don't have a cached set of binaries.
-      if: steps.artifact_cache.outputs.cache-hit != 'true'
+      if: steps.artifact_cache.outputs.cache-hit == 'false'
       env:
         IAS_MODE: DEV
         SGX_MODE: HW
@@ -193,18 +187,18 @@ jobs:
 
     - name: Copy artifacts to cache
       # Only copy if we don't have a cached set of binaries.
-      if: steps.artifact_cache.outputs.cache-hit != 'true'
+      if: steps.artifact_cache.outputs.cache-hit == 'false'
       run: |
         mkdir -p build_artifacts
         find target/release -maxdepth 1 -executable -type f -exec cp "{}" build_artifacts/ \;
         find target/release -maxdepth 1 -name "*.signed.so" -exec cp "{}" build_artifacts/ \;
 
     - name: check artifacts
+      if: ! contains(github.event.head_commit.message, '[skip-build]')
       run: |
         ls -alR build_artifacts
 
   build-go-projects:
-    # if: "! contains(github.event.head_commit.message, '[skip-build]')"
     runs-on: [self-hosted, large]
     container:
       image: golang:1.16.4
@@ -216,6 +210,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Cache go build binaries
+      if: ! contains(github.event.head_commit.message, '[skip-build]')
       id: go_artifact_cache
       uses: actions/cache@v2
       with:
@@ -226,13 +221,13 @@ jobs:
         key: ${{ runner.os }}-go-build-artifacts-${{ hashFiles('go-grpc-gateway/**/*.go', 'go-grpc-gateway/go.*', '**/*.proto') }}-${{ secrets.CACHE_BUSTER }}
 
     - name: Add protobuf-compiler
-      if: steps.go_artifact_cache.outputs.cache-hit != 'true'
+      if: steps.go_artifact_cache.outputs.cache-hit == 'false'
       run: |
         apt update
         apt install -y protobuf-compiler
 
     - name: Build go-grpc-gateway
-      if: steps.go_artifact_cache.outputs.cache-hit != 'true'
+      if: steps.go_artifact_cache.outputs.cache-hit == 'false'
       run: |
         cd go-grpc-gateway
         ./install_tools.sh
@@ -241,10 +236,6 @@ jobs:
         cp grpc-proxy ../go_build_artifacts/
 
   create-sample-data:
-    # if: |
-    #   always() &&
-    #   ! contains(github.event.head_commit.message, '[skip-sample-data]') &&
-    #   (needs.build-cargo-hardware.result == 'success' || needs.build-cargo-hardware.result == 'skipped')
     runs-on: [self-hosted, large]
     needs:
     - build-cargo-hardware
@@ -258,6 +249,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Cache rust build binaries
+      if: ! contains(github.event.head_commit.message, '[skip-create-sample-data]')
       id: artifact_cache
       uses: actions/cache@v2
       with:
@@ -266,6 +258,7 @@ jobs:
         key: ${{ runner.os }}-build-cargo-hardware-build-artifacts-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml') }}-${{ secrets.CACHE_BUSTER }}
 
     - name: Cache sample_data
+      if: steps.artifact_cache.outputs.cache-hit == 'false'
       id: sample_data_cache
       uses: actions/cache@v2
       with:
@@ -287,7 +280,7 @@ jobs:
         sha256sum "${FOG_AUTHORITY_ROOT_CA_CERT_PATH}"
 
     - name: Populate origin data
-      if: steps.sample_data_cache.outputs.cache-hit != 'true'
+      if: steps.sample_data_cache.outputs.cache-hit == 'false'
       env:
         BIN_PATH: build_artifacts
         FOG_REPORT_URL: fog://fog.${{ steps.meta.outputs.branch }}.development.mobilecoin.com
@@ -295,15 +288,11 @@ jobs:
         .internal-ci/util/populate_origin_data.sh
 
     - name: check sample_data
+      if: ! contains(github.event.head_commit.message, '[skip-create-sample-data]')
       run: |
         ls -alR sample_data
 
   docker:
-    # if: |
-    #   always() &&
-    #   ! contains(github.event.head_commit.message, '[skip-docker]') &&
-    #   (needs.create-sample-data.result == 'success' || needs.create-sample-data.result == 'skipped') &&
-    #   (needs.build-go-projects.result == 'success' || needs.build-go-projects.result == 'skipped')
     runs-on: [self-hosted, small]
     needs:
     - create-sample-data
@@ -329,6 +318,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Cache rust build binaries
+      if: ! contains(github.event.head_commit.message, '[skip-docker]')
       id: artifact_cache
       uses: actions/cache@v2
       with:
@@ -337,6 +327,7 @@ jobs:
         key: ${{ runner.os }}-build-cargo-hardware-build-artifacts-${{ hashFiles('**/*.rs', '**/*.proto', '**/Cargo.toml') }}-${{ secrets.CACHE_BUSTER }}
 
     - name: Cache go build binaries
+      if: ! contains(github.event.head_commit.message, '[skip-docker]')
       id: go_artifact_cache
       uses: actions/cache@v2
       with:
@@ -347,6 +338,7 @@ jobs:
         key: ${{ runner.os }}-go-build-artifacts-${{ hashFiles('go-grpc-gateway/**/*.go', 'go-grpc-gateway/go.*', '**/*.proto') }}-${{ secrets.CACHE_BUSTER }}
 
     - name: Cache sample_data
+      if: ! contains(github.event.head_commit.message, '[skip-docker]')
       id: sample_data_cache
       uses: actions/cache@v2
       with:
@@ -360,6 +352,7 @@ jobs:
         .internal-ci/util/metadata.sh
 
     - name: Generate Docker Tags
+      if: ! contains(github.event.head_commit.message, '[skip-docker]')
       id: docker_meta
       uses: docker/metadata-action@v3
       with:
@@ -368,15 +361,18 @@ jobs:
           type=raw,value=${{ steps.meta.outputs.tag }}
 
     - name: Set up Docker Buildx
+      if: ! contains(github.event.head_commit.message, '[skip-docker]')
       uses: docker/setup-buildx-action@v1
 
     - name: Login to DockerHub
+      if: ! contains(github.event.head_commit.message, '[skip-docker]')
       uses: docker/login-action@v1
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Publish to DockerHub
+      if: ! contains(github.event.head_commit.message, '[skip-docker]')
       id: docker_publish_dockerhub
       uses: docker/build-push-action@v2
       with:
@@ -393,10 +389,6 @@ jobs:
         tags: ${{ steps.docker_meta.outputs.tags }}
 
   charts:
-    # if: |
-    #   always() &&
-    #   ! contains(github.event.head_commit.message, '[skip-charts]') &&
-    #   needs.docker.result == 'success'
     runs-on: [self-hosted, small]
     needs:
     - docker
@@ -426,6 +418,7 @@ jobs:
         .internal-ci/util/metadata.sh
 
     - name: Package and publish chart
+      if: ! contains(github.event.head_commit.message, '[skip-charts]')
       uses: ./.github/actions/helm
       with:
         action: s3-publish
@@ -438,11 +431,6 @@ jobs:
         chart_path: .internal-ci/helm/${{ matrix.chart }}
 
   current-release-v1-deploy:
-    # if: |
-    #   always() &&
-    #   ! contains(github.event.head_commit.message, '[skip-current-release-v1-deploy]') &&
-    #   (needs.charts.result == 'success' || needs.charts.result == 'skipped') &&
-    #   (needs.previous-release-test.result == 'success' || needs.previous-release-test.result == 'skipped')
     runs-on: [self-hosted, small]
     needs:
     - previous-release-test
@@ -460,6 +448,7 @@ jobs:
         .internal-ci/util/metadata.sh
 
     - name: Mobilecoin Development Deploy (Dispatch)
+      if: ! contains(github.event.head_commit.message, '[skip-current-release-v1-deploy]')
       uses: aurelien-baudet/workflow-dispatch@v2.1.1
       with:
         workflow: mobilecoin-dev-deploy
@@ -477,10 +466,6 @@ jobs:
           }
 
   current-release-v1-test:
-    # if: |
-    #   always() &&
-    #   ! contains(github.event.head_commit.message, '[skip-current-release-v1-test]') &&
-    #   (needs.current-release-v1-deploy.result == 'success' || needs.current-release-v1-deploy.result == 'skipped')
     runs-on: [self-hosted, small]
     needs:
     - current-release-v1-deploy
@@ -497,6 +482,7 @@ jobs:
         .internal-ci/util/metadata.sh
 
     - name: Run MobileCoin core tests
+      if: ! contains(github.event.head_commit.message, '[skip-current-release-v1-test]')
       uses: aurelien-baudet/workflow-dispatch@v2.1.1
       with:
         workflow: mobilecoin-test
@@ -529,6 +515,7 @@ jobs:
         .internal-ci/util/metadata.sh
 
     - name: Update Consensus with block_version v2
+      if: ! contains(github.event.head_commit.message, '[skip-current-release-v2-update]')
       uses: aurelien-baudet/workflow-dispatch@v2.1.1
       with:
         workflow: mobilecoin-dev-update-consensus
@@ -559,6 +546,7 @@ jobs:
         .internal-ci/util/metadata.sh
 
     - name: Run MobileCoin core tests
+      if: ! contains(github.event.head_commit.message, '[skip-current-release-v2-test]')
       uses: aurelien-baudet/workflow-dispatch@v2.1.1
       with:
         workflow: mobilecoin-test
