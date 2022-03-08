@@ -26,6 +26,8 @@ global:
       ### Used to override Min/Max fee settings
       #   https://github.com/mobilecoinfoundation/mcips/blob/main/text/0001-dynamic-fees-v1.md
       allowAnyFee: 'false'
+      ### Block version - set to upgrade block version.
+      blockVersion: '1'
 
     ### Ledger distribution settings. The default for awsPath is auto-generated based on
     #   this values, but can be overridden.

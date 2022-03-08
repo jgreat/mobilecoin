@@ -9,3 +9,4 @@ data:
   peerHostname: {{ include "consensusNodeConfig.peerHostname" . | quote }}
   minimumFee: {{ .Values.global.node.nodeConfig.minimumFee | default "" | quote }}
   allowAnyFee: {{ .Values.global.node.nodeConfig.allowAnyFee | quote }}
+  blockVersion: {{ .Values.global.node.nodeConfig.blockVersion | quote }}

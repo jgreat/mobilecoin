@@ -20,6 +20,7 @@ data:
       --allow-any-fee
   {{- end }}
 {{- end }}
+      --block-version %(ENV_BLOCK_VERSION)s
       --peer-responder-id "%(ENV_LOCAL_NODE_ID)s:443"
       --peer-listen-uri=insecure-mcp://0.0.0.0:8443/
       --admin-listen-uri=insecure-mca://127.0.0.1:8001/

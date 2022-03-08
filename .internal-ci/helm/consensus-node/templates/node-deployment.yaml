@@ -121,6 +121,11 @@ spec:
               name: client-auth-token
               key: token
               optional: true
+        - name: BLOCK_VERSION
+          valueFrom:
+            configMapRef:
+              name: {{ include "consensusNode.nodeConfig.configMap.name" . }}
+              key: blockVersion
         # This file is generated at consensus node startup and should be persistent as long as its on the same node.
         - name: SEALED_BLOCK_SIGNING_KEY
           value: /sealed-signing-key/block-signing-key

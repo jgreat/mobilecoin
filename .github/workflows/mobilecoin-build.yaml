@@ -13,7 +13,7 @@ on:
   # pull_request: {}
 
 jobs:
-  a-dev-reset:
+  dev-reset:
     if: "! contains(github.event.head_commit.message, '[skip-reset]')"
     runs-on: self-hosted
     steps:
@@ -46,10 +46,10 @@ jobs:
     if: |
       always() &&
       ! contains(github.event.head_commit.message, '[skip-previous-release-deploy]') &&
-      (needs.a-dev-reset.result == 'success' || needs.a-dev-reset.result == 'skipped')
+      (needs.dev-reset.result == 'success' || needs.dev-reset.result == 'skipped')
     runs-on: self-hosted
     needs:
-    - a-dev-reset
+    - dev-reset
     steps:
     - name: Start with clean workspace
       run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
