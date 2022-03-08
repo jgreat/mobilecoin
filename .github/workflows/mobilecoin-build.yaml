@@ -15,7 +15,7 @@ on:
 jobs:
   dev-reset:
     if: "! contains(github.event.head_commit.message, '[skip-reset]')"
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
     - name: Start with clean workspace
       run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
@@ -47,7 +47,7 @@ jobs:
       always() &&
       ! contains(github.event.head_commit.message, '[skip-previous-release-deploy]') &&
       (needs.dev-reset.result == 'success' || needs.dev-reset.result == 'skipped')
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs:
     - dev-reset
     steps:
@@ -84,7 +84,7 @@ jobs:
       always() &&
       ! contains(github.event.head_commit.message, '[skip-previous-release-test]') &&
       (needs.previous-release-deploy.result == 'success' || needs.previous-release-deploy.result == 'skipped')
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs:
     - previous-release-deploy
     steps:
@@ -245,7 +245,7 @@ jobs:
       always() &&
       ! contains(github.event.head_commit.message, '[skip-sample-data]') &&
       (needs.build-cargo-hardware.result == 'success' || needs.build-cargo-hardware.result == 'skipped')
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs:
     - build-cargo-hardware
     env:
@@ -304,12 +304,11 @@ jobs:
       ! contains(github.event.head_commit.message, '[skip-docker]') &&
       (needs.create-sample-data.result == 'success' || needs.create-sample-data.result == 'skipped') &&
       (needs.build-go-projects.result == 'success' || needs.build-go-projects.result == 'skipped')
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs:
     - create-sample-data
     - build-go-projects
     strategy:
-      max-parallel: 4
       matrix:
         image:
         - go-grpc-gateway
@@ -398,7 +397,7 @@ jobs:
       always() &&
       ! contains(github.event.head_commit.message, '[skip-charts]') &&
       needs.docker.result == 'success'
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs:
     - docker
     strategy:
@@ -444,7 +443,7 @@ jobs:
       ! contains(github.event.head_commit.message, '[skip-current-release-v1-deploy]') &&
       (needs.charts.result == 'success' || needs.charts.result == 'skipped') &&
       (needs.previous-release-test.result == 'success' || needs.previous-release-test.result == 'skipped')
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs:
     - previous-release-test
     - charts
@@ -472,7 +471,7 @@ jobs:
         inputs: |
           {
             "namespace": "${{ steps.meta.outputs.branch }}",
-            "version": "${{ env.PREVIOUS_RELEASE }}",
+            "version": "${{ steps.meta.outputs.tag }}",
             "docker_image_org": "${{ env.DOCKER_ORG }}",
             "ingest_color": "green"
           }
@@ -482,7 +481,7 @@ jobs:
       always() &&
       ! contains(github.event.head_commit.message, '[skip-current-release-v1-test]') &&
       (needs.current-release-v1-deploy.result == 'success' || needs.current-release-v1-deploy.result == 'skipped')
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs:
     - current-release-v1-deploy
     steps:

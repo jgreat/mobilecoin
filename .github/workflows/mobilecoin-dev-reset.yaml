@@ -10,14 +10,14 @@ on:
 
 jobs:
   list-values:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
     - name: values
       run: |
         echo namespace ${{ github.event.inputs.namespace }}
 
   reset:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         chart:
@@ -51,30 +51,10 @@ jobs:
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
 
-  # reset-sample-data:
-  #   needs:
-  #   - reset
-  #   runs-on: self-hosted
-  #   steps:
-  #   - name: Start with clean workspace
-  #     run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
-
-  #   - name: Checkout
-  #     uses: actions/checkout@v2
-
-  #   - name: Delete sample-keys secrets
-  #     uses: ./.github/actions/helm
-  #     with:
-  #       action: sample-keys-delete-secrets
-  #       namespace: ${{ github.event.inputs.namespace }}
-  #       rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
-  #       rancher_url: ${{ secrets.RANCHER_URL }}
-  #       rancher_token: ${{ secrets.RANCHER_TOKEN }}
-
   reset-storage:
     needs:
     - reset
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
     - name: Start with clean workspace
       run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
@@ -96,7 +76,7 @@ jobs:
   reset-s3:
     needs:
     - reset
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     container:
       image: amazon/aws-cli:latest
     steps:
