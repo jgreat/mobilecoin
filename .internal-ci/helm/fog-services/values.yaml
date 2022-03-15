@@ -38,22 +38,30 @@ fogReport:
       name: fog-report-signing-cert
     crt: ''
     key: ''
-
   ingress:
-    annotations:
-      cert-manager.io/cluster-issuer: letsencrypt-production-http
+    grpc:
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-production-http
+        haproxy.org/server-proto: "h2"              # Force GRPC/H2 mode
+        haproxy.org/server-ssl: "false"             # The backend (server) is http
+        haproxy.org/timeout-client: 239s            # 4 min timeout on azure
+        haproxy.org/timeout-server: 239s
+        haproxy.org/timeout-http-keep-alive: 120s
+        haproxy.org/abortonclose: "true"
+        haproxy.org/backend-config-snippet: |-
+          http-reuse aggressive
 
-      nginx.ingress.kubernetes.io/ssl-redirect: 'true'
-      nginx.ingress.kubernetes.io/backend-protocol: 'GRPC'
-
-      haproxy.org/server-proto: h2              # Force GRPC/H2 mode
-      haproxy.org/server-ssl: 'false'             # The backend (server) is http
-      haproxy.org/timeout-client: 239s            # 4 min timeout on azure
-      haproxy.org/timeout-server: 239s
-      haproxy.org/timeout-http-keep-alive: 120s
-      haproxy.org/abortonclose: 'true'
-      haproxy.org/backend-config-snippet: |-
-        http-reuse aggressive
+    http:
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-production-http
+        haproxy.org/server-ssl: "false"             # The backend (server) is http
+        haproxy.org/timeout-client: 239s            # 4 min timeout on azure
+        haproxy.org/timeout-server: 239s
+        haproxy.org/timeout-http-keep-alive: 120s
+        haproxy.org/abortonclose: "true"
+        haproxy.org/backend-config-snippet: |-
+          http-reuse aggressive
+        haproxy.org/path-rewrite: '/gw/(.*) /\1'    # Strip the /gw prefix
 
   podAnnotations:
     fluentbit.io/include: 'true' # collect logs with fluentbit
@@ -88,20 +96,32 @@ fogView:
     log: info,rustls=warn,hyper=warn,tokio_reactor=warn,mio=warn,want=warn,reqwest=warn,rusoto_core=error,rusoto_signature=error,h2=error,rocket=warn,<unknown>=warn
 
   ingress:
-    # As string so we can template the cookie salt.
-    annotations: |-
-      cert-manager.io/cluster-issuer: letsencrypt-production-http
-
-      haproxy.org/server-proto: 'h2'              # Force GRPC/H2 mode
-      haproxy.org/server-ssl: 'false'             # The backend (server) is http
-      haproxy.org/timeout-client: 239s            # 4 min timeout on azure
-      haproxy.org/timeout-server: 239s
-      haproxy.org/timeout-http-keep-alive: 120s
-      haproxy.org/abortonclose: 'true'
-      haproxy.org/backend-config-snippet: |-
-        http-reuse aggressive
-        dynamic-cookie-key {{ include "fogServices.fogViewCookieSalt" . }}
-        cookie VIEW insert indirect nocache dynamic
+    grpc:
+      annotations: |-
+        cert-manager.io/cluster-issuer: letsencrypt-production-http
+        haproxy.org/server-proto: "h2"              # Force GRPC/H2 mode
+        haproxy.org/server-ssl: "false"             # The backend (server) is http
+        haproxy.org/timeout-client: 239s            # 4 min timeout on azure
+        haproxy.org/timeout-server: 239s
+        haproxy.org/timeout-http-keep-alive: 120s
+        haproxy.org/abortonclose: "true"
+        haproxy.org/backend-config-snippet: |-
+          http-reuse aggressive
+          dynamic-cookie-key {{ include "fogServices.fogViewGRPCCookieSalt" . }}
+          cookie VIEW insert indirect nocache dynamic
+    http:
+      annotations: |-
+        cert-manager.io/cluster-issuer: letsencrypt-production-http
+        haproxy.org/server-ssl: "false"             # The backend (server) is http
+        haproxy.org/timeout-client: 239s            # 4 min timeout on azure
+        haproxy.org/timeout-server: 239s
+        haproxy.org/timeout-http-keep-alive: 120s
+        haproxy.org/abortonclose: "true"
+        haproxy.org/backend-config-snippet: |-
+          http-reuse aggressive
+          dynamic-cookie-key {{ include "fogServices.fogViewHTTPCookieSalt" . }}
+          cookie "VIEWHTTP" insert indirect nocache dynamic
+        haproxy.org/path-rewrite: '/gw/(.*) /\1'    # Strip the /gw prefix
 
   podAnnotations:
     fluentbit.io/include: 'true' # collect logs with fluentbit
@@ -144,21 +164,34 @@ fogLedger:
           storage: 512Gi
 
   ingress:
-    # As string so we can template the cookie salt.
-    annotations: |-
-      cert-manager.io/cluster-issuer: letsencrypt-production-http
+    grpc:
+      annotations: |-
+        cert-manager.io/cluster-issuer: letsencrypt-production-http
+        haproxy.org/server-proto: "h2"              # Force GRPC/H2 mode
+        haproxy.org/server-ssl: "false"             # The backend (server) is http
+        # haproxy.org/cookie-persistence: "fog-ledger"
+        haproxy.org/timeout-client: 239s            # 4 min timeout on azure
+        haproxy.org/timeout-server: 239s
+        haproxy.org/timeout-http-keep-alive: 120s
+        haproxy.org/abortonclose: "true"
+        haproxy.org/backend-config-snippet: |-
+          http-reuse aggressive
+          dynamic-cookie-key {{ include "fogServices.fogLedgerGRPCCookieSalt" . }}
+          cookie "LEDGER" insert indirect nocache dynamic
 
-      haproxy.org/server-proto: 'h2'              # Force GRPC/H2 mode
-      haproxy.org/server-ssl: 'false'             # The backend (server) is http
-      # haproxy.org/cookie-persistence: 'fog-ledger'
-      haproxy.org/timeout-client: 239s            # 4 min timeout on azure
-      haproxy.org/timeout-server: 239s
-      haproxy.org/timeout-http-keep-alive: 120s
-      haproxy.org/abortonclose: 'true'
-      haproxy.org/backend-config-snippet: |-
-        http-reuse aggressive
-        dynamic-cookie-key {{ include "fogServices.fogLedgerCookieSalt" . }}
-        cookie 'LEDGER' insert indirect nocache dynamic
+    http:
+      annotations: |-
+        cert-manager.io/cluster-issuer: letsencrypt-production-http
+        haproxy.org/server-ssl: "false"             # The backend (server) is http
+        haproxy.org/timeout-client: 239s            # 4 min timeout on azure
+        haproxy.org/timeout-server: 239s
+        haproxy.org/timeout-http-keep-alive: 120s
+        haproxy.org/abortonclose: "true"
+        haproxy.org/backend-config-snippet: |-
+          http-reuse aggressive
+          dynamic-cookie-key {{ include "fogServices.fogLedgerHTTPCookieSalt" . }}
+          cookie "LEDGERHTTP" insert indirect nocache dynamic
+        haproxy.org/path-rewrite: '/gw/(.*) /\1'    # Strip the /gw prefix
 
   podAnnotations:
     fluentbit.io/include: 'true' # collect logs with fluentbit

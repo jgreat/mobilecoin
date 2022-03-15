@@ -104,8 +104,22 @@ spec:
         - name: supervisor-conf
           mountPath: /etc/supervisor/conf.d
           readOnly: true
+      - name: grpc-gateway
         resources:
           {{- toYaml .Values.fogView.resources | nindent 10 }}
+        image: "{{ .Values.grpcGateway.image.org | default .Values.image.org }}/{{ .Values.grpcGateway.image.name }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: Always
+        command:
+        - /usr/bin/go-grpc-gateway
+        - -grpc-server-endpoint=127.0.0.1:3228
+        - -grpc-insecure
+        - -http-server-listen=:8225
+        - -logtostderr
+        ports:
+          - name: view-http
+            containerPort: 8225
+        resources:
+          {{- toYaml .Values.grpcGateway.resources | nindent 10 }}
 {{- if eq .Values.jaegerTracing.enabled true }}
       - name: jaeger-agent
         image: jaegertracing/jaeger-agent:latest

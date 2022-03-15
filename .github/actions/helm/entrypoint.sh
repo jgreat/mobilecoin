@@ -254,12 +254,12 @@ then
                     then
                         echo "-- ${p} Active ingest found, retiring."
                         command="fog_ingest_client --uri 'insecure-fog-ingest://${p}:3226' retire 2>/dev/null | jq -r ."
-                        mode=$(k exec -n "${INPUT_NAMESPACE}" "${toolbox}" -- /bin/bash -c "${command}")
+                        k exec -n "${INPUT_NAMESPACE}" "${toolbox}" -- /bin/bash -c "${command}"
                         active_found="yes"
                     fi
                 done
 
-                if [ -n "${active_found}" ]
+                if [ "${active_found}" != "yes" ]
                 then
                     echo "-- No active flipside ingest found."
                 fi

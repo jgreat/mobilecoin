@@ -17,3 +17,6 @@ spec:
     - name: mgmt
       port: 8000
       targetPort: mgmt
+    - name: view-http
+      port: 8225
+      targetPort: view-http

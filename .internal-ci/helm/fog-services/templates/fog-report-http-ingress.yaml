@@ -1,15 +1,15 @@
 # Adding a separate ingress for each host so we don't stomp on existing certs.
-{{- $hosts := split "\n" (include "fogServices.fogReportHosts" . | trim) }}
+{{- $hosts := split "\n" (include "chart.fogReportHosts" . | trim) }}
 {{- range $hosts }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "fogServices.fullname" $ }}-fog-report-grpc-{{ . }}
+  name: {{ include "chart.fullname" $ }}-fog-report-http-{{ . }}
   labels:
     app: fog-report
-    {{- include "fogServices.labels" $ | nindent 4 }}
+    {{- include "chart.labels" $ | nindent 4 }}
   annotations:
-    {{- toYaml $.Values.fogReport.ingress.annotations | nindent 4 }}
+    {{- toYaml $.Values.fogReport.ingress.http.annotations | nindent 4 }}
 spec:
   tls:
   - hosts:
@@ -19,12 +19,12 @@ spec:
   - host: {{ . }}
     http:
       paths:
-      - path: /report.ReportAPI
+      - path: /gw/report.ReportAPI
         pathType: Prefix
         backend:
           service:
-            name: {{ include "fogServices.fullname" $ }}-fog-report
+            name: {{ include "chart.fullname" $ }}-fog-report
             port:
-              number: 3222
+              number: 8222
 ---
 {{- end }}

@@ -96,26 +96,53 @@ app.kubernetes.io/instance: {{ .Release.Name }}
   {{- end }}
 {{- end }}
 
-{{/* fogViewCookieSalt - reuse existing password */}}
-{{- define "fogServices.fogViewCookieSalt" -}}
+{{/* fogViewGRPCCookieSalt - reuse existing password */}}
+{{- define "fogServices.fogViewGRPCCookieSalt" -}}
 {{- $salt := randAlphaNum 8 }}
-{{- if .Values.fogServicesConfig.fogView.cookie.salt }}
-{{- $salt = .Values.fogServicesConfig.fogView.cookie.salt }}
+{{- if .Values.fogServicesConfig.fogView.grpc.cookie.salt }}
+{{- $salt = .Values.fogServicesConfig.fogView.grpc.cookie.salt }}
 {{- end }}
-{{- $saltSecret := (lookup "v1" "Secret" .Release.Namespace "fog-view-cookie") }}
+{{- $saltSecret := (lookup "v1" "Secret" .Release.Namespace "fog-view-grpc-cookie") }}
 {{- if $saltSecret }}
 {{- $salt = index $saltSecret.data "salt" | b64dec }}
 {{- end }}
 {{- $salt }}
 {{- end }}
 
-{{/* fogLedgerCookieSalt - reuse existing password */}}
-{{- define "fogServices.fogLedgerCookieSalt" -}}
+{{/* fogViewHTTPCookieSalt - reuse existing password */}}
+{{- define "fogServices.fogViewHTTPCookieSalt" -}}
 {{- $salt := randAlphaNum 8 }}
-{{- if .Values.fogServicesConfig.fogLedger.cookie.salt }}
-{{- $salt = .Values.fogServicesConfig.fogLedger.cookie.salt }}
+{{- if .Values.fogServicesConfig.fogView.http.cookie.salt }}
+{{- $salt = .Values.fogServicesConfig.fogView.http.cookie.salt }}
 {{- end }}
-{{- $saltSecret := (lookup "v1" "Secret" .Release.Namespace "fog-ledger-cookie") }}
+{{- $saltSecret := (lookup "v1" "Secret" .Release.Namespace "fog-view-http-cookie") }}
+{{- if $saltSecret }}
+{{- $salt = index $saltSecret.data "salt" | b64dec }}
+{{- end }}
+{{- $salt }}
+{{- end }}
+
+
+{{/* fogLedgerGRPCCookieSalt - reuse existing password */}}
+{{- define "fogServices.fogLedgerGRPCCookieSalt" -}}
+{{- $salt := randAlphaNum 8 }}
+{{- if .Values.fogServicesConfig.fogLedger.grpc.cookie.salt }}
+{{- $salt = .Values.fogServicesConfig.fogLedger.grpc.cookie.salt }}
+{{- end }}
+{{- $saltSecret := (lookup "v1" "Secret" .Release.Namespace "fog-ledger-grpc-cookie") }}
+{{- if $saltSecret }}
+{{- $salt = index $saltSecret.data "salt" | b64dec }}
+{{- end }}
+{{- $salt }}
+{{- end }}
+
+{{/* fogLedgerHTTPCookieSalt - reuse existing password */}}
+{{- define "fogServices.fogLedgerHTTPCookieSalt" -}}
+{{- $salt := randAlphaNum 8 }}
+{{- if .Values.fogServicesConfig.fogLedger.http.cookie.salt }}
+{{- $salt = .Values.fogServicesConfig.fogLedger.http.cookie.salt }}
+{{- end }}
+{{- $saltSecret := (lookup "v1" "Secret" .Release.Namespace "fog-ledger-http-cookie") }}
 {{- if $saltSecret }}
 {{- $salt = index $saltSecret.data "salt" | b64dec }}
 {{- end }}

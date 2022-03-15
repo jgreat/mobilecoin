@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "chart.fullname" . }}-fog-view-http
+  labels:
+    app: fog-view
+    {{- include "chart.labels" . | nindent 4 }}
+  annotations:
+    {{ toYaml (tpl .Values.fogView.ingress.http.annotations . | fromYaml)| nindent 4 }}
+spec:
+  tls:
+  - hosts:
+    - {{ include "chart.fogPublicFQDN" . }}
+    secretName: {{ include "chart.fogPublicFQDN" . }}-fog-tls
+  rules:
+  - host: {{ include "chart.fogPublicFQDN" . }}
+    http:
+      paths:
+      - path: /gw/fog_view.FogViewAPI
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ include "chart.fullname" . }}-fog-view
+            port:
+              number: 8225

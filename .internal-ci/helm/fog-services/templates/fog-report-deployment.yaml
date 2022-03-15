@@ -96,6 +96,20 @@ spec:
           readOnly: true
         resources:
           {{- toYaml .Values.fogReport.resources | nindent 10 }}
+      - name: grpc-gateway
+        image: "{{ .Values.grpcGateway.image.org | default .Values.image.org }}/{{ .Values.grpcGateway.image.name }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: Always
+        command:
+        - /usr/bin/go-grpc-gateway
+        - -grpc-server-endpoint=127.0.0.1:3228
+        - -grpc-insecure
+        - -http-server-listen=:8222
+        - -logtostderr
+        ports:
+          - name: report-http
+            containerPort: 8222
+        resources:
+          {{- toYaml .Values.grpcGateway.resources | nindent 10 }}
 {{- if eq .Values.jaegerTracing.enabled true }}
       - name: jaeger-agent
         image: jaegertracing/jaeger-agent:latest

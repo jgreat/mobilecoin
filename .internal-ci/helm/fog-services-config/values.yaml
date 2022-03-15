@@ -35,8 +35,12 @@ fogReport:
 fogView:
   ### Cookie salts will be generated if no values are provided
   #   Secret values will be reused if they already exist.
-  cookie:
-    salt: ''
+  grpc:
+    cookie:
+      salt: ''
+  http:
+    cookie:
+      salt: ''
   configMap:
     # https://docs.diesel.rs/diesel/r2d2/struct.Builder.html
     POSTGRES_IDLE_TIMEOUT: '60'
@@ -47,8 +51,12 @@ fogView:
 fogLedger:
   ### Cookie salts will be generated if no values are provided
   #   Secret values will be reused if they already exist.
-  cookie:
-    salt: ''
+  grpc:
+    cookie:
+      salt: ''
+  http:
+    cookie:
+      salt: ''
   configMap:
     PLACEHOLDER: ''
 

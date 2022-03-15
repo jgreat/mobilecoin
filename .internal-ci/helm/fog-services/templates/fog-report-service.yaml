@@ -17,3 +17,6 @@ spec:
     - name: mgmt
       port: 8000
       targetPort: mgmt
+    - name: report-http
+      port: 8222
+      targetPort: report-http
