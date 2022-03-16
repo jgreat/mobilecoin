@@ -4,6 +4,31 @@ These build, dockerfiles, helm charts and scripts are used internally for Mobile
 
 ## Workflow
 
+To be discussed and finalized: 
+
+Github actions makes some workflows easier that others.  I feel like I have a reasonable grip on its capabilities.  I'd like to flowchart out the development/git/ci workflow and get us all on the same page. Based on the findings I'd like to propose we lean closer to a more formal git-flow process.   
+
+branching:
+- `main`  is consistent with the latest release.
+- `develop` (default) is the edge branch and would be the PR/merge target between releases.
+  - automatically built and deployed to `develop` namespace.
+  - GHA cache will share cache targets from the default branch with other branches, (`feature`, `release`...)
+- `feature/*` target branch pattern for integration into our repo and ci/testing workflows.
+  - automatically built and deployed to the develop cluster on push.
+  - dev deploy is automatically torn down when branch is removed.
+  - branches are removed once pr is merged into `develop`
+  - Outside forks would be reviewed and then merged into a feature branch for deployment and testing before merge into `develop`
+- `release/0.0.0` semver release branches
+  - cut from `develop` and/or cherry-picked features.
+  - automatically builds `0.0.0-dev` releases
+  - can target with manual (push button) build for TestNet/MainNet and other stable environments.  Will expect an external signed enclave `0.0.0-test, 0.0.0-prod`.
+  - Merged into `main` and back into `develop` on successful release.
+  - `main` should be tagged when we merge in the release.
+
+Forks:
+
+All PRs from external forks must be reviewed and then pushed into a `feature` branch. External PRs must not be merged directly into `develop`, `release` or `main` branches. Its important to review all external changes with an eye toward security.  Special care should be taken with any modifications to `.internal-ci` and `.github` directories.
+
 
 ## Artifacts
 
@@ -20,9 +45,27 @@ We use [Semver 2](https://semver.org/){:target="_blank"} for general versioning.
 
 **Feature Branches**
 
-Feature branches are versioned as 0.0.0.
+- `feature/my-awesome-feature` valid characters `[a-z][0-9]-`
+- Feature branch names will be normalized in the versioning, namespaces, dns. 
+  - `feature/` prefix will be removed
+  - semver portion will be set to `0.0.0`.
 
+format:
+```
 0.0.0-${branch}.${GITHUB_RUN_NUMBER}.sha-${sha}
+```
+
+examples:
+```
+feature/my.awesome_feature
+
+0.0.0-my-awesome-feature.21.sha-abcd1234
+```
+
+**Release branches**
+
+
+- `release/1.2.0` valid characters 
 
 
 ## CI triggers
