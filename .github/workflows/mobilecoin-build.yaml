@@ -138,8 +138,8 @@ jobs:
         ! contains(github.event.head_commit.message, '[skip-build]')
       run: |
         mkdir -p build_artifacts
-        find target/release -maxdepth 1 -executable -type f -exec cp "{}" build_artifacts/bin/ \;
-        find target/release -maxdepth 1 -name "*.signed.so" -exec cp "{}" build_artifacts/signed.so/ \;
+        find target/release -maxdepth 1 -executable -type f -exec cp "{}" build_artifacts/ \;
+        find target/release -maxdepth 1 -name "*.signed.so" -exec cp "{}" build_artifacts/ \;
 
     - name: Create css measurements
       if: |
