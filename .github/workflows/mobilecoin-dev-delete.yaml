@@ -1,0 +1,37 @@
+name: mobilecoin-dev-delete
+
+on: 
+  workflow_dispatch:
+    inputs:
+      namespace:
+        description: "Target Namespace"
+        type: string
+        required: true
+
+jobs:
+  list-values:
+    runs-on: self-hosted
+    steps:
+    - name: values
+      run: |
+        echo namespace ${{ github.event.inputs.namespace }}
+
+  delete:
+    # start after a successful build or destroy is checked on a dispatch
+    if: github.event.inputs.delete == 'true'
+    runs-on: self-hosted
+    steps:
+    - name: Start with clean workspace
+      run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Delete namespace
+      uses: ./.github/actions/helm
+      with:
+        action: namespace-delete
+        namespace: ${{ github.event.inputs.namespace }}
+        rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
+        rancher_url: ${{ secrets.RANCHER_URL }}
+        rancher_token: ${{ secrets.RANCHER_TOKEN }}

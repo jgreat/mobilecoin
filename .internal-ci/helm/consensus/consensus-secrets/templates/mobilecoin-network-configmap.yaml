@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mobilecoin-network
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+data:
+  network: {{ .Values.mobileCoinNetwork.value }}

@@ -1,0 +1,10 @@
+{{- if .Values.node.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "consensusNode.fullname" . }}-data
+  labels:
+    {{- include "consensusNode.labels" . | nindent 4 }}
+spec:
+  {{- toYaml .Values.node.persistence.spec | nindent 2 }}
+{{- end }}
