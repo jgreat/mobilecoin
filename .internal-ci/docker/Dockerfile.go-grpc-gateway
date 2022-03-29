@@ -1,0 +1,16 @@
+# Runtime Image
+FROM ubuntu:focal-20220113
+
+RUN apt-get update \
+  && apt-get upgrade -y \
+  && apt-get install -y ca-certificates \
+  && apt-get clean \
+  && rm -r /var/lib/apt/lists
+
+ARG GO_BIN_PATH=go-grpc-gateway
+COPY ${GO_BIN_PATH}/grpc-proxy /usr/bin/go-grpc-gateway
+
+COPY .internal-ci/docker/entrypoints/go-grpc-gateway.sh /usr/bin/entrypoint.sh
+ENTRYPOINT ["/usr/bin/entrypoint.sh"]
+
+EXPOSE 8000

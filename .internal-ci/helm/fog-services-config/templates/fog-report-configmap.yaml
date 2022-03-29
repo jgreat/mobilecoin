@@ -1,0 +1,8 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: fog-report
+  labels:
+    {{- include "fogServicesConfig.labels" . | nindent 4 }}
+data:
+  {{- toYaml .Values.fogReport.configMap | nindent 2 }}
