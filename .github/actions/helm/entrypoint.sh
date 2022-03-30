@@ -50,6 +50,30 @@ rancher_get_kubeconfig()
     chmod 600 "${KUBECONFIG}"
 }
 
+helm_upgrade()
+{
+    repo_name="${1}"
+    sets="${2}"
+
+    helm upgrade "${INPUT_RELEASE_NAME}" "${repo_name}/${INPUT_CHART_NAME}" \
+        -i --wait --timeout="${INPUT_CHART_WAIT_TIMEOUT}" \
+        --namespace "${INPUT_NAMESPACE}" \
+        --version "${INPUT_CHART_VERSION}" "${sets}"
+}
+
+helm_upgrade_with_values()
+{
+    repo_name="${1}"
+    sets="${2}"
+
+    helm upgrade "${INPUT_RELEASE_NAME}" "${repo_name}/${INPUT_CHART_NAME}" \
+        -i --wait --timeout="${INPUT_CHART_WAIT_TIMEOUT}" \
+        -f "${INPUT_CHART_VALUES}" \
+        --namespace "${INPUT_NAMESPACE}" \
+        --version "${INPUT_CHART_VERSION}" "${sets}"
+}
+
+
 if [ -n "${INPUT_ACTION}" ]
 then
     case "${INPUT_ACTION}" in
@@ -194,7 +218,7 @@ then
             is_set INPUT_CHART_WAIT_TIMEOUT
 
             echo "-- Add chart repo ${INPUT_CHART_REPO}"
-            repo_name=$(dd bs=10 count=1 if=/dev/urandom | base64 | tr -d +/=)
+            repo_name=$(dd bs=10 count=1 if=/dev/urandom 2>/dev/null | base64 | tr -d +/=)
             echo "-- Repo random name ${repo_name}"
             helm repo add "${repo_name}" "${INPUT_CHART_REPO}"
             helm repo update
@@ -203,18 +227,27 @@ then
 
             if [ -n "${INPUT_CHART_VALUES}" ]
             then
-                echo "-- deploy ${INPUT_CHART_NAME} with values."
-                helm upgrade "${INPUT_RELEASE_NAME}" "${repo_name}/${INPUT_CHART_NAME}" \
-                -i --wait --timeout="${INPUT_CHART_WAIT_TIMEOUT}" \
-                -f "${INPUT_CHART_VALUES}" \
-                --namespace "${INPUT_NAMESPACE}" \
-                --version "${INPUT_CHART_VERSION}" ${sets}
+                for t in {1..3}
+                do
+                    echo "-- deploy ${INPUT_CHART_NAME} with values - try ${t}"
+                if helm_upgrade_with_values "${repo_name}" "${sets}"
+                    then
+                        sleep 10
+                    else
+                        echo_exit "Deploy Successful"
+                    fi
+                done
             else
-                echo "-- deploy ${INPUT_CHART_NAME}"
-                helm upgrade "${INPUT_RELEASE_NAME}" "${repo_name}/${INPUT_CHART_NAME}" \
-                -i --wait --timeout="${INPUT_CHART_WAIT_TIMEOUT}" \
-                --namespace "${INPUT_NAMESPACE}" \
-                --version "${INPUT_CHART_VERSION}" ${sets}
+                for t in {1..3}
+                do
+                    echo "-- Deploy ${INPUT_CHART_NAME} - try ${t}"
+                    if helm_upgrade "${repo_name}" "${sets}"
+                    then
+                        sleep 10
+                    else
+                        echo_exit "Deploy Successful"
+                    fi
+                done
             fi
             ;;
 
