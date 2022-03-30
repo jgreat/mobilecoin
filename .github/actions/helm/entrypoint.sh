@@ -50,22 +50,6 @@ rancher_get_kubeconfig()
     chmod 600 "${KUBECONFIG}"
 }
 
-delete_release()
-{
-    echo "-- Get release list"
-    release=$(helm list -a -q -n "${INPUT_NAMESPACE}" | grep "${INPUT_RELEASE_NAME}" || true)
-    if [ -n "${release}" ]
-    then
-        echo "-- Deleting release ${INPUT_RELEASE_NAME}"
-        helm delete "${INPUT_RELEASE_NAME}" -n "${INPUT_NAMESPACE}" --wait --timeout="${INPUT_CHART_WAIT_TIMEOUT}"
-        # recurse until releases are not found
-        sleep 1
-        delete_release
-    else
-        echo "-- Release ${INPUT_RELEASE_NAME} not found."
-    fi
-}
-
 if [ -n "${INPUT_ACTION}" ]
 then
     case "${INPUT_ACTION}" in
@@ -171,7 +155,21 @@ then
 
             k get ns "${INPUT_NAMESPACE}" || echo_exit "Namespace doesn't exist"
 
-            delete_release
+            echo "-- Get release list"
+            release=$(helm list -a -q -n "${INPUT_NAMESPACE}" | grep "${INPUT_RELEASE_NAME}" || true)
+            if [ -n "${release}" ]
+            then
+                echo "-- Deleting release ${INPUT_RELEASE_NAME}"
+                helm delete "${INPUT_RELEASE_NAME}" -n "${INPUT_NAMESPACE}" --wait --timeout="${INPUT_CHART_WAIT_TIMEOUT}"
+
+                # Wait for delete since it seems like the helm chart sometimes doesn't really wait.
+                sleep 5
+                k -n "${INPUT_NAMESPACE}" wait all --for=delete --timeout="${INPUT_CHART_WAIT_TIMEOUT}" -l "app.kubernetes.io/managed-by=Helm,app.kubernetes.io/instance=consensus-node-3"
+
+            else
+                echo "-- Release ${INPUT_RELEASE_NAME} not found."
+            fi
+
             ;;
 
         delete-pvcs)
