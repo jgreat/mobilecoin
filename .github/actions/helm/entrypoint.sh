@@ -163,8 +163,9 @@ then
                 helm delete "${INPUT_RELEASE_NAME}" -n "${INPUT_NAMESPACE}" --wait --timeout="${INPUT_CHART_WAIT_TIMEOUT}"
 
                 # Wait for delete since it seems like the helm chart sometimes doesn't really wait.
+                echo "-- No for reals, wait for resources to delete"
                 sleep 5
-                k -n "${INPUT_NAMESPACE}" wait all --for=delete --timeout="${INPUT_CHART_WAIT_TIMEOUT}" -l "app.kubernetes.io/managed-by=Helm,app.kubernetes.io/instance=consensus-node-3"
+                k -n "${INPUT_NAMESPACE}" wait all --for=delete --timeout="${INPUT_CHART_WAIT_TIMEOUT}" -l "app.kubernetes.io/managed-by=Helm,app.kubernetes.io/instance=${INPUT_RELEASE_NAME}"
 
             else
                 echo "-- Release ${INPUT_RELEASE_NAME} not found."

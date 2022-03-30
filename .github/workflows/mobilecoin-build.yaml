@@ -17,6 +17,7 @@ jobs:
 # Generate data and environment information
 ############################################
   generate-metadata:
+    name: 👾 Environment Info 👾
     runs-on: [self-hosted, small]
     outputs:
       branch: ${{ steps.meta.outputs.branch }}
@@ -33,7 +34,7 @@ jobs:
       run: |
         .internal-ci/util/metadata.sh
 
-    - name: Print Environment Details
+    - name: 👾 Print Environment Details 👾
       env:
         NAMESPACE: ${{ steps.meta.outputs.branch }}
         BUILD_TAG: ${{ steps.meta.outputs.tag }}
