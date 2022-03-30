@@ -55,10 +55,20 @@ helm_upgrade()
     repo_name="${1}"
     sets="${2}"
 
-    helm upgrade "${INPUT_RELEASE_NAME}" "${repo_name}/${INPUT_CHART_NAME}" \
-        -i --wait --timeout="${INPUT_CHART_WAIT_TIMEOUT}" \
-        --namespace "${INPUT_NAMESPACE}" \
-        --version "${INPUT_CHART_VERSION}" "${sets}"
+    for t in {1..3}
+    do
+        echo "-- Deploy ${INPUT_CHART_NAME} - try ${t}"
+        # shellcheck disable=SC2086
+        if helm upgrade "${INPUT_RELEASE_NAME}" "${repo_name}/${INPUT_CHART_NAME}" \
+            -i --wait --timeout="${INPUT_CHART_WAIT_TIMEOUT}" \
+            --namespace "${INPUT_NAMESPACE}" \
+            --version "${INPUT_CHART_VERSION}" ${sets}
+        then
+            sleep 10
+        else
+            echo_exit "Deploy Successful"
+        fi
+    done
 }
 
 helm_upgrade_with_values()
@@ -66,11 +76,21 @@ helm_upgrade_with_values()
     repo_name="${1}"
     sets="${2}"
 
-    helm upgrade "${INPUT_RELEASE_NAME}" "${repo_name}/${INPUT_CHART_NAME}" \
-        -i --wait --timeout="${INPUT_CHART_WAIT_TIMEOUT}" \
-        -f "${INPUT_CHART_VALUES}" \
-        --namespace "${INPUT_NAMESPACE}" \
-        --version "${INPUT_CHART_VERSION}" "${sets}"
+    for t in {1..3}
+    do
+        echo "-- deploy ${INPUT_CHART_NAME} with values - try ${t}"
+        # shellcheck disable=SC2086
+        if helm upgrade "${INPUT_RELEASE_NAME}" "${repo_name}/${INPUT_CHART_NAME}" \
+            -i --wait --timeout="${INPUT_CHART_WAIT_TIMEOUT}" \
+            -f "${INPUT_CHART_VALUES}" \
+            --namespace "${INPUT_NAMESPACE}" \
+            --version "${INPUT_CHART_VERSION}" ${sets}
+        then
+            sleep 10
+        else
+            echo_exit "Deploy Successful"
+        fi
+    done
 }
 
 
@@ -227,27 +247,9 @@ then
 
             if [ -n "${INPUT_CHART_VALUES}" ]
             then
-                for t in {1..3}
-                do
-                    echo "-- deploy ${INPUT_CHART_NAME} with values - try ${t}"
-                if helm_upgrade_with_values "${repo_name}" "${sets}"
-                    then
-                        sleep 10
-                    else
-                        echo_exit "Deploy Successful"
-                    fi
-                done
+                helm_upgrade_with_values "${repo_name}" "${sets}"
             else
-                for t in {1..3}
-                do
-                    echo "-- Deploy ${INPUT_CHART_NAME} - try ${t}"
-                    if helm_upgrade "${repo_name}" "${sets}"
-                    then
-                        sleep 10
-                    else
-                        echo_exit "Deploy Successful"
-                    fi
-                done
+                helm_upgrade "${repo_name}" "${sets}"
             fi
             ;;
 
