@@ -64,9 +64,9 @@ helm_upgrade()
             --namespace "${INPUT_NAMESPACE}" \
             --version "${INPUT_CHART_VERSION}" ${sets}
         then
-            sleep 10
-        else
             echo_exit "Deploy Successful"
+        else
+            sleep 10
         fi
     done
 }
@@ -86,9 +86,9 @@ helm_upgrade_with_values()
             --namespace "${INPUT_NAMESPACE}" \
             --version "${INPUT_CHART_VERSION}" ${sets}
         then
-            sleep 10
-        else
             echo_exit "Deploy Successful"
+        else
+            sleep 10
         fi
     done
 }
