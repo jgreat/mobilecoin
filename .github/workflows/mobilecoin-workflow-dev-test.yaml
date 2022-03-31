@@ -175,7 +175,7 @@ jobs:
   mobilecoind-integration:
     runs-on: [self-hosted, small]
     needs:
-    - fog-test-client
+    - fog-distribution
     steps:
     - name: Checkout
       uses: actions/checkout@v2

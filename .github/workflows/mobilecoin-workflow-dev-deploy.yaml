@@ -270,7 +270,8 @@ jobs:
 
   fog-services-deploy:
     needs:
-    - fog-ingest-deploy
+    - postgresql-deploy
+    - consensus-deploy
     runs-on: [self-hosted, small]
     steps:
     - name: Checkout
