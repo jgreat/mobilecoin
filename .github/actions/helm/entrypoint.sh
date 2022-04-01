@@ -69,6 +69,7 @@ helm_upgrade()
             sleep 10
         fi
     done
+    error_exit "Helm Deployment Failed"
 }
 
 helm_upgrade_with_values()
@@ -91,6 +92,7 @@ helm_upgrade_with_values()
             sleep 10
         fi
     done
+    error_exit "Helm Deployment Failed"
 }
 
 

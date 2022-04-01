@@ -68,3 +68,8 @@ mobilecoind:
 
   podAnnotations:
     fluentbit.io/include: 'true' # collect logs with fluentbit
+    fluentbit.io/exclude-jaeger-agent: 'true'
+
+jaegerTracing:
+  enabled: true
+  collector: 'dns:///jaeger-collector:14250'

@@ -75,6 +75,9 @@ inputs:
   command:
     description: "shell commands to run"
     required: false
+  object_name:
+    description: "k8s object to scale"
+    required: false
 runs:
   using: 'docker'
   image: jgreat/k8s-toolbox-gha:latest
