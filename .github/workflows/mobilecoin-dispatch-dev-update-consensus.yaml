@@ -7,6 +7,10 @@ on:
         description: "Target Namespace"
         type: string
         required: true
+      version:
+        description: "Chart Version"
+        type: string
+        required: true
       block_version:
         description: "Block Version"
         type: string
@@ -21,12 +25,14 @@ jobs:
       run: |
         echo namespace ${{ github.event.inputs.namespace }}
         echo block_version ${{ github.event.inputs.block_version }}
+        echo version ${{ github.event.inputs.version }}
 
   update-consensus-block-version:
     uses: ./.github/workflows/mobilecoin-workflow-dev-update-block-version.yaml
     with:
       namespace: ${{ github.event.inputs.namespace }}
       block_version: "${{ github.event.inputs.block_version }}"
+      version: ${{ github.event.inputs.version }}
     secrets:
       RANCHER_CLUSTER: ${{ secrets.RANCHER_CLUSTER }}
       RANCHER_URL: ${{ secrets.RANCHER_URL }}

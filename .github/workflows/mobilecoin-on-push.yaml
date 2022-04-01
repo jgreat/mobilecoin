@@ -483,6 +483,7 @@ jobs:
         inputs: |
           {
             "namespace": "${{ needs.generate-metadata.outputs.namespace }}",
+            "version": "${{ needs.generate-metadata.outputs.tag }}",
             "block_version": "1"
           }
 

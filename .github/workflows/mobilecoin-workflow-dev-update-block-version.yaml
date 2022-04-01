@@ -12,6 +12,10 @@ on:
         type: string
         required: true
         default: '0'
+      version:
+        description: "release version"
+        type: string
+        required: true
     secrets:
       RANCHER_CLUSTER:
         description: "Rancher cluster name"
@@ -76,7 +80,7 @@ jobs:
         action: helm-deploy
         chart_repo: https://s3.us-east-2.amazonaws.com/charts.mobilecoin.com/
         chart_name: mc-core-dev-env-setup
-        chart_version: ${{ github.event.inputs.version }}
+        chart_version: ${{ inputs.version }}
         chart_values: .tmp/values/mc-core-dev-env-values.yaml
         chart_set: |
           --set=global.node.nodeConfig.blockVersion='{{ inputs.block_version }}'
