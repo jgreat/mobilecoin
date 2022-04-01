@@ -462,7 +462,7 @@ jobs:
           }
 
 #################################################
-# Update current consensus to namespace block v1
+# Update current consensus to namespace block v1 
 #################################################
   current-release-v1-update:
     runs-on: [self-hosted, small]
