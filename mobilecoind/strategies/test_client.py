@@ -11,13 +11,9 @@ Example setup and usage:
 ```
 """
 import argparse
-import concurrent.futures
 import logging
 import sys
-import json
-import grpc
 import mobilecoind_api_pb2
-import mobilecoind_api_pb2_grpc
 import os
 import time
 from accounts import *

@@ -1,27 +1,50 @@
-name: mobilecoin-dev-update-consensus
+name: mobilecoin-workflow-dev-update-block-version
 
-on: 
-  workflow_dispatch:
+on:
+  workflow_call:
     inputs:
       namespace:
         description: "Target Namespace"
         type: string
         required: true
+      block_version:
+        description: "block_version"
+        type: string
+        required: true
+        default: '0'
+    secrets:
+      RANCHER_CLUSTER:
+        description: "Rancher cluster name"
+        required: true
+      RANCHER_URL:
+        description: "Rancher server URL"
+        required: true
+      RANCHER_TOKEN:
+        description: "Rancher access token"
+        required: true
+      LEDGER_AWS_ACCESS_KEY_ID:
+        description: "Ledger AWS S3 access"
+        required: true
+      LEDGER_AWS_SECRET_ACCESS_KEY:
+        description: "Ledger AWS S3 access"
+        required: true
+      IAS_KEY:
+        description: "IAS"
+        required: true
+      IAS_SPID:
+        description: "IAS"
+        required: true
+      FOG_REPORT_SIGNING_CERT:
+        description: "Fog Report signing cert pem"
+        required: true
+      FOG_REPORT_SIGNING_CERT_KEY:
+        description: "Fog Report signing cert key"
+        required: true
 
 jobs:
-  list-values:
-    runs-on: [self-hosted, small]
-    steps:
-    - name: values
-      run: |
-        echo namespace ${{ github.event.inputs.namespace }}
-
   setup-environment:
     runs-on: [self-hosted, small]
     steps:
-    - name: Start with clean workspace
-      run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
-
     - name: Checkout
       uses: actions/checkout@v2
 
@@ -43,17 +66,11 @@ jobs:
         FOG_REPORT_SIGNING_CERT: ${{ secrets.FOG_REPORT_SIGNING_CERT }}
         FOG_REPORT_SIGNING_CERT_KEY: ${{ secrets.FOG_REPORT_SIGNING_CERT_KEY }}
         # CLIENT_AUTH_TOKEN:
-        # SENTRY_DSN_CONSENSUS:
-        # SENTRY_DSN_LEDGER_DISTRIBUTION:
-        # SENTRY_DSN_FOG_INGEST:
-        # SENTRY_DSN_FOG_VIEW:
-        # SENTRY_DSN_FOG_LEDGER:
-        # SENTRY_DSN_FOG_INGEST:
       run: |
         mkdir -p .tmp/values/
         .internal-ci/util/generate_dev_values.sh > .tmp/values/mc-core-dev-env-values.yaml
 
-    - name: Deploy environment setup with block_version=2
+    - name: Deploy environment setup with block_version
       uses: ./.github/actions/helm
       with:
         action: helm-deploy
@@ -62,9 +79,9 @@ jobs:
         chart_version: ${{ github.event.inputs.version }}
         chart_values: .tmp/values/mc-core-dev-env-values.yaml
         chart_set: |
-          --set=global.node.nodeConfig.blockVersion='2'
+          --set=global.node.nodeConfig.blockVersion='{{ inputs.block_version }}'
         release_name: mc-core-dev-env-setup
-        namespace: ${{ github.event.inputs.namespace }}
+        namespace: ${{ inputs.namespace }}
         rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
@@ -82,9 +99,6 @@ jobs:
         - deployment.app/consensus-node-4
         - deployment.app/consensus-node-5
     steps:
-    - name: Start with clean workspace
-      run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
-
     - name: Checkout
       uses: actions/checkout@v2
 
@@ -93,7 +107,7 @@ jobs:
       with:
         action: pod-restart
         object_name: ${{ matrix.object_name }}
-        namespace: ${{ github.event.inputs.namespace }}
+        namespace: ${{ inputs.namespace }}
         rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}

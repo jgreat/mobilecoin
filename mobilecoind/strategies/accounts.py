@@ -7,7 +7,6 @@ import time
 import os
 import sys
 import uuid
-import json
 import mobilecoind_api_pb2
 import mobilecoind_api_pb2_grpc
 from collections import namedtuple

@@ -1,4 +1,4 @@
-name: mobilecoin-build
+name: mobilecoin-on-push
 
 env:
   DOCKER_ORG: jgreat
@@ -6,11 +6,8 @@ env:
 
 on:
   push:
-    # tags:
-    # - 'v*'
     branches:
     - release-1.2.0-ci-*
-  # pull_request: {}
 
 jobs:
 ############################################
@@ -364,19 +361,6 @@ jobs:
             "namespace": "${{ needs.generate-metadata.outputs.namespace }}"
           }
 
-  # dev-reset:
-  #   needs:
-  #   - generate-metadata
-  #   uses: ./.github/workflows/workflow-dev-reset.yaml
-  #   with:
-  #     namespace: ${{ needs.generate-metadata.outputs.namespace }}
-  #   secrets:
-  #     RANCHER_CLUSTER: ${{ secrets.RANCHER_CLUSTER }}
-  #     RANCHER_URL: ${{ secrets.RANCHER_URL }}
-  #     RANCHER_TOKEN: ${{ secrets.RANCHER_TOKEN }}
-  #     LEDGER_AWS_ACCESS_KEY_ID: ${{ secrets.LEDGER_AWS_ACCESS_KEY_ID }}
-  #     LEDGER_AWS_SECRET_ACCESS_KEY: ${{ secrets.LEDGER_AWS_SECRET_ACCESS_KEY }}
-
 #######################################
 # Deploy previous release to namespace
 #######################################
@@ -404,27 +388,6 @@ jobs:
             "ingest_color": "blue"
           }
 
-  # previous-release-deploy:
-  #   needs:
-  #   - generate-metadata
-  #   - dev-reset
-  #   uses: ./.github/workflows/workflow-dev-deploy.yaml
-  #   with:
-  #     namespace: ${{ needs.generate-metadata.outputs.namespace }}
-  #     version: ${{ needs.generate-metadata.outputs.previous_release }}
-  #     docker_image_org: ${{ needs.generate-metadata.outputs.docker_org }}
-  #     ingest_color: blue
-  #   secrets:
-  #     RANCHER_CLUSTER: ${{ secrets.RANCHER_CLUSTER }}
-  #     RANCHER_URL: ${{ secrets.RANCHER_URL }}
-  #     RANCHER_TOKEN: ${{ secrets.RANCHER_TOKEN }}
-  #     LEDGER_AWS_ACCESS_KEY_ID: ${{ secrets.LEDGER_AWS_ACCESS_KEY_ID }}
-  #     LEDGER_AWS_SECRET_ACCESS_KEY: ${{ secrets.LEDGER_AWS_SECRET_ACCESS_KEY }}
-  #     IAS_KEY: ${{ secrets.IAS_KEY }}
-  #     IAS_SPID: ${{ secrets.IAS_SPID }}
-  #     FOG_REPORT_SIGNING_CERT: ${{ secrets.FOG_REPORT_SIGNING_CERT }}
-  #     FOG_REPORT_SIGNING_CERT_KEY: ${{ secrets.FOG_REPORT_SIGNING_CERT_KEY }}
-
   previous-release-test:
     runs-on: [self-hosted, small]
     needs:
@@ -446,20 +409,6 @@ jobs:
             "namespace": "${{ needs.generate-metadata.outputs.namespace }}",
             "ingest_color": "blue"
           }
-
-  # previous-release-test:
-  #   needs:
-  #   - previous-release-deploy
-  #   - generate-metadata
-  #   uses: ./.github/workflows/workflow-dev-test.yaml
-  #   with:
-  #     namespace: ${{ needs.generate-metadata.outputs.namespace }}
-  #     ingest_color: blue
-  #   secrets:
-  #     RANCHER_CLUSTER: ${{ secrets.RANCHER_CLUSTER }}
-  #     RANCHER_URL: ${{ secrets.RANCHER_URL }}
-  #     RANCHER_TOKEN: ${{ secrets.RANCHER_TOKEN }}
-  #     FOG_AUTHORITY_ROOT_CA_CERT: ${{ secrets.FOG_AUTHORITY_ROOT_CA_CERT }}
 
 ###############################################
 # Deploy current version to namespace block v0
@@ -489,28 +438,6 @@ jobs:
             "ingest_color": "green"
           }
 
-  # current-release-v0-deploy:
-  #   needs:
-  #   - generate-metadata
-  #   - previous-release-test
-  #   - charts
-  #   uses: ./.github/workflows/workflow-dev-deploy.yaml
-  #   with:
-  #     namespace: ${{ needs.generate-metadata.outputs.namespace }}
-  #     version: ${{ needs.generate-metadata.outputs.tag }}
-  #     docker_image_org: ${{ needs.generate-metadata.outputs.docker_org }}
-  #     ingest_color: green
-  #   secrets:
-  #     RANCHER_CLUSTER: ${{ secrets.RANCHER_CLUSTER }}
-  #     RANCHER_URL: ${{ secrets.RANCHER_URL }}
-  #     RANCHER_TOKEN: ${{ secrets.RANCHER_TOKEN }}
-  #     LEDGER_AWS_ACCESS_KEY_ID: ${{ secrets.LEDGER_AWS_ACCESS_KEY_ID }}
-  #     LEDGER_AWS_SECRET_ACCESS_KEY: ${{ secrets.LEDGER_AWS_SECRET_ACCESS_KEY }}
-  #     IAS_KEY: ${{ secrets.IAS_KEY }}
-  #     IAS_SPID: ${{ secrets.IAS_SPID }}
-  #     FOG_REPORT_SIGNING_CERT: ${{ secrets.FOG_REPORT_SIGNING_CERT }}
-  #     FOG_REPORT_SIGNING_CERT_KEY: ${{ secrets.FOG_REPORT_SIGNING_CERT_KEY }}
-
   current-release-v0-test:
     runs-on: [self-hosted, small]
     needs:
@@ -534,63 +461,50 @@ jobs:
             "fog_distribution": "false"
           }
 
-  # current-release-v0-test:
-  #   needs:
-  #   - generate-metadata
-  #   - current-release-v0-deploy
-  #   uses: ./.github/workflows/workflow-dev-test.yaml
-  #   with:
-  #     namespace: ${{ needs.generate-metadata.outputs.namespace }}
-  #     ingest_color: green
-  #     fog_distribution: false
-  #   secrets:
-  #     RANCHER_CLUSTER: ${{ secrets.RANCHER_CLUSTER }}
-  #     RANCHER_URL: ${{ secrets.RANCHER_URL }}
-  #     RANCHER_TOKEN: ${{ secrets.RANCHER_TOKEN }}
-  #     FOG_AUTHORITY_ROOT_CA_CERT: ${{ secrets.FOG_AUTHORITY_ROOT_CA_CERT }}
-
 #################################################
 # Update current consensus to namespace block v1
 #################################################
-  # current-release-v2-update:
-  #   runs-on: [self-hosted, small]
-  #   needs:
-  #   - generate-metadata
-  #   - current-release-v0-test
-  #   steps:
-  #   - name: Checkout
-  #     uses: actions/checkout@v2
+  current-release-v1-update:
+    runs-on: [self-hosted, small]
+    needs:
+    - current-release-v0-test
+    - generate-metadata
+    steps:
+    - name: Deploy Release
+      if: "! contains(github.event.head_commit.message, '[skip-current-release-v1-update]')"
+      uses: aurelien-baudet/workflow-dispatch@v2.1.1
+      with:
+        workflow: mobilecoin-dispatch-dev-update-consensus
+        token: ${{ secrets.ACTIONS_TOKEN }}
+        wait-for-completion: true
+        wait-for-completion-timeout: 30m
+        wait-for-completion-interval: 30s
+        display-workflow-run-url-interval: 30s
+        inputs: |
+          {
+            "namespace": "${{ needs.generate-metadata.outputs.namespace }}",
+            "block_version": "1"
+          }
 
-  #   - name: Generate version metadata
-  #     id: meta
-  #     run: |
-  #       .internal-ci/util/metadata.sh
-
-  #   - name: Update Consensus with block_version v2
-  #     if: "! contains(github.event.head_commit.message, '[skip-current-release-v2-update]')"
-  #     uses: aurelien-baudet/workflow-dispatch@v2.1.1
-  #     with:
-  #       workflow: mobilecoin-dev-update-consensus
-  #       token: ${{ secrets.ACTIONS_TOKEN }}
-  #       wait-for-completion: true
-  #       wait-for-completion-timeout: 30m
-  #       wait-for-completion-interval: 30s
-  #       display-workflow-run-url-interval: 30s
-  #       inputs: |
-  #         {
-  #           "namespace": "${{ steps.meta.outputs.branch }}"
-  #         }
-
-  # current-release-v2-test:
-  #   needs:
-  #   - generate-metadata
-  #   - current-release-v2-update
-  #   uses: ./.github/workflows/workflow-dev-test.yaml
-  #   with:
-  #     namespace: ${{ needs.generate-metadata.outputs.namespace }}
-  #     ingest_color: green
-  #     fog_distribution: false
-  #   secrets:
-  #     RANCHER_CLUSTER: ${{ secrets.RANCHER_CLUSTER }}
-  #     RANCHER_URL: ${{ secrets.RANCHER_URL }}
-  #     RANCHER_TOKEN: ${{ secrets.RANCHER_TOKEN }}
+  current-release-v1-test:
+    runs-on: [self-hosted, small]
+    needs:
+    - current-release-v1-update
+    - generate-metadata
+    steps:
+    - name: Run MobileCoin integration tests
+      if: "! contains(github.event.head_commit.message, '[skip-current-release-v1-test]')"
+      uses: aurelien-baudet/workflow-dispatch@v2.1.1
+      with:
+        workflow: mobilecoin-dispatch-dev-test
+        token: ${{ secrets.ACTIONS_TOKEN }}
+        wait-for-completion: true
+        wait-for-completion-timeout: 30m
+        wait-for-completion-interval: 30s
+        display-workflow-run-url-interval: 30s
+        inputs: |
+          {
+            "namespace": "${{ needs.generate-metadata.outputs.namespace }}",
+            "ingest_color": "green",
+            "fog_distribution": "false"
+          }

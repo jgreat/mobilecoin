@@ -84,12 +84,6 @@ jobs:
         FOG_REPORT_SIGNING_CERT: ${{ secrets.FOG_REPORT_SIGNING_CERT }}
         FOG_REPORT_SIGNING_CERT_KEY: ${{ secrets.FOG_REPORT_SIGNING_CERT_KEY }}
         # CLIENT_AUTH_TOKEN:
-        # SENTRY_DSN_CONSENSUS:
-        # SENTRY_DSN_LEDGER_DISTRIBUTION:
-        # SENTRY_DSN_FOG_INGEST:
-        # SENTRY_DSN_FOG_VIEW:
-        # SENTRY_DSN_FOG_LEDGER:
-        # SENTRY_DSN_FOG_INGEST:
       run: |
         mkdir -p .tmp/values/
         .internal-ci/util/generate_dev_values.sh > .tmp/values/mc-core-dev-env-values.yaml

@@ -30,7 +30,7 @@ on:
 
 jobs:
   generate-metadata:
-    uses: ./.github/workflows/mobilecoin-workflow-dev-generate-metadata.yaml
+    uses: ./.github/reusable-workflows/mobilecoin-workflow-dev-generate-metadata.yaml
 
   previous-release-test:
     needs:

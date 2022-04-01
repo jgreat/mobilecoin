@@ -1,0 +1,32 @@
+name: mobilecoin-dispatch-dev-update-consensus
+
+on: 
+  workflow_dispatch:
+    inputs:
+      namespace:
+        description: "Target Namespace"
+        type: string
+        required: true
+      block_version:
+        description: "Block Version"
+        type: string
+        required: true
+        default: '0'
+
+jobs:
+  list-values:
+    runs-on: [self-hosted, small]
+    steps:
+    - name: values
+      run: |
+        echo namespace ${{ github.event.inputs.namespace }}
+
+  update-consensus:
+    uses: ./.github/reusable-workflows/mobilecoin-workflow-dev-update-consensus.yaml
+    with:
+      namespace: ${{ github.event.inputs.namespace }}
+      block_version: "${{ github.event.inputs.block_version }}"
+    secrets:
+      RANCHER_CLUSTER: ${{ secrets.RANCHER_CLUSTER }}
+      RANCHER_URL: ${{ secrets.RANCHER_URL }}
+      RANCHER_TOKEN: ${{ secrets.RANCHER_TOKEN }}
