@@ -1,6 +1,6 @@
 name: mobilecoin-dispatch-dev-update-consensus
-      mobilecoin-dispatch-dev-update-consensus
-on: 
+
+on:
   workflow_dispatch:
     inputs:
       namespace:
@@ -22,8 +22,8 @@ jobs:
         echo namespace ${{ github.event.inputs.namespace }}
         echo block_version ${{ github.event.inputs.block_version }}
 
-  update-consensus:
-    uses: ./.github/workflows/mobilecoin-workflow-dev-update-consensus.yaml
+  update-consensus-block-version:
+    uses: ./.github/workflows/mobilecoin-workflow-dev-update-block-version.yaml
     with:
       namespace: ${{ github.event.inputs.namespace }}
       block_version: "${{ github.event.inputs.block_version }}"
