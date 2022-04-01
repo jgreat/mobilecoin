@@ -1,5 +1,5 @@
 name: mobilecoin-dispatch-dev-update-consensus
-
+      mobilecoin-dispatch-dev-update-consensus
 on: 
   workflow_dispatch:
     inputs:
@@ -20,6 +20,7 @@ jobs:
     - name: values
       run: |
         echo namespace ${{ github.event.inputs.namespace }}
+        echo block_version ${{ github.event.inputs.block_version }}
 
   update-consensus:
     uses: ./.github/reusable-workflows/mobilecoin-workflow-dev-update-consensus.yaml

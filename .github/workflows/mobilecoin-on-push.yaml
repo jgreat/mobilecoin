@@ -470,7 +470,7 @@ jobs:
     - current-release-v0-test
     - generate-metadata
     steps:
-    - name: Deploy Release
+    - name: Update consensus config
       if: "! contains(github.event.head_commit.message, '[skip-current-release-v1-update]')"
       uses: aurelien-baudet/workflow-dispatch@v2.1.1
       with:
