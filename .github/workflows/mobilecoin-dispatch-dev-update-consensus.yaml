@@ -23,7 +23,7 @@ jobs:
         echo block_version ${{ github.event.inputs.block_version }}
 
   update-consensus:
-    uses: ./.github/reusable-workflows/mobilecoin-workflow-dev-update-consensus.yaml
+    uses: ./.github/workflows/mobilecoin-workflow-dev-update-consensus.yaml
     with:
       namespace: ${{ github.event.inputs.namespace }}
       block_version: "${{ github.event.inputs.block_version }}"

@@ -10,7 +10,7 @@ on:
 
 jobs:
   reset:
-    uses: ./.github/reusable-workflows/mobilecoin-workflow-dev-reset.yaml
+    uses: ./.github/workflows/mobilecoin-workflow-dev-reset.yaml
     with:
       namespace: ${{ github.event.inputs.namespace }}
     secrets:

@@ -24,7 +24,7 @@ on:
 
 jobs:
   deploy:
-    uses: ./.github/reusable-workflows/mobilecoin-workflow-dev-deploy.yaml
+    uses: ./.github/workflows/mobilecoin-workflow-dev-deploy.yaml
     with:
       namespace: ${{ github.event.inputs.namespace }}
       version: ${{ github.event.inputs.version }}
