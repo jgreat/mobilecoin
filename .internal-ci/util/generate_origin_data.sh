@@ -39,7 +39,7 @@ fi
 
 if [[ -n "${FOG_KEYS_SEED}" ]]
 then
-    is_set FOG_AUTHORITY_ROOT_CA_CERT_PATH
+    is_set FOG_REPORT_SIGNING_CA_CERT_PATH
     is_set FOG_REPORT_URL
 
     echo ""
@@ -48,7 +48,7 @@ then
     sample-keys --num 500 \
         --seed "${FOG_KEYS_SEED}" \
         --fog-report-url "${FOG_REPORT_URL}" \
-        --fog-authority-root "${FOG_AUTHORITY_ROOT_CA_CERT_PATH}" \
+        --fog-authority-root "${FOG_REPORT_SIGNING_CA_CERT_PATH}" \
         --output-dir ./fog_keys
 
     rm -f ./ledger/lock.mdb

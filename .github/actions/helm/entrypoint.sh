@@ -330,12 +330,14 @@ then
             is_set INPUT_NAMESPACE
             is_set INPUT_INITIAL_KEYS_SEED
             is_set INPUT_FOG_KEYS_SEED
+            is_set INPUT_FOG_REPORT_SIGNING_CA_CERT
 
             k delete secret sample-keys-seeds -n "${INPUT_NAMESPACE}" --now --wait --request-timeout=5m --ignore-not-found
 
             k create secret generic sample-keys-seeds -n "${INPUT_NAMESPACE}" \
                 --from-literal=FOG_KEYS_SEED="${INPUT_FOG_KEYS_SEED}" \
-                --from-literal=INITIAL_KEYS_SEED="${INPUT_INITIAL_KEYS_SEED}"
+                --from-literal=INITIAL_KEYS_SEED="${INPUT_INITIAL_KEYS_SEED}" \
+                --from-literal=FOG_REPORT_SIGNING_CA_CERT="${INPUT_FOG_REPORT_SIGNING_CA_CERT}"
             ;;
 
         pod-restart)

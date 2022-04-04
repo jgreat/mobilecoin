@@ -72,6 +72,9 @@ inputs:
   fog_keys_seed:
     description: "seed to recreate fog keys with sample-keys"
     required: false
+  fog_report_signing_ca_cert:
+    description: "CA certificate for fog-report signing certs"
+    required: false
   command:
     description: "shell commands to run"
     required: false

@@ -48,6 +48,9 @@ on:
       FOG_REPORT_SIGNING_CERT_KEY:
         description: "Fog Report signing cert key"
         required: true
+      FOG_REPORT_SIGNING_CERT_CA:
+        description: "Fog Report signing CA cert"
+        required: true
 
 jobs:
   list-values:
@@ -131,6 +134,7 @@ jobs:
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
         initial_keys_seed: ${{ steps.seed.outputs.initial_keys_seed }}
         fog_keys_seed: ${{ steps.seed.outputs.fog_keys_seed }}
+        fog_report_signing_ca_cert: ${{ secrets.FOG_REPORT_SIGNING_CA_CERT }}
 
   consensus-deploy:
     needs:
