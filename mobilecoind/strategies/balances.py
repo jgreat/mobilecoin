@@ -19,7 +19,7 @@ import os
 from accounts import connect, load_key_and_register
 from google.protobuf.empty_pb2 import Empty
 
-logging.basicConfig(stream = sys.stdout, level = logging.INFO)
+logging.basicConfig(stream = sys.stdout, level = logging.INFO, format='"{levelname}:{module}:{lineno}: {message}"')
 
 def parse_args() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()

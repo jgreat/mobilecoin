@@ -14,7 +14,7 @@ from enum import Enum
 from random import randint
 from google.protobuf.empty_pb2 import Empty
 
-logging.basicConfig(stream = sys.stdout, level = logging.INFO)
+logging.basicConfig(stream = sys.stdout, level = logging.INFO, format='"{levelname}:{module}:{lineno}: {message}"')
 
 
 AccountData = namedtuple("AccountData",
@@ -82,7 +82,7 @@ def wait_for_accounts_sync(stub, accounts, wait_secs):
     block_count = stub.GetLedgerInfo(Empty()).block_count
     synced_ids = {a: False for a in accounts}
     while not all(synced_ids.values()):
-        logging.info(".")
+        logging.info("Waiting for accounts to sync")
         for a in synced_ids:
             request = mobilecoind_api_pb2.GetMonitorStatusRequest(monitor_id=a)
             monitor_block = stub.GetMonitorStatus(request).status.next_block
@@ -96,7 +96,7 @@ def get_synced_accounts(stub, accounts):
     block_count = stub.GetLedgerInfo(Empty()).block_count
     synced = {a: False for a in accounts}
     while not any(synced.values()):
-        logging.info(".")
+        logging.info("Waiting for accounts to sync")
         for a in synced:
             request = mobilecoind_api_pb2.GetMonitorStatusRequest(monitor_id=a)
             monitor_block = stub.GetMonitorStatus(request).status.next_block
@@ -137,7 +137,7 @@ def poll(monitor_id, tx_stats, stub):
     complete = {t: False for t in tx_stats.keys()}
     receipts = {t: tx_stats[t] for t in tx_stats.keys()}
     pending = complete.keys()
-    while not all(complete.values()): 
+    while not all(complete.values()):
         for tx_id in pending:
             try:
                 resp = stub.GetTxStatusAsSender(

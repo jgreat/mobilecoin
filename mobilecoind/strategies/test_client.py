@@ -11,16 +11,16 @@ Example setup and usage:
 ```
 """
 import argparse
-import logging
-import sys
 import glob
+import logging
 import mobilecoind_api_pb2
 import os
+import sys
 import time
 from accounts import connect, load_key_and_register, poll, wait_for_accounts_sync, TransferStatus
 from google.protobuf.empty_pb2 import Empty
 
-logging.basicConfig(stream = sys.stdout, level = logging.INFO)
+logging.basicConfig(stream = sys.stdout, level = logging.INFO, format='"{levelname}:{module}:{lineno}: {message}"')
 
 
 def parse_args() -> argparse.ArgumentParser:
@@ -89,7 +89,7 @@ if __name__ == '__main__':
 
     stub = connect(args.mobilecoind_host, args.mobilecoind_port)
     accounts = [
-        load_key_and_register(os.path.join(args.key_dir, k), stub)
+        load_key_and_register(k, stub)
         for k in sorted(glob.glob(os.path.join(args.key_dir, '*.json')))
     ]
 
