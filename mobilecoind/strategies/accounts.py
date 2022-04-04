@@ -14,7 +14,7 @@ from enum import Enum
 from random import randint
 from google.protobuf.empty_pb2 import Empty
 
-logging.basicConfig(stream = sys.stdout, level = logging.INFO, format='"{levelname}:{module}:{lineno}: {message}"')
+logging.basicConfig(stream = sys.stdout, level = logging.INFO, format="%(levelname)s:%(module)s:%(lineno)s: %(message)s")
 
 
 AccountData = namedtuple("AccountData",
