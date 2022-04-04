@@ -55,7 +55,7 @@ jobs:
   recreate-keys:
     runs-on: [self-hosted, small]
     env:
-      FOG_REPORT_SIGNING_CA_CERT_PATH: .tmp/fog_authority_root_ca.pem
+      FOG_REPORT_SIGNING_CA_CERT_PATH: .tmp/fog_report_signing_ca_cert.pem
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -76,7 +76,7 @@ jobs:
     - name: Write Fog Report Authority Root CA cert
       run: |
         mkdir -p .tmp
-        echo "${{ secrets.FOG_REPORT_SIGNING_CA_CERT }}" > ".tmp/fog_authority_root_ca.pem"
+        echo "${{ secrets.FOG_REPORT_SIGNING_CA_CERT }}" > "${FOG_REPORT_SIGNING_CA_CERT_PATH}"
 
     - name: Copy Fog Report Authority root CA cert to toolbox
       uses: ./.github/actions/helm
@@ -88,7 +88,7 @@ jobs:
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
         src: ${{ env.FOG_REPORT_SIGNING_CA_CERT_PATH }}
-        dst: /tmp/fog_authority_root_ca.pem
+        dst: /tmp/fog_report_signing_ca_cert.pem
 
     - name: Delete existing keys
       uses: ./.github/actions/helm
@@ -115,7 +115,7 @@ jobs:
           INITIALIZE_LEDGER="true" \
           INITIAL_KEYS_SEED="${{ steps.seed.outputs.initial_keys_seed }}" \
           FOG_KEYS_SEED="${{ steps.seed.outputs.fog_keys_seed }}" \
-          FOG_REPORT_SIGNING_CA_CERT_PATH="/tmp/fog_authority_root_ca.pem" \
+          FOG_REPORT_SIGNING_CA_CERT_PATH="/tmp/fog_report_signing_ca_cert.pem" \
           FOG_REPORT_URL="fog://fog.${{ inputs.namespace }}.development.mobilecoin.com:443" \
           /util/generate_origin_data.sh
 
