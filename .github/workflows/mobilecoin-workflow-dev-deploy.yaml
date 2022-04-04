@@ -48,7 +48,7 @@ on:
       FOG_REPORT_SIGNING_CERT_KEY:
         description: "Fog Report signing cert key"
         required: true
-      FOG_REPORT_SIGNING_CERT_CA:
+      FOG_REPORT_SIGNING_CERT_CA_CERT:
         description: "Fog Report signing CA cert"
         required: true
 

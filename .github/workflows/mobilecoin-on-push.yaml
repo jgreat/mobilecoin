@@ -34,7 +34,7 @@ jobs:
     - name: 👾 Print Environment Details 👾
       env:
         NAMESPACE: ${{ steps.meta.outputs.branch }}
-        BUILD_TAG: ${{ steps.meta.outputs.tag }}
+        VERSION: ${{ steps.meta.outputs.tag }}
       run: |
         .internal-ci/util/print_details.sh
 
