@@ -24,14 +24,14 @@ on:
 
 jobs:
   list-values:
-    runs-on: self-hosted
+    runs-on: [self-hosted, Linux, small]
     steps:
     - name: values
       run: |
         echo namespace ${{ github.event.inputs.namespace }}
 
   delete:
-    runs-on: self-hosted
+    runs-on: [self-hosted, Linux, small]
     steps:
     - name: Delete namespace
       uses: mobilecoinofficial/gha-k8s-toolbox@v1

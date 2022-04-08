@@ -31,14 +31,14 @@ on:
 # We don't want to just delete the namespace on every run we need to preserve letsEncrypt certificates due to rate limits. We can delete app charts, postgres and dangling PVCs
 jobs:
   list-values:
-    runs-on: [self-hosted, small]
+    runs-on: [self-hosted, Linux, small]
     steps:
     - name: values
       run: |
         echo namespace ${{ inputs.namespace }}
 
   reset-releases:
-    runs-on: [self-hosted, small]
+    runs-on: [self-hosted, Linux, small]
     strategy:
       matrix:
         chart:
@@ -66,7 +66,7 @@ jobs:
   reset-storage:
     needs:
     - reset-releases
-    runs-on: [self-hosted, small]
+    runs-on: [self-hosted, Linux, small]
     steps:
     - name: Delete PersistentVolumeClaims
       uses: mobilecoinofficial/gha-k8s-toolbox@v1
@@ -80,7 +80,7 @@ jobs:
   reset-s3:
     needs:
     - reset-releases
-    runs-on: [self-hosted, small]
+    runs-on: [self-hosted, Linux, small]
     container:
       image: amazon/aws-cli:latest
     steps:

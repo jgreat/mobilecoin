@@ -46,7 +46,7 @@ on:
 
 jobs:
   list-values:
-    runs-on: [self-hosted, small]
+    runs-on: [self-hosted, Linux, small]
     steps:
     - name: values
       run: |
@@ -57,7 +57,7 @@ jobs:
         echo mobilecoind_integration ${{ inputs.mobilecoind_integration }}
 
   recreate-keys:
-    runs-on: [self-hosted, small]
+    runs-on: [self-hosted, Linux, small]
     env:
       FOG_REPORT_SIGNING_CA_CERT_PATH: .tmp/fog_report_signing_ca_cert.pem
     steps:
@@ -124,7 +124,7 @@ jobs:
           /util/generate_origin_data.sh
 
   fog-distribution:
-    runs-on: [self-hosted, small]
+    runs-on: [self-hosted, Linux, small]
     needs:
     - recreate-keys
     steps:
@@ -142,7 +142,7 @@ jobs:
           /test/fog-distribution-test.sh
 
   fog-test-client:
-    runs-on: [self-hosted, small]
+    runs-on: [self-hosted, Linux, small]
     needs:
     - fog-distribution
     steps:
@@ -170,7 +170,7 @@ jobs:
             --fog-ledger fog-ledger://fog.${{ inputs.namespace }}.development.mobilecoin.com:443
 
   mobilecoind-integration:
-    runs-on: [self-hosted, small]
+    runs-on: [self-hosted, Linux, small]
     needs:
     - fog-test-client
     steps:

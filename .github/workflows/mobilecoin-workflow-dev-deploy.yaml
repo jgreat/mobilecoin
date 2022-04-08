@@ -58,7 +58,7 @@ on:
 
 jobs:
   list-values:
-    runs-on: [self-hosted, small]
+    runs-on: [self-hosted, Linux, small]
     steps:
     - name: values
       run: |
@@ -68,7 +68,7 @@ jobs:
         echo ingest_color ${{ inputs.ingest_color }}
 
   setup-environment:
-    runs-on: [self-hosted, small]
+    runs-on: [self-hosted, Linux, small]
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -110,7 +110,7 @@ jobs:
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
 
   populate-key-seed-secret:
-    runs-on: [self-hosted, small]
+    runs-on: [self-hosted, Linux, small]
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -144,7 +144,7 @@ jobs:
     needs:
     - setup-environment
     - populate-key-seed-secret
-    runs-on: [self-hosted, small]
+    runs-on: [self-hosted, Linux, small]
     strategy:
       matrix:
         release_name:
@@ -173,7 +173,7 @@ jobs:
   postgresql-deploy:
     needs:
     - setup-environment
-    runs-on: [self-hosted, small]
+    runs-on: [self-hosted, Linux, small]
     steps:
     - name: Deploy PostgreSQL instance
       uses: mobilecoinofficial/gha-k8s-toolbox@v1
@@ -196,7 +196,7 @@ jobs:
   mobilecoind-deploy:
     needs:
     - consensus-deploy
-    runs-on: [self-hosted, small]
+    runs-on: [self-hosted, Linux, small]
     steps:
     - name: Deploy Consensus nodes
       uses: mobilecoinofficial/gha-k8s-toolbox@v1
@@ -218,7 +218,7 @@ jobs:
     needs:
     - postgresql-deploy
     - consensus-deploy
-    runs-on: [self-hosted, small]
+    runs-on: [self-hosted, Linux, small]
     steps:
     - name: Deploy fog-ingest
       uses: mobilecoinofficial/gha-k8s-toolbox@v1
@@ -262,7 +262,7 @@ jobs:
     needs:
     - postgresql-deploy
     - consensus-deploy
-    runs-on: [self-hosted, small]
+    runs-on: [self-hosted, Linux, small]
     steps:
     - name: Deploy fog-services
       uses: mobilecoinofficial/gha-k8s-toolbox@v1

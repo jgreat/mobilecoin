@@ -22,15 +22,6 @@ on:
         default: '0'
 
 jobs:
-  list-values:
-    runs-on: [self-hosted, small]
-    steps:
-    - name: values
-      run: |
-        echo namespace ${{ github.event.inputs.namespace }}
-        echo block_version ${{ github.event.inputs.block_version }}
-        echo version ${{ github.event.inputs.version }}
-
   update-consensus-block-version:
     uses: ./.github/workflows/mobilecoin-workflow-dev-update-block-version.yaml
     with:
