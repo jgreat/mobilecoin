@@ -1,0 +1,43 @@
+# Copyright (c) 2022 MobileCoin Inc.
+#
+# MobileCoin Core projects - Reusable Workflow - Delete development namespace and associated components.
+
+name: mobilecoin-workflow-dev-delete
+
+on:
+  workflow_call:
+    inputs:
+      namespace:
+        description: "Target Namespace"
+        type: string
+        required: true
+    secrets:
+      RANCHER_CLUSTER:
+        description: "Rancher cluster name"
+        required: true
+      RANCHER_URL:
+        description: "Rancher server URL"
+        required: true
+      RANCHER_TOKEN:
+        description: "Rancher access token"
+        required: true
+
+jobs:
+  list-values:
+    runs-on: self-hosted
+    steps:
+    - name: values
+      run: |
+        echo namespace ${{ github.event.inputs.namespace }}
+
+  delete:
+    runs-on: self-hosted
+    steps:
+    - name: Delete namespace
+      uses: mobilecoinofficial/gha-k8s-toolbox@v1
+      with:
+        action: namespace-delete
+        namespace: ${{ inputs.namespace }}
+        rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
+        rancher_url: ${{ secrets.RANCHER_URL }}
+        rancher_token: ${{ secrets.RANCHER_TOKEN }}

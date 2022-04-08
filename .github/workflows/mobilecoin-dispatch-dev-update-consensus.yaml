@@ -1,3 +1,7 @@
+# Copyright (c) 2022 MobileCoin Inc.
+#
+# MobileCoin Core projects - Dispatch (manual) Job - Update consensus nodes in a development namespace.
+
 name: mobilecoin-dispatch-dev-update-consensus
 
 on:
@@ -18,7 +22,7 @@ on:
         default: '0'
 
 jobs:
-  list-values: 
+  list-values:
     runs-on: [self-hosted, small]
     steps:
     - name: values

@@ -1,4 +1,8 @@
-name: mobilecoin-on-push
+# Copyright (c) 2022 MobileCoin Inc.
+#
+# MobileCoin Core projects - Build, deploy to development.
+
+name: mobilecoin-dev-cd
 
 env:
   DOCKER_ORG: jgreat
@@ -8,6 +12,9 @@ on:
   push:
     branches:
     - release-1.2.0-ci-*
+    - release/*
+    - feature/*
+    - develop
 
 jobs:
 ############################################
@@ -24,7 +31,7 @@ jobs:
       previous_release: ${{ env.PREVIOUS_RELEASE }}
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Generate version metadata
       id: meta
@@ -56,10 +63,10 @@ jobs:
   build-cargo-hardware:
     runs-on: [self-hosted, large]
     container:
-      image: jgreat/rust-sgx-base:0.0.8
+      image: mobilecoin/rust-sgx-base@sha256:565e0b31ba40379098de222d63f13fee9fc3f7b72318743794f103f79e85fbca
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Cache rust build binaries
       if: "! contains(github.event.head_commit.message, '[skip-build]')"
@@ -170,7 +177,7 @@ jobs:
       image: golang:1.16.4
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Add protobuf-compiler
       if: "! contains(github.event.head_commit.message, '[skip-build]')"
@@ -235,7 +242,7 @@ jobs:
         # - fog-test-client
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Cache rust build binaries
       if: "! contains(github.event.head_commit.message, '[skip-docker]')"
@@ -318,7 +325,7 @@ jobs:
         - mc-core-dev-env-setup
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Generate version metadata
       id: meta
@@ -327,9 +334,9 @@ jobs:
 
     - name: Package and publish chart
       if: "! contains(github.event.head_commit.message, '[skip-charts]')"
-      uses: ./.github/actions/helm
+      uses: mobilecoinofficial/gha-k8s-toolbox@v1
       with:
-        action: s3-publish
+        action: helm-s3-publish
         aws_access_key_id: ${{ secrets.CHARTS_AWS_ACCESS_KEY_ID }}
         aws_secret_access_key: ${{ secrets.CHARTS_AWS_SECRET_ACCESS_KEY }}
         aws_default_region: us-east-2
@@ -462,7 +469,7 @@ jobs:
           }
 
 #################################################
-# Update current consensus to namespace block v1 
+# Update current consensus to namespace block v1
 #################################################
   current-release-v1-update:
     runs-on: [self-hosted, small]

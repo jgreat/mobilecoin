@@ -1,3 +1,7 @@
+# Copyright (c) 2022 MobileCoin Inc.
+#
+# MobileCoin Core projects - Reusable Workflow - Reset/remove all components from a development namespace.
+
 name: mobilecoin-workflow-dev-reset
 
 on:
@@ -24,6 +28,7 @@ on:
         description: "Ledger AWS S3 access"
         required: true
 
+# We don't want to just delete the namespace on every run we need to preserve letsEncrypt certificates due to rate limits. We can delete app charts, postgres and dangling PVCs
 jobs:
   list-values:
     runs-on: [self-hosted, small]
@@ -48,15 +53,10 @@ jobs:
         - fog-services
         - mobilecoind
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-
-    # We don't want to just delete the namespace on every run we need to preserve letsEncrypt certificates due to rate limits.
-    # We can delete app charts, postgres and dangling PVCs
     - name: Delete release
-      uses: ./.github/actions/helm
+      uses: mobilecoinofficial/gha-k8s-toolbox@v1
       with:
-        action: delete-release
+        action: helm-release-delete
         namespace: ${{ inputs.namespace }}
         release_name: ${{ matrix.chart }}
         rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
@@ -68,15 +68,10 @@ jobs:
     - reset-releases
     runs-on: [self-hosted, small]
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-
-    # We don't want to just delete the namespace on every run we need to preserve letsEncrypt certificates due to rate limits.
-    # We can delete app charts, postgres and dangling PVCs
     - name: Delete PersistentVolumeClaims
-      uses: ./.github/actions/helm
+      uses: mobilecoinofficial/gha-k8s-toolbox@v1
       with:
-        action: delete-pvcs
+        action: pvcs-delete
         namespace: ${{ inputs.namespace }}
         rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
         rancher_url: ${{ secrets.RANCHER_URL }}

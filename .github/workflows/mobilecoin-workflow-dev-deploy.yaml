@@ -1,3 +1,7 @@
+# Copyright (c) 2022 MobileCoin Inc.
+#
+# MobileCoin Core projects - Reusable Workflow - Deploy core apps to to the development namespace.
+
 name: mobilecoin-workflow-dev-deploy
 
 on:
@@ -67,10 +71,10 @@ jobs:
     runs-on: [self-hosted, small]
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Create namespace
-      uses: ./.github/actions/helm
+      uses: mobilecoinofficial/gha-k8s-toolbox@v1
       with:
         action: namespace-create
         namespace: ${{ inputs.namespace }}
@@ -92,7 +96,7 @@ jobs:
         .internal-ci/util/generate_dev_values.sh > .tmp/values/mc-core-dev-env-values.yaml
 
     - name: Deploy environment setup
-      uses: ./.github/actions/helm
+      uses: mobilecoinofficial/gha-k8s-toolbox@v1
       with:
         action: helm-deploy
         chart_repo: https://s3.us-east-2.amazonaws.com/charts.mobilecoin.com/
@@ -109,7 +113,7 @@ jobs:
     runs-on: [self-hosted, small]
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Cache wallet seeds
       id: wallet_seeds
@@ -125,7 +129,7 @@ jobs:
         .internal-ci/util/output_wallet_keys_seeds.sh
 
     - name: Create wallet keys seed secrets
-      uses: ./.github/actions/helm
+      uses: mobilecoinofficial/gha-k8s-toolbox@v1
       with:
         action: sample-keys-create-secrets
         namespace: ${{ inputs.namespace }}
@@ -150,11 +154,8 @@ jobs:
         - consensus-node-4
         - consensus-node-5
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-
     - name: Deploy Consensus nodes
-      uses: ./.github/actions/helm
+      uses: mobilecoinofficial/gha-k8s-toolbox@v1
       with:
         action: helm-deploy
         chart_repo: https://s3.us-east-2.amazonaws.com/charts.mobilecoin.com/
@@ -174,11 +175,8 @@ jobs:
     - setup-environment
     runs-on: [self-hosted, small]
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-
     - name: Deploy PostgreSQL instance
-      uses: ./.github/actions/helm
+      uses: mobilecoinofficial/gha-k8s-toolbox@v1
       with:
         action: helm-deploy
         chart_repo: https://charts.bitnami.com/bitnami
@@ -200,11 +198,8 @@ jobs:
     - consensus-deploy
     runs-on: [self-hosted, small]
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-
     - name: Deploy Consensus nodes
-      uses: ./.github/actions/helm
+      uses: mobilecoinofficial/gha-k8s-toolbox@v1
       with:
         action: helm-deploy
         chart_repo: https://s3.us-east-2.amazonaws.com/charts.mobilecoin.com/
@@ -225,11 +220,8 @@ jobs:
     - consensus-deploy
     runs-on: [self-hosted, small]
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-
     - name: Deploy fog-ingest
-      uses: ./.github/actions/helm
+      uses: mobilecoinofficial/gha-k8s-toolbox@v1
       with:
         action: helm-deploy
         chart_repo: https://s3.us-east-2.amazonaws.com/charts.mobilecoin.com/
@@ -245,7 +237,7 @@ jobs:
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
 
     - name: Run fog-recovery database migrations
-      uses: ./.github/actions/helm
+      uses: mobilecoinofficial/gha-k8s-toolbox@v1
       with:
         action: toolbox-exec
         ingest_color: ${{ inputs.ingest_color }}
@@ -257,7 +249,7 @@ jobs:
           fog-sql-recovery-db-migrations
 
     - name: Activate primary ingest
-      uses: ./.github/actions/helm
+      uses: mobilecoinofficial/gha-k8s-toolbox@v1
       with:
         action: fog-ingest-activate
         ingest_color: ${{ inputs.ingest_color }}
@@ -272,11 +264,8 @@ jobs:
     - consensus-deploy
     runs-on: [self-hosted, small]
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-
     - name: Deploy fog-services
-      uses: ./.github/actions/helm
+      uses: mobilecoinofficial/gha-k8s-toolbox@v1
       with:
         action: helm-deploy
         chart_repo: https://s3.us-east-2.amazonaws.com/charts.mobilecoin.com/
@@ -290,6 +279,3 @@ jobs:
         rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
-
-
-

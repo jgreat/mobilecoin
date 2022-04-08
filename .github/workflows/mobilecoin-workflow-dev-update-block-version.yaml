@@ -1,3 +1,7 @@
+# Copyright (c) 2022 MobileCoin Inc.
+#
+# MobileCoin Core projects - Dispatch (manual) Job - Update consensus nodes in a development namespace.
+
 name: mobilecoin-workflow-dev-update-block-version
 
 on:
@@ -50,10 +54,10 @@ jobs:
     runs-on: [self-hosted, small]
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Create namespace
-      uses: ./.github/actions/helm
+      uses: mobilecoinofficial/gha-k8s-toolbox@v1
       with:
         action: namespace-create
         namespace: ${{ github.event.inputs.namespace }}
@@ -75,7 +79,7 @@ jobs:
         .internal-ci/util/generate_dev_values.sh > .tmp/values/mc-core-dev-env-values.yaml
 
     - name: Deploy environment setup with block_version
-      uses: ./.github/actions/helm
+      uses: mobilecoinofficial/gha-k8s-toolbox@v1
       with:
         action: helm-deploy
         chart_repo: https://s3.us-east-2.amazonaws.com/charts.mobilecoin.com/
@@ -103,11 +107,8 @@ jobs:
         - deployment.app/consensus-node-4
         - deployment.app/consensus-node-5
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-
     - name: Restart Consensus Nodes
-      uses: ./.github/actions/helm
+      uses: mobilecoinofficial/gha-k8s-toolbox@v1
       with:
         action: pod-restart
         object_name: ${{ matrix.object_name }}

@@ -1,6 +1,10 @@
+# Copyright (c) 2022 MobileCoin Inc.
+#
+# MobileCoin Core projects - Dispatch (manual) Job - Run integration tests in a development namespace.
+
 name: mobilecoin-dispatch-dev-test
 
-on: 
+on:
   workflow_dispatch:
     inputs:
       namespace:
@@ -29,12 +33,7 @@ on:
         default: true
 
 jobs:
-  generate-metadata:
-    uses: ./.github/workflows/mobilecoin-workflow-dev-generate-metadata.yaml
-
-  previous-release-test:
-    needs:
-    - generate-metadata
+  test:
     uses: ./.github/workflows/mobilecoin-workflow-dev-test.yaml
     with:
       namespace: ${{ github.event.inputs.namespace }}

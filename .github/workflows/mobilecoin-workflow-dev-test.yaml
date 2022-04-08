@@ -1,3 +1,7 @@
+# Copyright (c) 2022 MobileCoin Inc.
+#
+# MobileCoin Core projects - Reusable Workflow - Run integration tests in a development namespace.
+
 name: mobilecoin-workflow-dev-test
 
 on:
@@ -58,7 +62,7 @@ jobs:
       FOG_REPORT_SIGNING_CA_CERT_PATH: .tmp/fog_report_signing_ca_cert.pem
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Cache wallet seeds
       id: wallet_seeds
@@ -79,7 +83,7 @@ jobs:
         echo "${{ secrets.FOG_REPORT_SIGNING_CA_CERT }}" > "${FOG_REPORT_SIGNING_CA_CERT_PATH}"
 
     - name: Copy Fog Report Authority root CA cert to toolbox
-      uses: ./.github/actions/helm
+      uses: mobilecoinofficial/gha-k8s-toolbox@v1
       with:
         action: toolbox-copy
         ingest_color: ${{ inputs.ingest_color }}
@@ -91,7 +95,7 @@ jobs:
         dst: /tmp/fog_report_signing_ca_cert.pem
 
     - name: Delete existing keys
-      uses: ./.github/actions/helm
+      uses: mobilecoinofficial/gha-k8s-toolbox@v1
       with:
         action: toolbox-exec
         ingest_color: ${{ inputs.ingest_color }}
@@ -103,7 +107,7 @@ jobs:
           rm -rf /tmp/sample_data
 
     - name: Recreate Keys for Testing
-      uses: ./.github/actions/helm
+      uses: mobilecoinofficial/gha-k8s-toolbox@v1
       with:
         action: toolbox-exec
         ingest_color: ${{ inputs.ingest_color }}
@@ -124,12 +128,9 @@ jobs:
     needs:
     - recreate-keys
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-
     - name: Test - fog-distribution
       if: inputs.fog_distribution == 'true'
-      uses: ./.github/actions/helm
+      uses: mobilecoinofficial/gha-k8s-toolbox@v1
       with:
         action: toolbox-exec
         ingest_color: ${{ inputs.ingest_color }}
@@ -145,12 +146,9 @@ jobs:
     needs:
     - fog-distribution
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-
     - name: Test - fog-test-client
       if: inputs.fog_test_client == 'true'
-      uses: ./.github/actions/helm
+      uses: mobilecoinofficial/gha-k8s-toolbox@v1
       with:
         action: toolbox-exec
         ingest_color: ${{ inputs.ingest_color }}
@@ -176,12 +174,9 @@ jobs:
     needs:
     - fog-test-client
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-
     - name: Test - mobilecoind (Wallet Integration)
       if: inputs.mobilecoind_integration == 'true'
-      uses: ./.github/actions/helm
+      uses: mobilecoinofficial/gha-k8s-toolbox@v1
       with:
         action: toolbox-exec
         ingest_color: ${{ inputs.ingest_color }}

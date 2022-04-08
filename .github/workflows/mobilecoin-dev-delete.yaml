@@ -1,37 +1,40 @@
+# Copyright (c) 2022 MobileCoin Inc.
+#
+# MobileCoin Core projects - Delete development namespaces when branch is removed.
+
 name: mobilecoin-dev-delete
 
-on: 
-  workflow_dispatch:
-    inputs:
-      namespace:
-        description: "Target Namespace"
-        type: string
-        required: true
+env:
+  PREVIOUS_RELEASE: 1.1.3-dev
+
+on:
+  delete: {}
 
 jobs:
-  list-values:
-    runs-on: self-hosted
-    steps:
-    - name: values
-      run: |
-        echo namespace ${{ github.event.inputs.namespace }}
-
   delete:
-    # start after a successful build or destroy is checked on a dispatch
-    if: github.event.inputs.delete == 'true'
-    runs-on: self-hosted
+    if: |
+      github.event.ref_type == 'branch' &&
+      startsWith(github.ref, 'refs/branch/feature/')
+    runs-on: [self-hosted, small]
     steps:
-    - name: Start with clean workspace
-      run: find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
-
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
-    - name: Delete namespace
-      uses: ./.github/actions/helm
-      with:
-        action: namespace-delete
-        namespace: ${{ github.event.inputs.namespace }}
-        rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
-        rancher_url: ${{ secrets.RANCHER_URL }}
-        rancher_token: ${{ secrets.RANCHER_TOKEN }}
+    - name: Generate version metadata
+      id: meta
+      run: |
+        .internal-ci/util/metadata.sh
+
+    # - name: Delete branch namespace
+    #   uses: aurelien-baudet/workflow-dispatch@v2.1.1
+    #   with:
+    #     workflow: mobilecoin-dispatch-dev-delete
+    #     token: ${{ secrets.ACTIONS_TOKEN }}
+    #     wait-for-completion: true
+    #     wait-for-completion-timeout: 30m
+    #     wait-for-completion-interval: 30s
+    #     display-workflow-run-url-interval: 30s
+    #     inputs: |
+    #       {
+    #         "namespace": "${{ steps.meta.outputs.namespace }}"
+    #       }
