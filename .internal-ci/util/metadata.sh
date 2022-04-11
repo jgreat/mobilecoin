@@ -51,7 +51,7 @@ docker_tag="type=raw,value=${tag}"
 # override tag/docker_tag for release
 if [[ "${GITHUB_REF_NAME}" =~ ^release/ ]]
 then
-    docker_tag="type=raw,value=${version}-dev,priority=20\\ntype=raw,value=${tag},priority=10"
+    docker_tag="type=raw,value=${version}-dev,priority=20%0Atype=raw,value=${version}-${GITHUB_RUN_NUMBER}.sha-${sha},priority=10"
     tag=${version}-dev
 fi
 
