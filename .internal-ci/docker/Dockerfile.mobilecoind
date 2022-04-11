@@ -1,5 +1,8 @@
+# Copyright (c) 2018-2022 The MobileCoin Foundation
+#
 # Dockerfile.mobilecoind
-#  Runtime image for mobilecoind service.
+#
+# Runtime image for mobilecoind service.
 
 ARG REPO_ORG=mobilecoin
 FROM ${REPO_ORG}/runtime-base:latest

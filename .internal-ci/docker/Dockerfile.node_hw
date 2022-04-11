@@ -1,5 +1,8 @@
-# Dockerfile.consensus
-#  Runtime image for MobileCoin consensus nodes.
+# Copyright (c) 2018-2022 The MobileCoin Foundation
+#
+# Dockerfile.node_hw
+#
+# Runtime image for MobileCoin consensus nodes built in SGX hw mode.
 
 ARG REPO_ORG=mobilecoin
 FROM ${REPO_ORG}/runtime-base:latest

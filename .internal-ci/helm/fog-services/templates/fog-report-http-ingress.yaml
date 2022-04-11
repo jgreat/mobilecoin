@@ -1,3 +1,4 @@
+# Copyright (c) 2018-2022 The MobileCoin Foundation
 # Adding a separate ingress for each host so we don't stomp on existing certs.
 {{- $hosts := split "\n" (include "fogServices.fogReportHosts" . | trim) }}
 {{- range $hosts }}

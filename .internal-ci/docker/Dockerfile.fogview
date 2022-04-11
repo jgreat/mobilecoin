@@ -1,5 +1,8 @@
+# Copyright (c) 2018-2022 The MobileCoin Foundation
+#
 # Dockerfile.fogview
-#  Runtime image for MobileCoin fogview nodes.
+#
+# Runtime image for MobileCoin fogview nodes.
 
 ARG REPO_ORG=mobilecoin
 FROM ${REPO_ORG}/runtime-base:latest

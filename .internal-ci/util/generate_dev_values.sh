@@ -1,4 +1,6 @@
 #!/bin/bash
+# Copyright (c) 2018-2022 The MobileCoin Foundation
+#
 # Generates message signer keys and populates other variables.
 
 location=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )

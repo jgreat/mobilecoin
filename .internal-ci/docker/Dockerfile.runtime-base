@@ -1,10 +1,9 @@
+# Copyright (c) 2018-2022 The MobileCoin Foundation
+#
 # Dockerfile.runtime-base
 #  A minimal base runtime image for mobilecoin applications.
 #
-# TODO: Maybe a cronjob to refresh this image on a regular basis instead of 
-#  rebuilding every run.
-# 
-FROM ubuntu:focal-20220113
+FROM ubuntu:focal-20220404
 
 SHELL ["/bin/bash", "-c"]
 
@@ -20,7 +19,7 @@ RUN  apt-get update \
 
 # Install Filebeat repo
 RUN  curl --retry 5 -fL https://artifacts.elastic.co/GPG-KEY-elasticsearch | apt-key add - \
-  && echo "deb https://artifacts.elastic.co/packages/oss-8.x/apt stable main" > /etc/apt/sources.list.d/elastic-8.x.list 
+  && echo "deb https://artifacts.elastic.co/packages/oss-8.x/apt stable main" > /etc/apt/sources.list.d/elastic-8.x.list
 
 # Install SGX ASEM repo
 COPY .internal-ci/docker/support/intel-sgx-archive-keyring.gpg /etc/apt/trusted.gpg.d/

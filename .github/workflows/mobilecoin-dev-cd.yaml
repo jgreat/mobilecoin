@@ -1,3 +1,4 @@
+# Copyright (c) 2018-2022 The MobileCoin Foundation
 # Copyright (c) 2022 MobileCoin Inc.
 #
 # MobileCoin Core projects - Build, deploy to development.
@@ -220,6 +221,50 @@ jobs:
         path: go_build_artifacts/
 
 #########################################
+# Create/Refresh base runtime image
+#########################################
+  docker-base:
+    runs-on: [self-hosted, Linux, small]
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Generate Docker Tags
+      if: "! contains(github.event.head_commit.message, '[skip docker]')"
+      id: docker_meta
+      uses: docker/metadata-action@v3
+      with:
+        images: ${{ env.DOCKER_ORG }}/runtime-base
+        flavor: |
+          latest=true
+        tags: |
+          type=sha
+
+    - name: Set up Docker Buildx
+      if: "! contains(github.event.head_commit.message, '[skip docker]')"
+      uses: docker/setup-buildx-action@v1
+
+    - name: Login to DockerHub
+      if: "! contains(github.event.head_commit.message, '[skip docker]')"
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Publish to DockerHub
+      if: "! contains(github.event.head_commit.message, '[skip docker]')"
+      id: docker_publish_dockerhub
+      uses: docker/build-push-action@v2
+      with:
+        build-args: |
+          REPO_ORG=${{ env.DOCKER_ORG }}
+        context: .
+        file: .internal-ci/docker/Dockerfile.runtime-base
+        labels: ${{ steps.docker_meta.outputs.labels }}
+        push: true
+        tags: ${{ steps.docker_meta.outputs.tags }}
+
+#########################################
 # Build/Publish public artifacts
 #########################################
   docker:
@@ -227,6 +272,7 @@ jobs:
     needs:
     - build-go-projects
     - build-cargo-hardware
+    - docker-base
     strategy:
       matrix:
         image:
@@ -238,8 +284,8 @@ jobs:
         - fogview
         - fog-ledger
         - mobilecoind
-        # - watcher
-        # - fog-test-client
+        - watcher
+        - fog-test-client
     steps:
     - name: Checkout
       uses: actions/checkout@v3

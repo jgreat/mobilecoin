@@ -1,5 +1,7 @@
 #!/bin/bash
-# This script will grab binaries from an existing build are rebuild 
+# Copyright (c) 2018-2022 The MobileCoin Foundation
+#
+# This script will grab binaries from an existing build are rebuild
 #   the containers/charts with the current configuration.
 
 #   Use with caution.

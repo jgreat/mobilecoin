@@ -5,7 +5,7 @@ These build, dockerfiles, helm charts and scripts are used internally for Mobile
 ## Workflow
 
 - Members of the `mobilecoinfoundation` org should use the Branching Workflow.
-- External contributors should follow the Forking Workflow
+- External contributors should follow the Forking Workflow.
 
 ### Branching Workflow
 
@@ -15,7 +15,7 @@ For general updates cut a `feature/*` off of the `develop` branch and push chang
 
 **Releases**
 
-Release are versioned using [Semver 2](https://semver.org/){:target="_blank"}.
+Release are versioned using [Semver 2](https://semver.org/).
 
 - Major - Breaking changes, increment the first digit.
 - Minor - Enclave updates and features, increment the second digit.
@@ -23,7 +23,9 @@ Release are versioned using [Semver 2](https://semver.org/){:target="_blank"}.
 
 Cut a `release/v0.0.0` style branch off of `develop`. Pushing changes to `origin release/v*.*.*` will create a `release-v*-*-*` dynamic deployment to the development cluster for testing. The branch will also publish container images and helm charts tagged with `v*.*.*-dev`. Binaries in these artifacts will be singed with development keys.
 
-Promote a release by submitting a PR to merge code into `main`. Tag and create a GitHub Release for the git commit on `main`.
+Promote a release by submitting a PR to merge code into `main`.
+
+Tag and create a GitHub Release for the git commit on `main`.
 
 Merge `main` back into `develop` for a clean history.
 
@@ -54,9 +56,9 @@ Follow the same testing/deployment process described in above in Releases.
 
 ### Fork Workflow
 
-External contributors may create a fork of this repo and create potential changes to be incorporated into MobileCoin core applications. See [CONTRIBUTING](/CONTRIBUTING.md){:target="_blank"} for more details.
+External contributors may create a fork of this repo and create potential changes to be incorporated into MobileCoin core applications. See [CONTRIBUTING](/CONTRIBUTING.md) for more details.
 
-Uses should create a branch in their fork cut from the `develop` branch and submit PRs to the upstream `develop` branch.
+Users should create a branch in their fork cut from the `develop` branch and submit PRs to the upstream `develop` branch.
 
 A member of `mobilecoinfoundation` will review the PR and if accepted will create a `feature/*` branch to merge the changes into for CI and Integration testing.
 
@@ -77,7 +79,7 @@ This process will create a set of versioned docker containers and helm charts fo
 
 ### Versioning
 
-We use [Semver 2](https://semver.org/){:target="_blank"} for general versioning.
+We use [Semver 2](https://semver.org/) for general versioning.
 
 ⚠️ Note: Because we have multiple final releases (TestNet, MainNet...), and semver metadata isn't taken in account for ordering, all of the releases are technically "development" releases. Be aware that some tools like `helm` will need extra flags to display development versions.
 
@@ -170,13 +172,12 @@ The `[tag=]` flag will override the automatically generated docker/helm tag and 
 Available skips:
 
 - `[skip ci]` - GHA built-in to skip all workflow steps.
+- `[skip build]` - Skip rust/go builds.
+- `[skip docker]` - Skip docker image build/publish.
+- `[skip charts]` - Skip helm chart build/publish.
 - `[skip dev-reset]` - Skip dev namespace reset.
 - `[skip previous-deploy]` - Skip deploy of the previous consensus/fog release.
 - `[skip previous-test]` - Skip test of previous release.
-- `[skip build]` - Skip rust/go builds.
-- `[skip create-sample-data]` - Skip sample data/keys creation.
-- `[skip docker]` - Skip docker image build/publish.
-- `[skip charts]` - Skip helm chart build/publish.
 - `[skip current-release-v0-deploy]` - Skip current release at block-version=0 deploy.
 - `[skip current-release-v0-test]`- Skip current release at block-version=0 deploy.
 - `[skip current-release-v1-update]` - Skip current release at block-version=1 consensus update.

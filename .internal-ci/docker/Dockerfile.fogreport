@@ -1,5 +1,8 @@
+# Copyright (c) 2018-2022 The MobileCoin Foundation
+#
 # Dockerfile.fogreport
-#  Runtime image for MobileCoin fogreport nodes.
+#
+# Runtime image for MobileCoin fogreport nodes.
 
 ARG REPO_ORG=mobilecoin
 FROM ${REPO_ORG}/runtime-base:latest

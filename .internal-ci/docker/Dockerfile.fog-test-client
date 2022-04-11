@@ -1,4 +1,12 @@
-FROM ubuntu:focal-20220113
+# Copyright (c) 2018-2022 The MobileCoin Foundation
+#
+# Dockerfile.fog-test-client
+#
+# Binaries and associated tools for running fog-test-client in canary mode for continuous
+# e2e testing.
+
+ARG REPO_ORG=mobilecoin
+FROM ${REPO_ORG}/runtime-base:latest
 
 RUN addgroup --system --gid 1000 app \
   && addgroup --system --gid 2000 app-data \

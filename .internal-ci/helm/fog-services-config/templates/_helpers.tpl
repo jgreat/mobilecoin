@@ -1,3 +1,5 @@
+{{/* Copyright (c) 2018-2022 The MobileCoin Foundation */}}
+
 {{/* Expand the name of the fogServicesConfig. */}}
 {{- define "fogServicesConfig.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}

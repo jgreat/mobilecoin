@@ -1,6 +1,9 @@
+# Copyright (c) 2018-2022 The MobileCoin Foundation
 #
-# This builds a runtime container for bootstrapping ledger, account data and running tests.
+# Dockerfile.bootstrap-tools
 #
+# Multipurpose "toolbox" container for operations, testing and migrations.
+
 ARG REPO_ORG=mobilecoin
 FROM ${REPO_ORG}/runtime-base:latest
 

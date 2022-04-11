@@ -1,5 +1,6 @@
 #!/bin/bash
-
+# Copyright (c) 2018-2022 The MobileCoin Foundation
+#
 set -e
 
 BASE_PATH="${BASE_PATH:-.tmp/wallet_seeds}"

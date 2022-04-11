@@ -1,3 +1,4 @@
+# Copyright (c) 2018-2022 The MobileCoin Foundation
 {{- $peers := .Values.global.node.networkConfig.peers }}
 {{- $threshold := .Values.global.node.networkConfig.threshold }}
 {{- $localPeerHostname := (include "consensusNodeConfig.peerHostname" .) }}
