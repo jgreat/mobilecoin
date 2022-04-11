@@ -29,15 +29,15 @@ then
     echo "Release Branch detected: ${GITHUB_REF_NAME}"
     version="${branch}"
     # check to see if remaining version is basic semver
-    if [[ ! "${version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+    if [[ ! "${version}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
     then
         echo "release/<version> not basic semver: ${version}"
         echo "branch name invalid"
         exit 1
     fi
 else
-    version="0.0.0"
-    echo "Not a release branch, set default version of 0.0.0"
+    version="v0.0.0"
+    echo "Not a release branch, set default version of v0.0.0"
     branch=$(echo "${branch}" | sed -e 's/[._/]/-/g')
     echo "Clean up branch. Remove feature|deploy|release prefix and replace ._/ with - '${branch}'"
 fi
