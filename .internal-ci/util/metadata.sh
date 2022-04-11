@@ -38,12 +38,26 @@ then
 else
     version="v0.0.0"
     echo "Not a release branch, set default version of v0.0.0"
-    branch=$(echo "${branch}" | sed -e 's/[._/]/-/g')
-    echo "Clean up branch. Remove feature|deploy|release prefix and replace ._/ with - '${branch}'"
 fi
 
+echo "Clean up branch. Remove feature|deploy|release prefix and replace ._/ with - '${branch}'"
+branch=$(echo "${branch}" | sed -e 's/[._/]/-/g')
 sha="${GITHUB_SHA:0:8}"
+
+# Set tag/docker_tag
 tag="${version}-${branch}.${GITHUB_RUN_NUMBER}.sha-${sha}"
+docker_tag="type=raw,value=${tag}"
+
+# override tag/docker_tag for release
+if [[ "${GITHUB_REF_NAME}" =~ ^release/ ]]
+then
+    docker_tag=$(cat <<TAGS
+type=raw,value=${version}-dev,priority=20
+type=raw,value=${tag},priority=10
+TAGS
+)
+    tag=${version}-dev
+fi
 
 # Get commit flags
 if [ -f "${GITHUB_EVENT_PATH}" ]
@@ -60,3 +74,4 @@ echo "::set-output name=version::${version}"
 echo "::set-output name=branch::${branch}"
 echo "::set-output name=sha::${sha}"
 echo "::set-output name=tag::${tag}"
+echo "::set-output name=docker_tag::${docker_tag}"
