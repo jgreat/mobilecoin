@@ -402,7 +402,7 @@ jobs:
     steps:
     - name: Reset development namespace
       if: "! contains(github.event.head_commit.message, '[skip dev-reset]')"
-      uses: aurelien-baudet/workflow-dispatch@v2.1.1
+      uses: mobilecoinofficial/gha-workflow-dispatch@v2.1.2
       with:
         workflow: mobilecoin-dispatch-dev-reset
         token: ${{ secrets.ACTIONS_TOKEN }}
@@ -426,7 +426,7 @@ jobs:
     steps:
     - name: Deploy Release
       if: "! contains(github.event.head_commit.message, '[skip previous-release-deploy]')"
-      uses: aurelien-baudet/workflow-dispatch@v2.1.1
+      uses: mobilecoinofficial/gha-workflow-dispatch@v2.1.2
       with:
         workflow: mobilecoin-dispatch-dev-deploy
         token: ${{ secrets.ACTIONS_TOKEN }}
@@ -450,7 +450,7 @@ jobs:
     steps:
     - name: Run MobileCoin integration tests
       if: "! contains(github.event.head_commit.message, '[skip previous-release-test]')"
-      uses: aurelien-baudet/workflow-dispatch@v2.1.1
+      uses: mobilecoinofficial/gha-workflow-dispatch@v2.1.2
       with:
         workflow: mobilecoin-dispatch-dev-test
         token: ${{ secrets.ACTIONS_TOKEN }}
@@ -476,7 +476,7 @@ jobs:
     steps:
     - name: Deploy Release
       if: "! contains(github.event.head_commit.message, '[skip current-release-v0-deploy]')"
-      uses: aurelien-baudet/workflow-dispatch@v2.1.1
+      uses: mobilecoinofficial/gha-workflow-dispatch@v2.1.2
       with:
         workflow: mobilecoin-dispatch-dev-deploy
         token: ${{ secrets.ACTIONS_TOKEN }}
@@ -500,7 +500,7 @@ jobs:
     steps:
     - name: Run MobileCoin integration tests
       if: "! contains(github.event.head_commit.message, '[skip current-release-v0-test]')"
-      uses: aurelien-baudet/workflow-dispatch@v2.1.1
+      uses: mobilecoinofficial/gha-workflow-dispatch@v2.1.2
       with:
         workflow: mobilecoin-dispatch-dev-test
         token: ${{ secrets.ACTIONS_TOKEN }}
@@ -526,7 +526,7 @@ jobs:
     steps:
     - name: Update consensus config
       if: "! contains(github.event.head_commit.message, '[skip current-release-v1-update]')"
-      uses: aurelien-baudet/workflow-dispatch@v2.1.1
+      uses: mobilecoinofficial/gha-workflow-dispatch@v2.1.2
       with:
         workflow: mobilecoin-dispatch-dev-update-consensus
         token: ${{ secrets.ACTIONS_TOKEN }}
@@ -549,7 +549,7 @@ jobs:
     steps:
     - name: Run MobileCoin integration tests
       if: "! contains(github.event.head_commit.message, '[skip current-release-v1-test]')"
-      uses: aurelien-baudet/workflow-dispatch@v2.1.1
+      uses: mobilecoinofficial/gha-workflow-dispatch@v2.1.2
       with:
         workflow: mobilecoin-dispatch-dev-test
         token: ${{ secrets.ACTIONS_TOKEN }}

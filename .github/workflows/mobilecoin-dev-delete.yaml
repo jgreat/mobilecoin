@@ -25,7 +25,7 @@ jobs:
         .internal-ci/util/metadata.sh
 
     # - name: Delete branch namespace
-    #   uses: aurelien-baudet/workflow-dispatch@v2.1.1
+    #   uses: mobilecoinofficial/gha-workflow-dispatch@v2.1.2
     #   with:
     #     workflow: mobilecoin-dispatch-dev-delete
     #     token: ${{ secrets.ACTIONS_TOKEN }}
