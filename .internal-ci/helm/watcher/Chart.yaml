@@ -1,6 +1,6 @@
 # Copyright (c) 2018-2022 The MobileCoin Foundation
 apiVersion: v2
-name: consensus-watcher
+name: watcher
 description: MobileCoin Consensus Watcher
 type: application
 version: 0.1.0
