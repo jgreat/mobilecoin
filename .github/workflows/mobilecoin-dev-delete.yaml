@@ -9,7 +9,7 @@ on:
 
 jobs:
   metadata:
-    if: startsWith(github.event.ref, 'feature/'))
+    if: startsWith(github.event.ref, 'feature/')
     runs-on: [self-hosted, Linux, small]
     outputs:
       namespace: ${{ steps.meta.outputs.namespace }}
