@@ -8,39 +8,44 @@ on:
   delete: {}
 
 jobs:
-  list:
+  metadata:
+    if: startsWith(github.event.ref, fromJSON('["feature/", "release/"]'))
+    runs-on: [self-hosted, Linux, small]
+    outputs:
+      namespace: ${{ steps.meta.outputs.namespace }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Generate version metadata
+      id: meta
+      env:
+        # override the ref name with the ref from the payload.
+        GITHUB_REF_NAME: ${{ github.event.ref }}
+      run: |
+        .internal-ci/util/metadata.sh
+
+  delete:
+    needs:
+    - metadata
+    uses: ./.github/workflows/mobilecoin-workflow-dev-reset.yaml
+    with:
+      namespace: ${{ needs.metadata.outputs.namespace }}
+      delete_namespace: true
+    secrets:
+      RANCHER_CLUSTER: ${{ secrets.RANCHER_CLUSTER }}
+      RANCHER_URL: ${{ secrets.RANCHER_URL }}
+      RANCHER_TOKEN: ${{ secrets.RANCHER_TOKEN }}
+      LEDGER_AWS_ACCESS_KEY_ID: ${{ secrets.DEV_LEDGER_AWS_ACCESS_KEY_ID }}
+      LEDGER_AWS_SECRET_ACCESS_KEY: ${{ secrets.DEV_LEDGER_AWS_SECRET_ACCESS_KEY }}
+
+  why-was-this-skipped:
+    if: always() && needs.metadata.result == 'skipped'
+    needs:
+      - metadata
     runs-on: [self-hosted, Linux, small]
     steps:
-    - name: dump payload
-      run: |
-        echo '${{ toJSON(github.event) }}'
     - name: details
       run: |
-        echo "ref ${{ github.ref }}'
-        echo "ref_type ${{ github.ref_type }}"
-        echo "ref_name ${{ github.ref_name }}"
-  # delete:
-  #   if: startsWith(github.ref, 'refs/branch/feature/')
-  #   runs-on: [self-hosted, Linux, small]
-  #   steps:
-  #   - name: Checkout
-  #     uses: actions/checkout@v3
-
-  #   - name: Generate version metadata
-  #     id: meta
-  #     run: |
-  #       .internal-ci/util/metadata.sh
-
-  #   - name: Delete branch namespace
-  #     uses: mobilecoinofficial/gha-workflow-dispatch@v2.1.3
-  #     with:
-  #       workflow: mobilecoin-dispatch-dev-delete
-  #       token: ${{ secrets.ACTIONS_TOKEN }}
-  #       wait-for-completion: true
-  #       wait-for-completion-timeout: 30m
-  #       wait-for-completion-interval: 30s
-  #       display-workflow-run-url-interval: 30s
-  #       inputs: |
-  #         {
-  #           "namespace": "${{ steps.meta.outputs.namespace }}"
-  #         }
+        echo "Deleted branch: ${{ github.event.ref }} did not match feature/* or release/*"

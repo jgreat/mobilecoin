@@ -17,24 +17,10 @@ jobs:
     uses: ./.github/workflows/mobilecoin-workflow-dev-reset.yaml
     with:
       namespace: ${{ github.event.inputs.namespace }}
+      delete_namespace: true
     secrets:
       RANCHER_CLUSTER: ${{ secrets.RANCHER_CLUSTER }}
       RANCHER_URL: ${{ secrets.RANCHER_URL }}
       RANCHER_TOKEN: ${{ secrets.RANCHER_TOKEN }}
       LEDGER_AWS_ACCESS_KEY_ID: ${{ secrets.DEV_LEDGER_AWS_ACCESS_KEY_ID }}
       LEDGER_AWS_SECRET_ACCESS_KEY: ${{ secrets.DEV_LEDGER_AWS_SECRET_ACCESS_KEY }}
-
-  delete:
-    runs-on: [self-hosted, Linux, small]
-    needs:
-    - reset
-    steps:
-    - name: Delete namespace
-      uses: mobilecoinofficial/gha-k8s-toolbox@v1
-      with:
-        action: namespace-delete
-        namespace: ${{ github.event.inputs.namespace }}
-        rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
-        rancher_url: ${{ secrets.RANCHER_URL }}
-        rancher_token: ${{ secrets.RANCHER_TOKEN }}
-

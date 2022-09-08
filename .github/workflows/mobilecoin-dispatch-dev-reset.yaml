@@ -17,6 +17,7 @@ jobs:
     uses: ./.github/workflows/mobilecoin-workflow-dev-reset.yaml
     with:
       namespace: ${{ github.event.inputs.namespace }}
+      delete_namespace: false
     secrets:
       RANCHER_CLUSTER: ${{ secrets.RANCHER_CLUSTER }}
       RANCHER_URL: ${{ secrets.RANCHER_URL }}
