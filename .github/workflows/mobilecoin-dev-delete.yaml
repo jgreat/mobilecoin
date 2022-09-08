@@ -13,7 +13,7 @@ jobs:
     steps:
     - name: dump payload
       run: |
-        echo '${{ github.event }}'
+        echo '${{ toJSON(github.event) }}'
     - name: details
       run: |
         echo "ref ${{ github.ref }}'
